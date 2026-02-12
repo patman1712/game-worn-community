@@ -53,6 +53,8 @@ import JerseyDetail from './pages/JerseyDetail';
 import MyCollection from './pages/MyCollection';
 import EditJersey from './pages/EditJersey';
 import UserProfile from './pages/UserProfile';
+import Settings from './pages/Settings';
+import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
@@ -62,9 +64,11 @@ export const PAGES = {
     "MyCollection": MyCollection,
     "EditJersey": EditJersey,
     "UserProfile": UserProfile,
+    "Settings": Settings,
 }
 
 export const pagesConfig = {
     mainPage: "Home",
     Pages: PAGES,
+    Layout: __Layout,
 };

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Shirt, Loader2 } from "lucide-react";
+import { Shirt, Loader2, RefreshCw } from "lucide-react";
 
 import JerseyCard from "@/components/jerseys/JerseyCard";
 import FilterBar from "@/components/jerseys/FilterBar";
@@ -13,6 +13,9 @@ export default function Home() {
   const [league, setLeague] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
   const [currentUser, setCurrentUser] = useState(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [pullStartY, setPullStartY] = useState(0);
+  const [pullDistance, setPullDistance] = useState(0);
 
   const queryClient = useQueryClient();
 
@@ -20,7 +23,7 @@ export default function Home() {
     base44.auth.me().then(setCurrentUser).catch(() => {});
   }, []);
 
-  const { data: jerseys = [], isLoading } = useQuery({
+  const { data: jerseys = [], isLoading, refetch } = useQuery({
     queryKey: ["jerseys"],
     queryFn: () => base44.entities.Jersey.list("-created_date", 200),
   });
@@ -30,6 +33,47 @@ export default function Home() {
     queryFn: () => currentUser ? base44.entities.JerseyLike.filter({ user_email: currentUser.email }) : [],
     enabled: !!currentUser,
   });
+
+  // Pull to refresh
+  const handleTouchStart = (e) => {
+    if (window.scrollY === 0) {
+      setPullStartY(e.touches[0].clientY);
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    if (pullStartY > 0 && window.scrollY === 0) {
+      const currentY = e.touches[0].clientY;
+      const distance = Math.min(currentY - pullStartY, 100);
+      if (distance > 0) {
+        setPullDistance(distance);
+      }
+    }
+  };
+
+  const handleTouchEnd = async () => {
+    if (pullDistance > 60) {
+      setIsRefreshing(true);
+      await refetch();
+      setTimeout(() => setIsRefreshing(false), 500);
+    }
+    setPullStartY(0);
+    setPullDistance(0);
+  };
+
+  useEffect(() => {
+    const feedElement = document.getElementById('jersey-feed');
+    if (feedElement) {
+      feedElement.addEventListener('touchstart', handleTouchStart);
+      feedElement.addEventListener('touchmove', handleTouchMove);
+      feedElement.addEventListener('touchend', handleTouchEnd);
+      return () => {
+        feedElement.removeEventListener('touchstart', handleTouchStart);
+        feedElement.removeEventListener('touchmove', handleTouchMove);
+        feedElement.removeEventListener('touchend', handleTouchEnd);
+      };
+    }
+  }, [pullStartY, pullDistance]);
 
   const likeMutation = useMutation({
     mutationFn: async (jerseyId) => {
@@ -44,7 +88,44 @@ export default function Home() {
         if (jersey) await base44.entities.Jersey.update(jerseyId, { likes_count: (jersey.likes_count || 0) + 1 });
       }
     },
-    onSuccess: () => {
+    onMutate: async (jerseyId) => {
+      // Optimistic update
+      await queryClient.cancelQueries({ queryKey: ["jerseys"] });
+      await queryClient.cancelQueries({ queryKey: ["likes"] });
+
+      const previousJerseys = queryClient.getQueryData(["jerseys"]);
+      const previousLikes = queryClient.getQueryData(["likes", currentUser?.email]);
+
+      const existing = likes.find(l => l.jersey_id === jerseyId);
+      
+      // Update jerseys count optimistically
+      queryClient.setQueryData(["jerseys"], (old = []) => 
+        old.map(j => j.id === jerseyId 
+          ? { ...j, likes_count: existing ? Math.max(0, (j.likes_count || 0) - 1) : (j.likes_count || 0) + 1 }
+          : j
+        )
+      );
+
+      // Update likes optimistically
+      if (existing) {
+        queryClient.setQueryData(["likes", currentUser?.email], (old = []) => 
+          old.filter(l => l.id !== existing.id)
+        );
+      } else {
+        queryClient.setQueryData(["likes", currentUser?.email], (old = []) => [
+          ...old,
+          { id: 'temp-' + Date.now(), jersey_id: jerseyId, user_email: currentUser.email }
+        ]);
+      }
+
+      return { previousJerseys, previousLikes };
+    },
+    onError: (err, jerseyId, context) => {
+      // Rollback on error
+      queryClient.setQueryData(["jerseys"], context.previousJerseys);
+      queryClient.setQueryData(["likes", currentUser?.email], context.previousLikes);
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["jerseys"] });
       queryClient.invalidateQueries({ queryKey: ["likes"] });
     },
@@ -85,7 +166,19 @@ export default function Home() {
   const topLeague = Object.entries(leagueCounts).sort(([,a],[,b]) => b - a)[0]?.[0];
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen" id="jersey-feed">
+      {/* Pull to refresh indicator */}
+      {pullDistance > 0 && (
+        <div className="fixed top-14 left-0 right-0 flex justify-center z-40">
+          <div 
+            className="bg-slate-900/90 backdrop-blur-sm rounded-full p-2 shadow-lg"
+            style={{ transform: `translateY(${Math.min(pullDistance - 20, 40)}px)`, opacity: pullDistance / 80 }}
+          >
+            <RefreshCw className={`w-5 h-5 text-cyan-400 ${isRefreshing || pullDistance > 60 ? 'animate-spin' : ''}`} />
+          </div>
+        </div>
+      )}
+
       {/* Hero */}
       <div className="relative overflow-hidden pt-8 pb-12 px-4">
         <div className="absolute inset-0 bg-gradient-to-br from-cyan-900/20 via-transparent to-violet-900/20" />

@@ -7,10 +7,15 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Upload, X, Image as ImageIcon, Loader2 } from "lucide-react";
+import MobileDrawerSelect from "./MobileDrawerSelect";
 
 const LEAGUES = ["NHL", "DEL", "SHL", "KHL", "NLA", "EIHL", "Liiga", "CHL", "IIHF", "AHL", "OHL", "Sonstige"];
 const JERSEY_TYPES = ["Home", "Away", "Third", "Special", "All-Star", "Retro", "Practice"];
 const CONDITIONS = ["Neu mit Etikett", "Neu ohne Etikett", "Sehr gut", "Gut", "Getragen", "Game-Worn"];
+
+const LEAGUE_OPTIONS = LEAGUES.map(l => ({ value: l, label: l }));
+const TYPE_OPTIONS = JERSEY_TYPES.map(t => ({ value: t, label: t }));
+const CONDITION_OPTIONS = CONDITIONS.map(c => ({ value: c, label: c }));
 
 export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSubmitting }) {
   const [form, setForm] = useState(initialData || {
@@ -29,6 +34,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
     is_signed: false,
   });
   const [uploading, setUploading] = useState(false);
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
   const handleChange = (field, value) => {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -134,14 +140,24 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
         </div>
         <div>
           <Label className="text-white/70 text-sm mb-1.5 block">Liga</Label>
-          <Select value={form.league} onValueChange={(v) => handleChange("league", v)}>
-            <SelectTrigger className="bg-slate-800/50 border-white/10 text-white">
-              <SelectValue placeholder="Liga wählen" />
-            </SelectTrigger>
-            <SelectContent>
-              {LEAGUES.map(l => <SelectItem key={l} value={l}>{l}</SelectItem>)}
-            </SelectContent>
-          </Select>
+          {isMobile ? (
+            <MobileDrawerSelect
+              value={form.league}
+              onValueChange={(v) => handleChange("league", v)}
+              options={LEAGUE_OPTIONS}
+              label="Liga wählen"
+              placeholder="Liga wählen"
+            />
+          ) : (
+            <Select value={form.league} onValueChange={(v) => handleChange("league", v)}>
+              <SelectTrigger className="bg-slate-800/50 border-white/10 text-white">
+                <SelectValue placeholder="Liga wählen" />
+              </SelectTrigger>
+              <SelectContent>
+                {LEAGUES.map(l => <SelectItem key={l} value={l}>{l}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          )}
         </div>
         <div>
           <Label className="text-white/70 text-sm mb-1.5 block">Saison</Label>
@@ -172,25 +188,45 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
         </div>
         <div>
           <Label className="text-white/70 text-sm mb-1.5 block">Trikot-Typ</Label>
-          <Select value={form.jersey_type} onValueChange={(v) => handleChange("jersey_type", v)}>
-            <SelectTrigger className="bg-slate-800/50 border-white/10 text-white">
-              <SelectValue placeholder="Typ wählen" />
-            </SelectTrigger>
-            <SelectContent>
-              {JERSEY_TYPES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-            </SelectContent>
-          </Select>
+          {isMobile ? (
+            <MobileDrawerSelect
+              value={form.jersey_type}
+              onValueChange={(v) => handleChange("jersey_type", v)}
+              options={TYPE_OPTIONS}
+              label="Trikot-Typ wählen"
+              placeholder="Typ wählen"
+            />
+          ) : (
+            <Select value={form.jersey_type} onValueChange={(v) => handleChange("jersey_type", v)}>
+              <SelectTrigger className="bg-slate-800/50 border-white/10 text-white">
+                <SelectValue placeholder="Typ wählen" />
+              </SelectTrigger>
+              <SelectContent>
+                {JERSEY_TYPES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          )}
         </div>
         <div>
           <Label className="text-white/70 text-sm mb-1.5 block">Zustand</Label>
-          <Select value={form.condition} onValueChange={(v) => handleChange("condition", v)}>
-            <SelectTrigger className="bg-slate-800/50 border-white/10 text-white">
-              <SelectValue placeholder="Zustand wählen" />
-            </SelectTrigger>
-            <SelectContent>
-              {CONDITIONS.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-            </SelectContent>
-          </Select>
+          {isMobile ? (
+            <MobileDrawerSelect
+              value={form.condition}
+              onValueChange={(v) => handleChange("condition", v)}
+              options={CONDITION_OPTIONS}
+              label="Zustand wählen"
+              placeholder="Zustand wählen"
+            />
+          ) : (
+            <Select value={form.condition} onValueChange={(v) => handleChange("condition", v)}>
+              <SelectTrigger className="bg-slate-800/50 border-white/10 text-white">
+                <SelectValue placeholder="Zustand wählen" />
+              </SelectTrigger>
+              <SelectContent>
+                {CONDITIONS.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          )}
         </div>
       </div>
 

@@ -36,7 +36,24 @@ export default function MyCollection() {
 
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.Jersey.delete(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["myJerseys"] }),
+    onMutate: async (id) => {
+      // Optimistic delete
+      await queryClient.cancelQueries({ queryKey: ["myJerseys"] });
+      const previousJerseys = queryClient.getQueryData(["myJerseys", user?.email]);
+      
+      queryClient.setQueryData(["myJerseys", user?.email], (old = []) => 
+        old.filter(j => j.id !== id)
+      );
+
+      return { previousJerseys };
+    },
+    onError: (err, id, context) => {
+      // Rollback on error
+      queryClient.setQueryData(["myJerseys", user?.email], context.previousJerseys);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["myJerseys"] });
+    },
   });
 
   if (!user) return null;

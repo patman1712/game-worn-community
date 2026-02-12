@@ -2,29 +2,29 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
-import { Shirt, Home, Plus, FolderOpen, LogIn, LogOut, Menu, X } from "lucide-react";
+import { Shirt, Home, Plus, FolderOpen, LogIn, LogOut, ChevronLeft, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+const TABS = [
+  { name: "Home", icon: Home, label: "Entdecken", page: "Home" },
+  { name: "MyCollection", icon: FolderOpen, label: "Sammlung", page: "MyCollection", authRequired: true },
+  { name: "AddJersey", icon: Plus, label: "Hinzufügen", page: "AddJersey", authRequired: true },
+  { name: "Settings", icon: Settings, label: "Einstellungen", page: "Settings", authRequired: true },
+];
+
+const CHILD_PAGES = ["JerseyDetail", "EditJersey", "UserProfile"];
 
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
-  const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => setUser(null));
   }, []);
 
-  useEffect(() => {
-    setMenuOpen(false);
-  }, [location]);
-
-  const navItems = [
-    { name: "Home", icon: Home, label: "Entdecken", page: "Home" },
-    ...(user ? [
-      { name: "MyCollection", icon: FolderOpen, label: "Meine Sammlung", page: "MyCollection" },
-      { name: "AddJersey", icon: Plus, label: "Hinzufügen", page: "AddJersey" },
-    ] : []),
-  ];
+  const isChildPage = CHILD_PAGES.includes(currentPageName);
+  const showBottomNav = !isChildPage;
+  const visibleTabs = TABS.filter(tab => !tab.authRequired || user);
 
   return (
     <div className="min-h-screen bg-slate-950">
@@ -33,8 +33,37 @@ export default function Layout({ children, currentPageName }) {
           --background: 222.2 84% 4.9%;
           --foreground: 210 40% 98%;
         }
-        body { background: #0a0e1a; }
-        * { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.1) transparent; }
+        
+        body { 
+          background: #0a0e1a;
+          overscroll-behavior: none;
+          -webkit-overflow-scrolling: touch;
+        }
+        
+        button, a[role="tab"], [role="button"] {
+          -webkit-user-select: none;
+          user-select: none;
+          -webkit-tap-highlight-color: transparent;
+        }
+        
+        * { 
+          scrollbar-width: thin; 
+          scrollbar-color: rgba(255,255,255,0.1) transparent; 
+        }
+
+        /* Disable pull-to-refresh on body */
+        body {
+          overscroll-behavior-y: contain;
+        }
+
+        @supports (padding-top: env(safe-area-inset-top)) {
+          .safe-top {
+            padding-top: env(safe-area-inset-top);
+          }
+          .safe-bottom {
+            padding-bottom: env(safe-area-inset-bottom);
+          }
+        }
       `}</style>
 
       {/* Ambient gradient bg */}
@@ -43,110 +72,79 @@ export default function Layout({ children, currentPageName }) {
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-violet-500/5 rounded-full blur-3xl" />
       </div>
 
-      {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-slate-950/80 border-b border-white/5">
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to={createPageUrl("Home")} className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center">
-              <Shirt className="w-4 h-4 text-white" />
-            </div>
-            <span className="font-bold text-white text-lg tracking-tight">
-              Jersey<span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">Vault</span>
-            </span>
-          </Link>
-
-          {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-1">
-            {navItems.map(item => (
-              <Link
-                key={item.name}
-                to={createPageUrl(item.page)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-all ${
-                  currentPageName === item.name
-                    ? "bg-white/10 text-white"
-                    : "text-white/40 hover:text-white/70 hover:bg-white/5"
-                }`}
+      {/* Mobile-optimized Header */}
+      <header className="sticky top-0 z-50 backdrop-blur-xl bg-slate-950/95 border-b border-white/5 safe-top">
+        <div className="h-14 flex items-center justify-between px-4">
+          {isChildPage ? (
+            <>
+              <button
+                onClick={() => window.history.back()}
+                className="flex items-center gap-2 text-white/70 active:text-white -ml-2 p-2"
               >
-                <item.icon className="w-4 h-4" />
-                {item.label}
-              </Link>
-            ))}
-            <div className="w-px h-6 bg-white/10 mx-2" />
-            {user ? (
-              <Button
-                onClick={() => base44.auth.logout()}
-                variant="ghost"
-                size="sm"
-                className="text-white/40 hover:text-white/70 hover:bg-white/5"
-              >
-                <LogOut className="w-4 h-4 mr-2" />
-                Abmelden
-              </Button>
-            ) : (
-              <Button
-                onClick={() => base44.auth.redirectToLogin()}
-                size="sm"
-                className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white"
-              >
-                <LogIn className="w-4 h-4 mr-2" />
-                Anmelden
-              </Button>
-            )}
-          </nav>
-
-          {/* Mobile hamburger */}
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="md:hidden p-2 text-white/50 hover:text-white"
-          >
-            {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
-        </div>
-
-        {/* Mobile menu */}
-        {menuOpen && (
-          <div className="md:hidden border-t border-white/5 bg-slate-950/95 backdrop-blur-xl px-4 py-4 space-y-1">
-            {navItems.map(item => (
-              <Link
-                key={item.name}
-                to={createPageUrl(item.page)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm ${
-                  currentPageName === item.name
-                    ? "bg-white/10 text-white"
-                    : "text-white/40"
-                }`}
-              >
-                <item.icon className="w-4 h-4" />
-                {item.label}
-              </Link>
-            ))}
-            <div className="border-t border-white/5 pt-3 mt-3">
-              {user ? (
-                <button
-                  onClick={() => base44.auth.logout()}
-                  className="flex items-center gap-3 px-4 py-3 text-white/40 text-sm w-full"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Abmelden
-                </button>
-              ) : (
-                <button
+                <ChevronLeft className="w-5 h-5" />
+                <span className="text-sm font-medium">Zurück</span>
+              </button>
+              <div className="absolute left-1/2 -translate-x-1/2">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center">
+                    <Shirt className="w-3.5 h-3.5 text-white" />
+                  </div>
+                </div>
+              </div>
+              <div className="w-20" />
+            </>
+          ) : (
+            <>
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center">
+                  <Shirt className="w-4 h-4 text-white" />
+                </div>
+                <span className="font-bold text-white text-base tracking-tight">
+                  Jersey<span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">Vault</span>
+                </span>
+              </div>
+              {!user && (
+                <Button
                   onClick={() => base44.auth.redirectToLogin()}
-                  className="flex items-center gap-3 px-4 py-3 text-cyan-400 text-sm w-full"
+                  size="sm"
+                  className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-xs h-8 px-3"
                 >
-                  <LogIn className="w-4 h-4" />
+                  <LogIn className="w-3.5 h-3.5 mr-1.5" />
                   Anmelden
-                </button>
+                </Button>
               )}
-            </div>
-          </div>
-        )}
+            </>
+          )}
+        </div>
       </header>
 
-      {/* Content */}
-      <main className="relative">
+      {/* Content with bottom padding for tab bar */}
+      <main className="relative" style={{ paddingBottom: showBottomNav ? 'calc(4rem + env(safe-area-inset-bottom))' : 0 }}>
         {children}
       </main>
+
+      {/* Bottom Tab Navigation */}
+      {showBottomNav && (
+        <nav className="fixed bottom-0 left-0 right-0 z-50 bg-slate-950/95 backdrop-blur-xl border-t border-white/5 safe-bottom">
+          <div className="grid grid-cols-4 h-16">
+            {visibleTabs.map(tab => {
+              const isActive = currentPageName === tab.name;
+              return (
+                <Link
+                  key={tab.name}
+                  to={createPageUrl(tab.page)}
+                  className="flex flex-col items-center justify-center gap-1 active:bg-white/5 transition-colors"
+                >
+                  <tab.icon className={`w-5 h-5 transition-colors ${isActive ? 'text-cyan-400' : 'text-white/40'}`} />
+                  <span className={`text-[10px] font-medium transition-colors ${isActive ? 'text-cyan-400' : 'text-white/40'}`}>
+                    {tab.label}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
+      )}
     </div>
   );
 }
