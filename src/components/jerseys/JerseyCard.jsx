@@ -18,7 +18,7 @@ export default function JerseyCard({ jersey, isLiked, onLike, index = 0 }) {
       <Link to={createPageUrl("JerseyDetail") + `?id=${jersey.id}`}>
         <div className="relative bg-slate-900/60 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/5 hover:border-cyan-500/30 transition-all duration-500 hover:shadow-[0_0_40px_rgba(6,182,212,0.1)]">
           {/* Image */}
-          <div className="relative aspect-[3/4] overflow-hidden bg-slate-800">
+          <div className="relative aspect-square overflow-hidden bg-slate-800">
             {!imgLoaded && (
               <div className="absolute inset-0 bg-slate-800 animate-pulse" />
             )}
@@ -32,17 +32,28 @@ export default function JerseyCard({ jersey, isLiked, onLike, index = 0 }) {
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-80" />
 
             {/* Badges top */}
-            <div className="absolute top-3 left-3 flex gap-1.5">
+            <div className="absolute top-3 left-3 flex gap-1.5 flex-wrap max-w-[calc(100%-80px)]">
               {jersey.is_game_worn && (
                 <Badge className="bg-amber-500/90 text-white border-0 text-[10px] px-2 py-0.5 backdrop-blur-sm">
                   <Award className="w-3 h-3 mr-1" />
                   Game-Worn
                 </Badge>
               )}
+              {jersey.is_game_issued && (
+                <Badge className="bg-orange-500/90 text-white border-0 text-[10px] px-2 py-0.5 backdrop-blur-sm">
+                  <Award className="w-3 h-3 mr-1" />
+                  Game-Issued
+                </Badge>
+              )}
               {jersey.is_signed && (
                 <Badge className="bg-violet-500/90 text-white border-0 text-[10px] px-2 py-0.5 backdrop-blur-sm">
                   <Star className="w-3 h-3 mr-1" />
                   Signiert
+                </Badge>
+              )}
+              {jersey.for_sale && (
+                <Badge className="bg-green-500/90 text-white border-0 text-[10px] px-2 py-0.5 backdrop-blur-sm">
+                  For Sale
                 </Badge>
               )}
             </div>

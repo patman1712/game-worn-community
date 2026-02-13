@@ -32,7 +32,10 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
     image_url: "",
     additional_images: [],
     is_game_worn: false,
+    is_game_issued: false,
     is_signed: false,
+    is_private: false,
+    for_sale: false,
   });
   const [uploading, setUploading] = useState(false);
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
@@ -280,14 +283,30 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
       </div>
 
       {/* Toggles */}
-      <div className="flex gap-8">
-        <div className="flex items-center gap-3">
-          <Switch checked={form.is_game_worn} onCheckedChange={(v) => handleChange("is_game_worn", v)} />
-          <Label className="text-white/60 text-sm">Game-Worn</Label>
+      <div className="space-y-3">
+        <div className="flex flex-wrap gap-6">
+          <div className="flex items-center gap-3">
+            <Switch checked={form.is_game_worn} onCheckedChange={(v) => handleChange("is_game_worn", v)} />
+            <Label className="text-white/60 text-sm">Game-Worn</Label>
+          </div>
+          <div className="flex items-center gap-3">
+            <Switch checked={form.is_game_issued} onCheckedChange={(v) => handleChange("is_game_issued", v)} />
+            <Label className="text-white/60 text-sm">Game-Issued</Label>
+          </div>
+          <div className="flex items-center gap-3">
+            <Switch checked={form.is_signed} onCheckedChange={(v) => handleChange("is_signed", v)} />
+            <Label className="text-white/60 text-sm">Signiert</Label>
+          </div>
         </div>
-        <div className="flex items-center gap-3">
-          <Switch checked={form.is_signed} onCheckedChange={(v) => handleChange("is_signed", v)} />
-          <Label className="text-white/60 text-sm">Signiert</Label>
+        <div className="flex flex-wrap gap-6">
+          <div className="flex items-center gap-3">
+            <Switch checked={form.for_sale} onCheckedChange={(v) => handleChange("for_sale", v)} />
+            <Label className="text-white/60 text-sm">Zum Verkauf (For Sale)</Label>
+          </div>
+          <div className="flex items-center gap-3">
+            <Switch checked={form.is_private} onCheckedChange={(v) => handleChange("is_private", v)} />
+            <Label className="text-white/60 text-sm">Privat (nur ich kann es sehen)</Label>
+          </div>
         </div>
       </div>
 

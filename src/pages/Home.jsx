@@ -23,10 +23,15 @@ export default function Home() {
     base44.auth.me().then(setCurrentUser).catch(() => {});
   }, []);
 
-  const { data: jerseys = [], isLoading, refetch } = useQuery({
+  const { data: allJerseys = [], isLoading, refetch } = useQuery({
     queryKey: ["jerseys"],
     queryFn: () => base44.entities.Jersey.list("-created_date", 200),
   });
+
+  // Filter out private jerseys (unless they belong to the current user)
+  const jerseys = allJerseys.filter(j => 
+    !j.is_private || j.owner_email === currentUser?.email || j.created_by === currentUser?.email
+  );
 
   const { data: likes = [] } = useQuery({
     queryKey: ["likes", currentUser?.email],

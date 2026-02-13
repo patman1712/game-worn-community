@@ -2,17 +2,17 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
-import { Shirt, Home, Plus, FolderOpen, LogIn, LogOut, ChevronLeft, Settings } from "lucide-react";
+import { Shirt, Home, Plus, FolderOpen, LogIn, LogOut, ChevronLeft, Settings, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const TABS = [
   { name: "Home", icon: Home, label: "Entdecken", page: "Home" },
+  { name: "Messages", icon: MessageCircle, label: "Nachrichten", page: "Messages", authRequired: true },
   { name: "MyCollection", icon: FolderOpen, label: "Sammlung", page: "MyCollection", authRequired: true },
   { name: "AddJersey", icon: Plus, label: "Hinzufügen", page: "AddJersey", authRequired: true },
-  { name: "Settings", icon: Settings, label: "Einstellungen", page: "Settings", authRequired: true },
 ];
 
-const CHILD_PAGES = ["JerseyDetail", "EditJersey", "UserProfile"];
+const CHILD_PAGES = ["JerseyDetail", "EditJersey", "UserProfile", "Chat", "Settings"];
 
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
