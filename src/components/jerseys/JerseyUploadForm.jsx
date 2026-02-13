@@ -140,8 +140,10 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
     e.stopPropagation();
     e.currentTarget.classList.remove('border-cyan-500/60', 'bg-cyan-500/5');
     
-    const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
-    handleDropFiles(files);
+    const files = Array.from(e.dataTransfer?.files || []).filter(f => f.type.startsWith('image/'));
+    if (files.length > 0) {
+      handleDropFiles(files);
+    }
   };
 
   const handleSubmit = (e) => {
