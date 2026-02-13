@@ -80,7 +80,12 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
   const handleSaveEditedImage = async (file) => {
     try {
       setUploading(true);
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const reader = new FileReader();
+      const arrayBuffer = await new Promise((resolve) => {
+        reader.onload = () => resolve(reader.result);
+        reader.readAsArrayBuffer(file);
+      });
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: arrayBuffer });
       
       if (editingImageType === 'main') {
         handleChange("image_url", file_url);
