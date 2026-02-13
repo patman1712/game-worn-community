@@ -26,13 +26,33 @@ Deno.serve(async (req) => {
     }
 
     if (approve) {
-      // Invite user to the app with the specified role
-      await base44.users.inviteUser(pendingUser.email, role);
+      // Create user directly with password using Base44 API
+      const appId = Deno.env.get('BASE44_APP_ID');
+      const serviceToken = req.headers.get('authorization')?.replace('Bearer ', '');
+      
+      const createUserResponse = await fetch(`https://api.base44.com/apps/${appId}/auth/users`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${serviceToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: pendingUser.email,
+          password: pendingUser.password_hash,
+          full_name: pendingUser.real_name || pendingUser.display_name,
+          role: role,
+        }),
+      });
+
+      if (!createUserResponse.ok) {
+        const errorData = await createUserResponse.json();
+        throw new Error(`User-Erstellung fehlgeschlagen: ${errorData.message || createUserResponse.statusText}`);
+      }
 
       // Wait a moment for user to be created
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Update user profile data after invitation
+      // Update user profile data
       const allUsers = await base44.asServiceRole.entities.User.list();
       const newUser = allUsers.find(u => u.email === pendingUser.email);
       
@@ -54,7 +74,11 @@ Deno.serve(async (req) => {
             <p>Hallo ${pendingUser.display_name},</p>
             <p>Gute Nachrichten! Dein Account wurde von einem Administrator freigeschaltet.</p>
             ${role === 'moderator' ? '<p><strong>Du wurdest als Moderator freigeschaltet</strong> und hast erweiterte Rechte in der Community. Du kannst Trikots und Kommentare bearbeiten und löschen.</p>' : ''}
-            <p>Du kannst dich jetzt mit deinen Zugangsdaten anmelden und die Jersey Collectors Community nutzen.</p>
+            <p>Du kannst dich jetzt mit deinen Zugangsdaten anmelden:</p>
+            <ul>
+              <li><strong>E-Mail:</strong> ${pendingUser.email}</li>
+              <li><strong>Passwort:</strong> Das Passwort, das du bei der Registrierung angegeben hast</li>
+            </ul>
             <p>Viel Spaß beim Sammeln und Teilen deiner Trikots!</p>
             <p>Mit freundlichen Grüßen,<br>Das Jersey Collectors Team</p>
           `,
@@ -75,7 +99,7 @@ Deno.serve(async (req) => {
         `,
       });
     } else {
-      // Reject user - delete pending entry only (don't send email to non-user)
+      // Reject user - delete pending entry
       await base44.asServiceRole.entities.PendingUser.delete(pendingUserId);
 
       // Notify admin who rejected
