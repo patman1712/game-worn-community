@@ -300,12 +300,24 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
         </div>
         <div className="flex flex-wrap gap-6">
           <div className="flex items-center gap-3">
-            <Switch checked={form.for_sale} onCheckedChange={(v) => handleChange("for_sale", v)} />
-            <Label className="text-white/60 text-sm">Zum Verkauf (For Sale)</Label>
-          </div>
-          <div className="flex items-center gap-3">
             <Switch checked={form.is_private} onCheckedChange={(v) => handleChange("is_private", v)} />
             <Label className="text-white/60 text-sm">Privat (nur ich kann es sehen)</Label>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-6">
+          <div className="flex items-center gap-3">
+            <Switch 
+              checked={form.for_sale} 
+              onCheckedChange={(v) => handleChange("for_sale", v)} 
+            />
+            <Label className="text-white/60 text-sm">Zum Verkauf</Label>
+          </div>
+          <div className="flex items-center gap-3">
+            <Switch 
+              checked={form.for_sale === false} 
+              onCheckedChange={(v) => handleChange("for_sale", !v)} 
+            />
+            <Label className="text-white/60 text-sm">Nicht zum Verkauf</Label>
           </div>
         </div>
       </div>

@@ -11,7 +11,9 @@ export default function ImageEditor({ imageUrl, onSave, onCancel }) {
   const imageRef = useRef(null);
 
   useEffect(() => {
-    loadAndDrawImage();
+    if (imageUrl) {
+      loadAndDrawImage();
+    }
   }, [imageUrl]);
 
   useEffect(() => {
@@ -21,6 +23,8 @@ export default function ImageEditor({ imageUrl, onSave, onCancel }) {
   }, [rotation]);
 
   const loadAndDrawImage = async () => {
+    if (!imageUrl) return;
+    
     setLoading(true);
     const img = new Image();
     img.crossOrigin = "anonymous";
@@ -28,7 +32,7 @@ export default function ImageEditor({ imageUrl, onSave, onCancel }) {
     img.onload = () => {
       imageRef.current = img;
       setLoading(false);
-      drawImage();
+      setTimeout(() => drawImage(), 50);
     };
     
     img.onerror = () => {
@@ -37,7 +41,11 @@ export default function ImageEditor({ imageUrl, onSave, onCancel }) {
       img2.onload = () => {
         imageRef.current = img2;
         setLoading(false);
-        drawImage();
+        setTimeout(() => drawImage(), 50);
+      };
+      img2.onerror = () => {
+        setLoading(false);
+        alert("Fehler beim Laden des Bildes");
       };
       img2.src = imageUrl;
     };
