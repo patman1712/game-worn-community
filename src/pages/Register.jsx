@@ -49,7 +49,7 @@ export default function Register() {
             </div>
             <CardTitle className="text-white text-xl">Registrierung erfolgreich!</CardTitle>
             <CardDescription className="text-white/60">
-              Deine Registrierung wurde erfolgreich übermittelt. Du erhältst eine E-Mail, sobald ein Administrator deinen Account freigeschaltet hat.
+              Deine Registrierung wurde erfolgreich übermittelt. Du erhältst eine E-Mail mit einem Einladungslink, sobald ein Administrator deinen Account freigeschaltet hat. Mit diesem Link kannst du dann dein Passwort setzen und dich anmelden.
             </CardDescription>
           </CardHeader>
           <CardContent>
