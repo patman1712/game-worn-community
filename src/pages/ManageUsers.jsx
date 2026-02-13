@@ -222,17 +222,18 @@ export default function ManageUsers() {
                             </div>
                             <Button
                               onClick={() => {
+                                const updates = {};
+                                if (editingUser.data?.display_name !== undefined) updates.display_name = editingUser.data.display_name;
+                                if (editingUser.data?.real_name !== undefined) updates.real_name = editingUser.data.real_name;
+                                if (editingUser.data?.location !== undefined) updates.location = editingUser.data.location;
+                                if (editingUser.data?.role !== undefined) updates.role = editingUser.data.role;
+                                if (editingUser.data?.show_location !== undefined) updates.show_location = editingUser.data.show_location;
+                                if (editingUser.data?.accept_messages !== undefined) updates.accept_messages = editingUser.data.accept_messages;
+                                
                                 manageMutation.mutate({
                                   action: 'update',
                                   userId: editingUser.id,
-                                  updates: {
-                                    display_name: editingUser.data?.display_name,
-                                    real_name: editingUser.data?.real_name,
-                                    location: editingUser.data?.location,
-                                    role: editingUser.data?.role || 'user',
-                                    show_location: editingUser.data?.show_location,
-                                    accept_messages: editingUser.data?.accept_messages,
-                                  }
+                                  updates
                                 });
                               }}
                               disabled={manageMutation.isPending}
