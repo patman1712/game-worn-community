@@ -53,12 +53,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
     if (!file) return;
     setUploading(true);
     try {
-      const reader = new FileReader();
-      const arrayBuffer = await new Promise((resolve) => {
-        reader.onload = () => resolve(reader.result);
-        reader.readAsArrayBuffer(file);
-      });
-      const { file_url } = await base44.integrations.Core.UploadFile({ file: arrayBuffer });
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
       if (isMain) {
         handleChange("image_url", file_url);
       } else {
