@@ -21,7 +21,7 @@ export default function AddJersey() {
     mutationFn: (data) =>
       base44.entities.Jersey.create({
         ...data,
-        owner_name: user?.full_name || "Anonym",
+        owner_name: user?.display_name || user?.full_name || "Anonym",
         owner_email: user?.email,
       }),
     onSuccess: () => {
