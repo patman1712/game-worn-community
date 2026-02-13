@@ -358,18 +358,8 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
 
 
       {/* Info Fields */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <Label className="text-white/70 text-sm mb-1.5 block">Titel *</Label>
-          <Input
-            value={form.title}
-            onChange={(e) => handleChange("title", e.target.value)}
-            placeholder="z.B. Gretzky Oilers Retro"
-            className="bg-slate-800/50 border-white/10 text-white placeholder:text-white/20 focus:border-cyan-500/50"
-            required
-          />
-        </div>
-        <div>
+       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+         <div>
           <Label className="text-white/70 text-sm mb-1.5 block">Team *</Label>
           <Input
             value={form.team}

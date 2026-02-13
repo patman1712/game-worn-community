@@ -42,8 +42,7 @@ export default function AddJersey() {
           Zurück
         </Link>
 
-        <h1 className="text-2xl font-bold text-white mb-1">Trikot hinzufügen</h1>
-        <p className="text-white/40 text-sm mb-8">Teile ein neues Trikot mit der Community.</p>
+        <h1 className="text-2xl font-bold text-white mb-8">Trikot hinzufügen</h1>
 
         <JerseyUploadForm
           onSubmit={(data) => createMutation.mutate(data)}
