@@ -175,7 +175,8 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
 
     try {
       for (const file of files) {
-        const { file_url } = await base44.integrations.Core.UploadFile({ file });
+        const compressed = await compressImage(file);
+        const { file_url } = await base44.integrations.Core.UploadFile({ file: compressed });
         uploadedUrls.push(file_url);
       }
       handleChange("additional_images", [...(form.additional_images || []), ...uploadedUrls]);
