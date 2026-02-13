@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -94,6 +95,7 @@ const TYPE_OPTIONS = JERSEY_TYPES.map(t => ({ value: t, label: t }));
 const CONDITION_OPTIONS = CONDITIONS.map(c => ({ value: c, label: c }));
 
 export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSubmitting }) {
+  const queryClient = useQueryClient();
   const [form, setForm] = useState(initialData || {
     title: "",
     team: "",
@@ -158,6 +160,9 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
         newImages[editingImageType] = file_url;
         handleChange("additional_images", newImages);
       }
+      
+      queryClient.invalidateQueries({ queryKey: ["jerseys"] });
+      queryClient.invalidateQueries({ queryKey: ["jersey"] });
       
       setEditingImage(null);
       setEditingImageType(null);
