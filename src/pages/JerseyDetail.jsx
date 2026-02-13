@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   ArrowLeft, Heart, Star, Award, User, Calendar,
-  Shirt, Tag, Shield, Loader2, ChevronLeft, ChevronRight
+  Shirt, Tag, Shield, Loader2, ChevronLeft, ChevronRight, MessageCircle
 } from "lucide-react";
 
 export default function JerseyDetail() {
@@ -145,9 +145,19 @@ export default function JerseyDetail() {
                     <Award className="w-3 h-3 mr-1" /> Game-Worn
                   </Badge>
                 )}
+                {jersey.is_game_issued && (
+                  <Badge className="bg-orange-500/20 text-orange-300 border border-orange-500/30 text-xs">
+                    <Award className="w-3 h-3 mr-1" /> Game-Issued
+                  </Badge>
+                )}
                 {jersey.is_signed && (
                   <Badge className="bg-violet-500/20 text-violet-300 border border-violet-500/30 text-xs">
                     <Star className="w-3 h-3 mr-1" /> Signiert
+                  </Badge>
+                )}
+                {jersey.for_sale && (
+                  <Badge className="bg-green-500/20 text-green-300 border border-green-500/30 text-xs">
+                    For Sale
                   </Badge>
                 )}
               </div>
@@ -196,7 +206,7 @@ export default function JerseyDetail() {
               </div>
             )}
 
-            {/* Owner + Like */}
+            {/* Owner + Actions */}
             <div className="flex items-center justify-between pt-4 border-t border-white/5">
               <Link
                 to={createPageUrl("UserProfile") + `?email=${jersey.owner_email || jersey.created_by}`}
@@ -210,14 +220,25 @@ export default function JerseyDetail() {
                   <p className="text-white/30 text-xs">Sammlung ansehen</p>
                 </div>
               </Link>
-              <Button
-                onClick={() => currentUser ? likeMutation.mutate() : base44.auth.redirectToLogin()}
-                variant="ghost"
-                className={`flex items-center gap-2 ${isLiked ? 'text-red-400 hover:text-red-300' : 'text-white/40 hover:text-white/70'} hover:bg-white/5`}
-              >
-                <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
-                <span className="text-sm">{jersey.likes_count || 0}</span>
-              </Button>
+              <div className="flex items-center gap-2">
+                {currentUser && (jersey.owner_email !== currentUser.email && jersey.created_by !== currentUser.email) && (
+                  <Link
+                    to={createPageUrl("Chat") + `?email=${jersey.owner_email || jersey.created_by}`}
+                  >
+                    <Button variant="ghost" className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10">
+                      <MessageCircle className="w-5 h-5" />
+                    </Button>
+                  </Link>
+                )}
+                <Button
+                  onClick={() => currentUser ? likeMutation.mutate() : base44.auth.redirectToLogin()}
+                  variant="ghost"
+                  className={`flex items-center gap-2 ${isLiked ? 'text-red-400 hover:text-red-300' : 'text-white/40 hover:text-white/70'} hover:bg-white/5`}
+                >
+                  <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
+                  <span className="text-sm">{jersey.likes_count || 0}</span>
+                </Button>
+              </div>
             </div>
           </motion.div>
         </div>
