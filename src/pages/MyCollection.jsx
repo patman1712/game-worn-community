@@ -116,16 +116,18 @@ export default function MyCollection() {
                         <h3 className="text-white font-medium text-sm truncate">{jersey.title}</h3>
                         <p className="text-white/40 text-xs mt-0.5">{jersey.team}</p>
                       </div>
-                      <div className="flex items-center gap-1 ml-3">
+                      <div className="flex items-center gap-2 ml-3">
                         <Link to={createPageUrl("EditJersey") + `?id=${jersey.id}`}>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-white/30 hover:text-cyan-400 hover:bg-white/5">
-                            <Pencil className="w-3.5 h-3.5" />
+                          <Button variant="ghost" size="sm" className="h-7 px-2 text-white/50 hover:text-cyan-400 hover:bg-cyan-500/10 text-xs">
+                            <Pencil className="w-3.5 h-3.5 mr-1" />
+                            Bearbeiten
                           </Button>
                         </Link>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-white/30 hover:text-red-400 hover:bg-white/5">
-                              <Trash2 className="w-3.5 h-3.5" />
+                            <Button variant="ghost" size="sm" className="h-7 px-2 text-white/50 hover:text-red-400 hover:bg-red-500/10 text-xs">
+                              <Trash2 className="w-3.5 h-3.5 mr-1" />
+                              Löschen
                             </Button>
                           </AlertDialogTrigger>
                           <AlertDialogContent className="bg-slate-900 border-white/10">
