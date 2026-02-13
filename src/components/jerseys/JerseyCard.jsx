@@ -1,9 +1,11 @@
-import React, { useState } from "react";
-import { Heart, Star, Award, User } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Heart, Star, Award, User, Edit } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import { base44 } from "@/api/base44Client";
 
 export default function JerseyCard({ jersey, isLiked, onLike, index = 0 }) {
   const [imgLoaded, setImgLoaded] = useState(false);
