@@ -42,8 +42,17 @@ Deno.serve(async (req) => {
     } 
     
     if (action === 'block') {
-      // Block user by setting role to 'blocked'
-      await base44.asServiceRole.entities.User.update(userId, { is_blocked: true });
+      // Block user
+      const currentUserData = await base44.asServiceRole.entities.User.filter({ id: userId });
+      if (currentUserData[0]) {
+        const userData = currentUserData[0].data || {};
+        await base44.asServiceRole.entities.User.update(userId, {
+          data: {
+            ...userData,
+            is_blocked: true
+          }
+        });
+      }
       
       const targetUser = await base44.asServiceRole.entities.User.filter({ id: userId });
       if (targetUser[0]) {
@@ -63,7 +72,16 @@ Deno.serve(async (req) => {
     
     if (action === 'unblock') {
       // Unblock user
-      await base44.asServiceRole.entities.User.update(userId, { is_blocked: false });
+      const currentUserData = await base44.asServiceRole.entities.User.filter({ id: userId });
+      if (currentUserData[0]) {
+        const userData = currentUserData[0].data || {};
+        await base44.asServiceRole.entities.User.update(userId, {
+          data: {
+            ...userData,
+            is_blocked: false
+          }
+        });
+      }
       
       const targetUser = await base44.asServiceRole.entities.User.filter({ id: userId });
       if (targetUser[0]) {

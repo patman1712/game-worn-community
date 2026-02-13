@@ -48,8 +48,8 @@ export default function ManageUsers() {
 
   const filteredUsers = users.filter(u => 
     u.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    u.display_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    u.real_name?.toLowerCase().includes(searchQuery.toLowerCase())
+    u.data?.display_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    u.data?.real_name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   if (!user || isLoading) {
@@ -93,7 +93,7 @@ export default function ManageUsers() {
                     </div>
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <p className="text-white font-medium">{u.display_name || u.full_name}</p>
+                        <p className="text-white font-medium">{u.data?.display_name || u.full_name}</p>
                         {u.role === 'admin' && (
                           <Badge className="bg-red-500/20 text-red-300 border border-red-500/30 text-xs">
                             <Shield className="w-3 h-3 mr-1" />
@@ -106,7 +106,7 @@ export default function ManageUsers() {
                             Moderator
                           </Badge>
                         )}
-                        {u.is_blocked && (
+                        {u.data?.is_blocked && (
                           <Badge className="bg-orange-500/20 text-orange-300 border border-orange-500/30 text-xs">
                             <Ban className="w-3 h-3 mr-1" />
                             Gesperrt
@@ -114,11 +114,11 @@ export default function ManageUsers() {
                         )}
                       </div>
                       <p className="text-white/50 text-sm">{u.email}</p>
-                      {u.real_name && u.real_name !== u.display_name && (
-                        <p className="text-white/30 text-xs mt-1">{u.real_name}</p>
+                      {u.data?.real_name && u.data?.real_name !== u.data?.display_name && (
+                        <p className="text-white/30 text-xs mt-1">{u.data.real_name}</p>
                       )}
-                      {u.location && (
-                        <p className="text-white/30 text-xs">📍 {u.location}</p>
+                      {u.data?.location && (
+                        <p className="text-white/30 text-xs">📍 {u.data.location}</p>
                       )}
                     </div>
                   </div>
@@ -146,24 +146,33 @@ export default function ManageUsers() {
                             <div>
                               <Label>Anzeigename</Label>
                               <Input
-                                value={editingUser.display_name || ''}
-                                onChange={(e) => setEditingUser({...editingUser, display_name: e.target.value})}
+                                value={editingUser.data?.display_name || ''}
+                                onChange={(e) => setEditingUser({
+                                  ...editingUser, 
+                                  data: {...editingUser.data, display_name: e.target.value}
+                                })}
                                 className="bg-slate-800 border-white/10 text-white"
                               />
                             </div>
                             <div>
                               <Label>Vollständiger Name</Label>
                               <Input
-                                value={editingUser.real_name || ''}
-                                onChange={(e) => setEditingUser({...editingUser, real_name: e.target.value})}
+                                value={editingUser.data?.real_name || ''}
+                                onChange={(e) => setEditingUser({
+                                  ...editingUser, 
+                                  data: {...editingUser.data, real_name: e.target.value}
+                                })}
                                 className="bg-slate-800 border-white/10 text-white"
                               />
                             </div>
                             <div>
                               <Label>Wohnort</Label>
                               <Input
-                                value={editingUser.location || ''}
-                                onChange={(e) => setEditingUser({...editingUser, location: e.target.value})}
+                                value={editingUser.data?.location || ''}
+                                onChange={(e) => setEditingUser({
+                                  ...editingUser, 
+                                  data: {...editingUser.data, location: e.target.value}
+                                })}
                                 className="bg-slate-800 border-white/10 text-white"
                               />
                             </div>
@@ -176,25 +185,31 @@ export default function ManageUsers() {
                                 <SelectTrigger className="bg-slate-800 border-white/10 text-white">
                                   <SelectValue />
                                 </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="user">User</SelectItem>
-                                  <SelectItem value="moderator">Moderator</SelectItem>
-                                  <SelectItem value="admin">Admin</SelectItem>
+                                <SelectContent className="bg-slate-900 border-white/10">
+                                  <SelectItem value="user" className="text-white">User</SelectItem>
+                                  <SelectItem value="moderator" className="text-white">Moderator</SelectItem>
+                                  <SelectItem value="admin" className="text-white">Admin</SelectItem>
                                 </SelectContent>
                               </Select>
                             </div>
                             <div className="flex items-center justify-between">
                               <Label>Wohnort anzeigen</Label>
                               <Switch
-                                checked={editingUser.show_location}
-                                onCheckedChange={(checked) => setEditingUser({...editingUser, show_location: checked})}
+                                checked={editingUser.data?.show_location || false}
+                                onCheckedChange={(checked) => setEditingUser({
+                                  ...editingUser, 
+                                  data: {...editingUser.data, show_location: checked}
+                                })}
                               />
                             </div>
                             <div className="flex items-center justify-between">
                               <Label>Nachrichten akzeptieren</Label>
                               <Switch
-                                checked={editingUser.accept_messages}
-                                onCheckedChange={(checked) => setEditingUser({...editingUser, accept_messages: checked})}
+                                checked={editingUser.data?.accept_messages !== false}
+                                onCheckedChange={(checked) => setEditingUser({
+                                  ...editingUser, 
+                                  data: {...editingUser.data, accept_messages: checked}
+                                })}
                               />
                             </div>
                             <Button
@@ -203,12 +218,12 @@ export default function ManageUsers() {
                                   action: 'update',
                                   userId: editingUser.id,
                                   updates: {
-                                    display_name: editingUser.display_name,
-                                    real_name: editingUser.real_name,
-                                    location: editingUser.location,
+                                    display_name: editingUser.data?.display_name,
+                                    real_name: editingUser.data?.real_name,
+                                    location: editingUser.data?.location,
                                     role: editingUser.role,
-                                    show_location: editingUser.show_location,
-                                    accept_messages: editingUser.accept_messages,
+                                    show_location: editingUser.data?.show_location,
+                                    accept_messages: editingUser.data?.accept_messages,
                                   }
                                 });
                               }}
@@ -225,16 +240,16 @@ export default function ManageUsers() {
                     {/* Block/Unblock */}
                     <Button
                       onClick={() => manageMutation.mutate({
-                        action: u.is_blocked ? 'unblock' : 'block',
+                        action: u.data?.is_blocked ? 'unblock' : 'block',
                         userId: u.id
                       })}
                       disabled={manageMutation.isPending}
                       size="sm"
                       variant="ghost"
-                      className={u.is_blocked ? "text-green-400 hover:bg-green-500/10" : "text-orange-400 hover:bg-orange-500/10"}
+                      className={u.data?.is_blocked ? "text-green-400 hover:bg-green-500/10" : "text-orange-400 hover:bg-orange-500/10"}
                     >
                       <Ban className="w-4 h-4 mr-2" />
-                      {u.is_blocked ? 'Entsperren' : 'Sperren'}
+                      {u.data?.is_blocked ? 'Entsperren' : 'Sperren'}
                     </Button>
 
                     {/* Delete */}
@@ -253,7 +268,7 @@ export default function ManageUsers() {
                         <AlertDialogHeader>
                           <AlertDialogTitle>User wirklich löschen?</AlertDialogTitle>
                           <AlertDialogDescription className="text-white/50">
-                            Dies wird den User <strong>{u.display_name}</strong> und alle seine Daten (Trikots, Kommentare, Nachrichten) permanent löschen.
+                            Dies wird den User <strong>{u.data?.display_name || u.full_name}</strong> und alle seine Daten (Trikots, Kommentare, Nachrichten) permanent löschen.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
