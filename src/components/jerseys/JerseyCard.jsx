@@ -48,11 +48,12 @@ export default function JerseyCard({ jersey, isLiked, onLike, index = 0 }) {
       transition={{ duration: 0.4, delay: index * 0.05 }}
       className="group relative"
     >
-      <Link to={createPageUrl("JerseyDetail") + `?id=${jersey.id}`} onClick={(e) => {
-        if (e.target.closest('[role="dialog"], button[class*="rounded-full"]')) {
-          e.preventDefault();
-        }
-      }}>
+      <div
+        onClick={() => {
+          window.location.href = createPageUrl("JerseyDetail") + `?id=${jersey.id}`;
+        }}
+        className="cursor-pointer"
+      >
         <div className="relative bg-slate-900/60 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/5 hover:border-cyan-500/30 transition-all duration-500 hover:shadow-[0_0_40px_rgba(6,182,212,0.1)]">
           {/* Image */}
           <div className="relative aspect-square overflow-hidden bg-slate-800">
