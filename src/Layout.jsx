@@ -133,13 +133,14 @@ export default function Layout({ children, currentPageName }) {
                     <LogIn className="w-3.5 h-3.5 mr-1.5" />
                     Anmelden
                   </Button>
-                  <Button
-                    onClick={() => base44.auth.redirectToLogin()}
-                    size="sm"
-                    className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-xs h-8 px-3"
-                  >
-                    Registrieren
-                  </Button>
+                  <Link to={createPageUrl("Register")}>
+                    <Button
+                      size="sm"
+                      className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-xs h-8 px-3"
+                    >
+                      Registrieren
+                    </Button>
+                  </Link>
                 </div>
               )}
             </>
