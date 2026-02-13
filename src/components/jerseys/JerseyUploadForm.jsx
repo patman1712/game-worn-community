@@ -6,8 +6,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Upload, X, Image as ImageIcon, Loader2 } from "lucide-react";
+import { Upload, X, Image as ImageIcon, Loader2, RotateCw } from "lucide-react";
 import MobileDrawerSelect from "./MobileDrawerSelect";
+import ImageEditor from "./ImageEditor";
 
 const LEAGUES = ["NHL", "DEL", "SHL", "KHL", "NLA", "EIHL", "Liiga", "CHL", "IIHF", "AHL", "OHL", "Sonstige"];
 const JERSEY_TYPES = ["Home", "Away", "Third", "Special", "All-Star", "Retro", "Practice"];
@@ -35,6 +36,8 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
   });
   const [uploading, setUploading] = useState(false);
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const [editingImage, setEditingImage] = useState(null);
+  const [editingImageType, setEditingImageType] = useState(null); // 'main' or index for additional
 
   const handleChange = (field, value) => {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -53,6 +56,28 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
     setUploading(false);
   };
 
+  const handleEditImage = (imageUrl, type) => {
+    setEditingImage(imageUrl);
+    setEditingImageType(type);
+  };
+
+  const handleSaveEditedImage = async (file) => {
+    setUploading(true);
+    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    
+    if (editingImageType === 'main') {
+      handleChange("image_url", file_url);
+    } else if (typeof editingImageType === 'number') {
+      const newImages = [...(form.additional_images || [])];
+      newImages[editingImageType] = file_url;
+      handleChange("additional_images", newImages);
+    }
+    
+    setEditingImage(null);
+    setEditingImageType(null);
+    setUploading(false);
+  };
+
   const removeAdditionalImage = (index) => {
     handleChange("additional_images", form.additional_images.filter((_, i) => i !== index));
   };
@@ -68,15 +93,24 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
       <div>
         <Label className="text-white/70 text-sm mb-2 block">Hauptbild *</Label>
         {form.image_url ? (
-          <div className="relative w-full aspect-[3/4] max-w-xs rounded-xl overflow-hidden border border-white/10">
+          <div className="relative w-full aspect-[3/4] max-w-xs rounded-xl overflow-hidden border border-white/10 group">
             <img src={form.image_url} alt="Preview" className="w-full h-full object-cover" />
-            <button
-              type="button"
-              onClick={() => handleChange("image_url", "")}
-              className="absolute top-2 right-2 p-1.5 bg-black/60 rounded-full hover:bg-black/80"
-            >
-              <X className="w-4 h-4 text-white" />
-            </button>
+            <div className="absolute top-2 right-2 flex gap-1.5">
+              <button
+                type="button"
+                onClick={() => handleEditImage(form.image_url, 'main')}
+                className="p-1.5 bg-black/60 rounded-full hover:bg-black/80 transition-opacity opacity-0 group-hover:opacity-100"
+              >
+                <RotateCw className="w-4 h-4 text-white" />
+              </button>
+              <button
+                type="button"
+                onClick={() => handleChange("image_url", "")}
+                className="p-1.5 bg-black/60 rounded-full hover:bg-black/80"
+              >
+                <X className="w-4 h-4 text-white" />
+              </button>
+            </div>
           </div>
         ) : (
           <label className="flex flex-col items-center justify-center w-full aspect-[3/4] max-w-xs rounded-xl border-2 border-dashed border-white/10 hover:border-cyan-500/40 bg-slate-800/50 cursor-pointer transition-colors">
@@ -98,8 +132,17 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
         <Label className="text-white/70 text-sm mb-2 block">Weitere Bilder</Label>
         <div className="flex gap-3 flex-wrap">
           {form.additional_images?.map((url, i) => (
-            <div key={i} className="relative w-20 h-20 rounded-lg overflow-hidden border border-white/10">
+            <div key={i} className="relative w-20 h-20 rounded-lg overflow-hidden border border-white/10 group">
               <img src={url} alt="" className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
+                <button
+                  type="button"
+                  onClick={() => handleEditImage(url, i)}
+                  className="p-1 bg-white/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity mr-1"
+                >
+                  <RotateCw className="w-3 h-3 text-white" />
+                </button>
+              </div>
               <button
                 type="button"
                 onClick={() => removeAdditionalImage(i)}
@@ -270,6 +313,18 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
           </Button>
         )}
       </div>
+
+      {/* Image Editor Modal */}
+      {editingImage && (
+        <ImageEditor
+          imageUrl={editingImage}
+          onSave={handleSaveEditedImage}
+          onCancel={() => {
+            setEditingImage(null);
+            setEditingImageType(null);
+          }}
+        />
+      )}
     </form>
   );
 }
