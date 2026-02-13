@@ -87,8 +87,9 @@ const compressImage = async (file, targetSizeKB = 1000) => {
 };
 
 const LEAGUES = ["NHL", "DEL", "SHL", "KHL", "NLA", "EIHL", "Liiga", "CHL", "IIHF", "AHL", "OHL", "Sonstige"];
-const JERSEY_TYPES = ["Home", "Away", "Third", "Special", "All-Star", "Retro", "Practice"];
+const JERSEY_TYPES = ["Home", "Away", "Third", "Special", "All-Star", "Retro", "Practice", "Warm-Up"];
 const CONDITIONS = ["Neu mit Etikett", "Neu ohne Etikett", "Sehr gut", "Gut", "Getragen", "Game-Worn"];
+const CAPTAIN_PATCH_OPTIONS = ["Keine", "C", "A"];
 
 const LEAGUE_OPTIONS = LEAGUES.map(l => ({ value: l, label: l }));
 const TYPE_OPTIONS = JERSEY_TYPES.map(t => ({ value: t, label: t }));
@@ -111,6 +112,8 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
     is_game_worn: false,
     is_game_issued: false,
     is_signed: false,
+    captain_patch: "Keine",
+    has_loa: false,
     is_private: false,
     for_sale: false,
   });
@@ -467,6 +470,27 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
             </Select>
           )}
         </div>
+        <div>
+          <Label className="text-white/70 text-sm mb-1.5 block">Captain/Alternate Patch</Label>
+          {isMobile ? (
+            <MobileDrawerSelect
+              value={form.captain_patch}
+              onValueChange={(v) => handleChange("captain_patch", v)}
+              options={CAPTAIN_PATCH_OPTIONS.map(c => ({ value: c, label: c }))}
+              label="Patch wählen"
+              placeholder="Patch wählen"
+            />
+          ) : (
+            <Select value={form.captain_patch} onValueChange={(v) => handleChange("captain_patch", v)}>
+              <SelectTrigger className="bg-slate-800/50 border-white/10 text-white">
+                <SelectValue placeholder="Patch wählen" />
+              </SelectTrigger>
+              <SelectContent>
+                {CAPTAIN_PATCH_OPTIONS.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          )}
+        </div>
       </div>
 
       {/* Toggles */}
@@ -487,25 +511,31 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
         </div>
         <div className="flex flex-wrap gap-6">
           <div className="flex items-center gap-3">
-            <Switch checked={form.is_private} onCheckedChange={(v) => handleChange("is_private", v)} />
-            <Label className="text-white/60 text-sm">Privat (nur ich kann es sehen)</Label>
+            <Switch checked={form.has_loa} onCheckedChange={(v) => handleChange("has_loa", v)} />
+            <Label className="text-white/60 text-sm">Hat LOA Zertifikat</Label>
           </div>
         </div>
         <div className="flex flex-wrap gap-6">
           <div className="flex items-center gap-3">
-            <Switch 
-              checked={form.for_sale} 
-              onCheckedChange={(v) => handleChange("for_sale", v)} 
-            />
-            <Label className="text-white/60 text-sm">Zum Verkauf</Label>
+            <Switch checked={form.is_private} onCheckedChange={(v) => handleChange("is_private", v)} />
+            <Label className="text-white/60 text-sm">Privat (nur ich kann es sehen)</Label>
           </div>
-          <div className="flex items-center gap-3">
-            <Switch 
-              checked={form.for_sale === false} 
-              onCheckedChange={(v) => handleChange("for_sale", !v)} 
-            />
-            <Label className="text-white/60 text-sm">Nicht zum Verkauf</Label>
-          </div>
+        </div>
+        <div className="flex flex-wrap gap-3">
+          <Button
+            type="button"
+            onClick={() => handleChange("for_sale", true)}
+            className={`${form.for_sale ? 'bg-red-600 hover:bg-red-700' : 'bg-slate-800/50 hover:bg-slate-800 text-white/40'} transition-colors`}
+          >
+            Zum Verkauf
+          </Button>
+          <Button
+            type="button"
+            onClick={() => handleChange("for_sale", false)}
+            className={`${!form.for_sale ? 'bg-green-600 hover:bg-green-700' : 'bg-slate-800/50 hover:bg-slate-800 text-white/40'} transition-colors`}
+          >
+            Nicht zum Verkauf
+          </Button>
         </div>
       </div>
 
