@@ -192,7 +192,6 @@ export default function JerseyDetail() {
                 )}
               </div>
               <h1 className="text-3xl font-bold text-white">{jersey.title}</h1>
-              <p className="text-white/50 text-lg mt-1">{jersey.team}</p>
             </div>
 
             {/* Player info */}
