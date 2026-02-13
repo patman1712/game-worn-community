@@ -17,13 +17,17 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'User ID fehlt' }, { status: 400 });
     }
 
-    if (approve) {
-      // Approve user and set role
-      await base44.asServiceRole.entities.User.update(userId, { role });
+    // Get user details first
+    const users = await base44.asServiceRole.entities.User.filter({ id: userId });
+    const userDetails = users[0];
 
-      // Get user details
-      const approvedUser = await base44.asServiceRole.entities.User.filter({ id: userId });
-      const userDetails = approvedUser[0];
+    if (!userDetails) {
+      return Response.json({ error: 'User nicht gefunden' }, { status: 404 });
+    }
+
+    if (approve) {
+      // Approve user and set role (user or moderator)
+      await base44.asServiceRole.entities.User.update(userId, { role });
 
       // Send approval email
       await base44.asServiceRole.integrations.Core.SendEmail({
@@ -33,30 +37,50 @@ Deno.serve(async (req) => {
           <h2>Dein Account wurde freigeschaltet!</h2>
           <p>Hallo ${userDetails.display_name || userDetails.email},</p>
           <p>Gute Nachrichten! Dein Account wurde von einem Administrator freigeschaltet.</p>
+          ${role === 'moderator' ? '<p><strong>Du wurdest als Moderator freigeschaltet</strong> und hast erweiterte Rechte in der Community.</p>' : ''}
           <p>Du kannst dich jetzt mit deinen Zugangsdaten anmelden und die Jersey Collectors Community nutzen.</p>
           <p>Viel Spaß beim Sammeln und Teilen deiner Trikots!</p>
           <p>Mit freundlichen Grüßen,<br>Das Jersey Collectors Team</p>
+        `,
+      });
+
+      // Notify admin who approved
+      await base44.asServiceRole.integrations.Core.SendEmail({
+        to: user.email,
+        subject: 'User freigeschaltet - Jersey Collectors',
+        body: `
+          <h2>User erfolgreich freigeschaltet</h2>
+          <p>Du hast den User <strong>${userDetails.display_name}</strong> (${userDetails.email}) erfolgreich als <strong>${role === 'moderator' ? 'Moderator' : 'User'}</strong> freigeschaltet.</p>
+          <p>Der User wurde per E-Mail benachrichtigt.</p>
         `,
       });
     } else {
       // Reject user - delete account
       await base44.asServiceRole.entities.User.delete(userId);
 
-      const rejectedUser = await base44.asServiceRole.entities.User.filter({ id: userId });
-      if (rejectedUser[0]) {
-        // Send rejection email
-        await base44.asServiceRole.integrations.Core.SendEmail({
-          to: rejectedUser[0].email,
-          subject: 'Registrierung abgelehnt - Jersey Collectors',
-          body: `
-            <h2>Registrierung abgelehnt</h2>
-            <p>Hallo,</p>
-            <p>Leider konnte deine Registrierung bei Jersey Collectors nicht genehmigt werden.</p>
-            <p>Bei Fragen wende dich bitte an einen Administrator.</p>
-            <p>Mit freundlichen Grüßen,<br>Das Jersey Collectors Team</p>
-          `,
-        });
-      }
+      // Send rejection email
+      await base44.asServiceRole.integrations.Core.SendEmail({
+        to: userDetails.email,
+        subject: 'Registrierung abgelehnt - Jersey Collectors',
+        body: `
+          <h2>Registrierung abgelehnt</h2>
+          <p>Hallo ${userDetails.display_name || 'dort'},</p>
+          <p>Leider konnte deine Registrierung bei Jersey Collectors nicht genehmigt werden.</p>
+          <p>Bei Fragen kannst du dich gerne an einen Administrator wenden.</p>
+          <p>Mit freundlichen Grüßen,<br>Das Jersey Collectors Team</p>
+        `,
+      });
+
+      // Notify admin who rejected
+      await base44.asServiceRole.integrations.Core.SendEmail({
+        to: user.email,
+        subject: 'User abgelehnt - Jersey Collectors',
+        body: `
+          <h2>User abgelehnt</h2>
+          <p>Du hast die Registrierung von <strong>${userDetails.display_name}</strong> (${userDetails.email}) abgelehnt.</p>
+          <p>Der User wurde per E-Mail benachrichtigt und aus der Datenbank gelöscht.</p>
+        `,
+      });
     }
 
     return Response.json({ success: true });
