@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
 
     if (approve) {
       try {
-        // Create user account via inviteUser
+        // Invite user - this sends them an email to set their password
         console.log('[INFO] Inviting user via SDK:', pendingUser.email, 'with role:', role);
         
         await base44.users.inviteUser(pendingUser.email, role);
@@ -52,8 +52,8 @@ Deno.serve(async (req) => {
         console.log('[INFO] Found new user:', newUser?.email, 'with ID:', newUser?.id);
 
         if (newUser) {
-          // Update the User entity data field with profile information
-          console.log('[INFO] Updating user profile in data field...');
+          // Store profile information in user's data field
+          console.log('[INFO] Updating user profile...');
           
           const currentData = newUser.data || {};
           
@@ -86,6 +86,8 @@ Deno.serve(async (req) => {
               <p>Mit freundlichen Grüßen,<br>Das Jersey Collectors Team</p>
             `,
           });
+
+          console.log('[INFO] Approval email sent');
         } else {
           console.error('[ERROR] User was not found in database after creation');
           throw new Error('User konnte nicht in der Datenbank gefunden werden');

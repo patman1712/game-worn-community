@@ -53,13 +53,11 @@ import Chat from './pages/Chat';
 import EditJersey from './pages/EditJersey';
 import Home from './pages/Home';
 import JerseyDetail from './pages/JerseyDetail';
+import ManageUsers from './pages/ManageUsers';
 import Messages from './pages/Messages';
 import MyCollection from './pages/MyCollection';
-import Register from './pages/Register';
 import Settings from './pages/Settings';
 import UserProfile from './pages/UserProfile';
-import ManageUsers from './pages/ManageUsers';
-import CustomLogin from './pages/CustomLogin';
 import __Layout from './Layout.jsx';
 
 
@@ -70,13 +68,11 @@ export const PAGES = {
     "EditJersey": EditJersey,
     "Home": Home,
     "JerseyDetail": JerseyDetail,
+    "ManageUsers": ManageUsers,
     "Messages": Messages,
     "MyCollection": MyCollection,
-    "Register": Register,
     "Settings": Settings,
     "UserProfile": UserProfile,
-    "ManageUsers": ManageUsers,
-    "CustomLogin": CustomLogin,
 }
 
 export const pagesConfig = {
