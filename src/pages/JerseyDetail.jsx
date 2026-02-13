@@ -191,7 +191,8 @@ export default function JerseyDetail() {
                   </Badge>
                 )}
               </div>
-              </div>
+              <h1 className="text-3xl font-bold text-white">{jersey.title}</h1>
+            </div>
 
             {/* Player info */}
             {jersey.player_name && (

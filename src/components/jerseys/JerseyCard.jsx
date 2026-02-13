@@ -129,23 +129,24 @@ export default function JerseyCard({ jersey, isLiked, onLike, index = 0 }) {
               </button>
             </div>
 
-            {/* Top badges */}
-            <div className="absolute top-3 left-3 flex items-center gap-1.5 flex-wrap">
-              {jersey.league && (
-                <Badge className="bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-[10px] px-2 py-0">
-                  {jersey.league}
-                </Badge>
-              )}
-              {jersey.jersey_type && (
-                <Badge className="bg-white/10 text-white/70 border border-white/10 text-[10px] px-2 py-0">
-                  {jersey.jersey_type}
-                </Badge>
-              )}
-            </div>
-
             {/* Bottom info overlay */}
             <div className="absolute bottom-0 left-0 right-0 p-4">
-              <p className="text-white/50 text-xs">{jersey.team}</p>
+              <div className="flex items-center gap-1.5 mb-2">
+                {jersey.league && (
+                  <Badge className="bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-[10px] px-2 py-0">
+                    {jersey.league}
+                  </Badge>
+                )}
+                {jersey.jersey_type && (
+                  <Badge className="bg-white/10 text-white/70 border border-white/10 text-[10px] px-2 py-0">
+                    {jersey.jersey_type}
+                  </Badge>
+                )}
+              </div>
+              <h3 className="font-semibold text-white text-sm leading-tight line-clamp-1">
+                {jersey.title}
+              </h3>
+              <p className="text-white/50 text-xs mt-0.5">{jersey.team}</p>
               {jersey.player_name && (
                 <p className="text-cyan-400/80 text-xs mt-1 font-medium">
                   #{jersey.player_number} {jersey.player_name}
