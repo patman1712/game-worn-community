@@ -153,12 +153,20 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
       setUploading(true);
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       
+      let updateData = {};
       if (editingImageType === 'main') {
+        updateData = { image_url: file_url };
         handleChange("image_url", file_url);
       } else if (typeof editingImageType === 'number') {
         const newImages = [...(form.additional_images || [])];
         newImages[editingImageType] = file_url;
+        updateData = { additional_images: newImages };
         handleChange("additional_images", newImages);
+      }
+      
+      // Update jersey directly in DB if we have an ID
+      if (initialData?.id && Object.keys(updateData).length > 0) {
+        await base44.entities.Jersey.update(initialData.id, updateData);
       }
       
       queryClient.invalidateQueries({ queryKey: ["jerseys"] });
