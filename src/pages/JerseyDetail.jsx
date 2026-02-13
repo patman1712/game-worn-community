@@ -181,15 +181,25 @@ export default function JerseyDetail() {
                   </Badge>
                 )}
                 {jersey.is_signed && (
-                  <Badge className="bg-violet-500/20 text-violet-300 border border-violet-500/30 text-xs">
-                    <Star className="w-3 h-3 mr-1" /> Signiert
-                  </Badge>
-                )}
-                {jersey.for_sale && (
-                  <Badge className="bg-green-500/20 text-green-300 border border-green-500/30 text-xs">
-                    For Sale
-                  </Badge>
-                )}
+                   <Badge className="bg-violet-500/20 text-violet-300 border border-violet-500/30 text-xs">
+                     <Star className="w-3 h-3 mr-1" /> Signiert
+                   </Badge>
+                 )}
+                 {jersey.captain_patch && jersey.captain_patch !== "Keine" && (
+                   <Badge className="bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs">
+                     {jersey.captain_patch} Patch
+                   </Badge>
+                 )}
+                 {jersey.has_loa && (
+                   <Badge className="bg-blue-500/20 text-blue-300 border border-blue-500/30 text-xs">
+                     LOA
+                   </Badge>
+                 )}
+                 {jersey.for_sale && (
+                   <Badge className="bg-green-500/20 text-green-300 border border-green-500/30 text-xs">
+                     For Sale
+                   </Badge>
+                 )}
               </div>
 
             </div>
