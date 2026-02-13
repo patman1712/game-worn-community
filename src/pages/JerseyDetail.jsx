@@ -253,11 +253,27 @@ export default function JerseyDetail() {
               <div className="flex items-center gap-2">
                 {/* Moderator Actions */}
                 {currentUser && (currentUser.data?.role === 'moderator' || currentUser.role === 'admin' || currentUser.data?.role === 'admin') && (
-                  <Link to={createPageUrl("EditJersey") + `?id=${jersey.id}`}>
-                    <Button variant="ghost" size="sm" className="text-orange-400 hover:text-orange-300 hover:bg-orange-500/10">
-                      Bearbeiten
+                  <>
+                    <Link to={createPageUrl("EditJersey") + `?id=${jersey.id}`}>
+                      <Button variant="ghost" size="sm" className="text-orange-400 hover:text-orange-300 hover:bg-orange-500/10">
+                        Bearbeiten
+                      </Button>
+                    </Link>
+                    <Button
+                      onClick={() => {
+                        if (confirm('Trikot wirklich löschen?')) {
+                          base44.entities.Jersey.delete(jersey.id).then(() => {
+                            window.location.href = createPageUrl("Home");
+                          });
+                        }
+                      }}
+                      variant="ghost"
+                      size="sm"
+                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                    >
+                      Löschen
                     </Button>
-                  </Link>
+                  </>
                 )}
                 {currentUser && (jersey.owner_email !== currentUser.email && jersey.created_by !== currentUser.email) && (
                   <Link
