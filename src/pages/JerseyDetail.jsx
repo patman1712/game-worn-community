@@ -102,7 +102,7 @@ export default function JerseyDetail() {
     );
   }
 
-  const allImages = [jersey.image_url, ...(jersey.additional_images || [])].filter(Boolean);
+  const allImages = [jersey.image_url, ...(jersey.additional_images || [])].filter((url, index, array) => array.indexOf(url) === index);
 
   return (
     <div className="min-h-screen">
