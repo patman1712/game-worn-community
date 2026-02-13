@@ -22,6 +22,7 @@ import {
 export default function JerseyCard({ jersey, isLiked, onLike, index = 0 }) {
   const [imgLoaded, setImgLoaded] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [open, setOpen] = useState(false);
   const displayName = jersey.owner_name || jersey.created_by;
   const queryClient = useQueryClient();
 
@@ -36,6 +37,7 @@ export default function JerseyCard({ jersey, isLiked, onLike, index = 0 }) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["jerseys"] });
       queryClient.invalidateQueries({ queryKey: ["myJerseys"] });
+      setOpen(false);
     },
   });
 
