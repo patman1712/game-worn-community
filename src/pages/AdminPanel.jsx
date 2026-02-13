@@ -31,10 +31,17 @@ export default function AdminPanel() {
 
   const approveMutation = useMutation({
     mutationFn: async ({ pendingUserId, approve, role }) => {
-      return base44.functions.invoke('approveUser', { pendingUserId, approve, role });
+      const response = await base44.functions.invoke('approveUser', { pendingUserId, approve, role });
+      if (response.data.error) {
+        throw new Error(response.data.error);
+      }
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pendingUsers'] });
+    },
+    onError: (error) => {
+      alert('Fehler: ' + error.message);
     },
   });
 
