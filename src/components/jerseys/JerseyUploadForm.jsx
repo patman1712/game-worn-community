@@ -11,7 +11,7 @@ import MobileDrawerSelect from "./MobileDrawerSelect";
 import ImageEditor from "./ImageEditor";
 import MultiImageUploadDialog from "./MultiImageUploadDialog";
 
-const compressImage = async (file) => {
+const compressImage = async (file, targetSizeKB = 1000) => {
   return new Promise((resolve, reject) => {
     try {
       const reader = new FileReader();
@@ -26,7 +26,7 @@ const compressImage = async (file) => {
               let width = img.width;
               let height = img.height;
 
-              const maxDimension = 800;
+              const maxDimension = 1200;
               if (width > height) {
                 if (width > maxDimension) {
                   height = (height * maxDimension) / width;
@@ -44,7 +44,9 @@ const compressImage = async (file) => {
               const ctx = canvas.getContext("2d");
               ctx.drawImage(img, 0, 0, width, height);
 
-              let quality = 0.75;
+              let quality = 0.85;
+              const targetSize = targetSizeKB * 1024;
+              
               const tryCompress = () => {
                 canvas.toBlob(
                   (blob) => {
@@ -52,11 +54,12 @@ const compressImage = async (file) => {
                       reject(new Error("Blob creation failed"));
                       return;
                     }
-                    if (blob.size > 500 * 1024 && quality > 0.4) {
-                      quality -= 0.1;
+                    if (blob.size > targetSize && quality > 0.3) {
+                      quality -= 0.08;
                       tryCompress();
                     } else {
-                      resolve(new File([blob], file.name, { type: "image/jpeg" }));
+                      const compressedFile = new File([blob], file.name, { type: "image/jpeg" });
+                      resolve(compressedFile);
                     }
                   },
                   "image/jpeg",
