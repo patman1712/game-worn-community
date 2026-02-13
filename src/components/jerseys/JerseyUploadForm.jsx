@@ -351,10 +351,10 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
       {/* Actions */}
       <div className="flex gap-3 pt-2">
         <Button
-          type="submit"
-          disabled={isSubmitting || !form.title || !form.team || !form.image_url}
-          className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white px-8"
-        >
+           type="submit"
+           disabled={isSubmitting || !form.title || !form.team || !form.image_url || form.additional_images.length === 0}
+           className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white px-8"
+         >
           {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
           {initialData ? "Aktualisieren" : "Veröffentlichen"}
         </Button>
