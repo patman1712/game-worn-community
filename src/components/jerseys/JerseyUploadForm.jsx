@@ -127,12 +127,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
     try {
       const uploadedUrls = [];
       for (const file of files) {
-        const reader = new FileReader();
-        const arrayBuffer = await new Promise((resolve) => {
-          reader.onload = () => resolve(reader.result);
-          reader.readAsArrayBuffer(file);
-        });
-        const { file_url } = await base44.integrations.Core.UploadFile({ file: arrayBuffer });
+        const { file_url } = await base44.integrations.Core.UploadFile({ file });
         uploadedUrls.push(file_url);
       }
       handleChange("additional_images", [...(form.additional_images || []), ...uploadedUrls]);
