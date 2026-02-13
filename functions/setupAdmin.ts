@@ -32,33 +32,17 @@ Deno.serve(async (req) => {
       real_name: 'Administrator',
     });
     
-    // Set password using admin endpoint
-    const appId = Deno.env.get('BASE44_APP_ID');
-    const token = req.headers.get('authorization')?.replace('Bearer ', '');
-    
-    const passwordResponse = await fetch(`https://api.base44.com/apps/${appId}/admin/users/${user.id}/password`, {
-      method: 'PUT',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ password }),
-    });
-    
-    if (!passwordResponse.ok) {
-      const errorText = await passwordResponse.text();
-      console.error('Password update failed:', passwordResponse.status, errorText);
-      return Response.json({ 
-        error: 'Passwort konnte nicht gesetzt werden',
-        details: errorText,
-        status: passwordResponse.status
-      }, { status: 500 });
+    // Delete any pending user entries
+    const pendingUsers = await base44.asServiceRole.entities.PendingUser.filter({ email });
+    for (const pu of pendingUsers) {
+      await base44.asServiceRole.entities.PendingUser.delete(pu.id);
     }
     
     return Response.json({ 
       success: true, 
-      message: `Admin-User ${email} wurde eingerichtet mit Passwort: ${password}`,
-      userId: user.id
+      message: `Admin-User ${email} wurde eingerichtet. Bitte setze das Passwort manuell über das Base44 Dashboard.`,
+      userId: user.id,
+      note: 'Passwort kann nur über das Dashboard gesetzt werden. Gehe zu Users -> info@foto-scheiber.de -> Passwort zurücksetzen'
     });
     
   } catch (error) {
