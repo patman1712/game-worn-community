@@ -92,8 +92,16 @@ export default function MultiImageUploadDialog({ open, onOpenChange, onImagesUpl
         const compressed = await compressImage(files[i]);
         setProgress((prev) => ({ ...prev, [i]: 80 }));
 
+        // Convert File to base64 for upload
+        const reader = new FileReader();
+        const base64Promise = new Promise((resolve) => {
+          reader.onload = () => resolve(reader.result);
+          reader.readAsArrayBuffer(compressed);
+        });
+        const arrayBuffer = await base64Promise;
+
         // Upload
-        const { file_url } = await base44.integrations.Core.UploadFile({ file: compressed });
+        const { file_url } = await base44.integrations.Core.UploadFile({ file: arrayBuffer });
         uploadedUrls.push(file_url);
 
         setProgress((prev) => ({ ...prev, [i]: 100 }));
