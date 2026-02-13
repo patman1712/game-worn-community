@@ -87,7 +87,7 @@ const compressImage = async (file, targetSizeKB = 1000) => {
 };
 
 const LEAGUES = ["NHL", "DEL", "SHL", "KHL", "NLA", "EIHL", "Liiga", "CHL", "IIHF", "AHL", "OHL", "Sonstige"];
-const JERSEY_TYPES = ["Home", "Away", "Third", "Special", "All-Star", "Retro", "Practice", "Warm-Up", "Fanjersey"];
+const JERSEY_TYPES = ["Home", "Away", "Third", "Special", "All-Star", "Retro", "Practice", "Warm-Up", "Fan-Jersey"];
 const CONDITIONS = ["Neu mit Etikett", "Neu ohne Etikett", "Sehr gut", "Gut", "Getragen", "Game-Worn"];
 const CAPTAIN_PATCH_OPTIONS = ["Keine", "C", "A"];
 
