@@ -38,6 +38,7 @@ export default function JerseyCard({ jersey, isLiked, onLike, index = 0 }) {
       queryClient.invalidateQueries({ queryKey: ["jerseys"] });
       queryClient.invalidateQueries({ queryKey: ["myJerseys"] });
       setOpen(false);
+      window.location.href = createPageUrl("Home");
     },
   });
 
