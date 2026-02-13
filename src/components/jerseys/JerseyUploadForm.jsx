@@ -376,6 +376,13 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
           }}
         />
       )}
+
+      {/* Multi Image Upload Dialog */}
+      <MultiImageUploadDialog
+        open={multiImageDialogOpen}
+        onOpenChange={setMultiImageDialogOpen}
+        onImagesUploaded={handleMultiImageUpload}
+      />
     </form>
   );
 }
