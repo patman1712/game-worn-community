@@ -173,6 +173,16 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
     handleChange("additional_images", form.additional_images.filter((_, i) => i !== index));
   };
 
+  const handleDragEnd = (result) => {
+    const { source, destination } = result;
+    if (!destination) return;
+    
+    const newImages = Array.from(form.additional_images || []);
+    const [removed] = newImages.splice(source.index, 1);
+    newImages.splice(destination.index, 0, removed);
+    handleChange("additional_images", newImages);
+  };
+
   const handleMultiImageUpload = (urls) => {
     handleChange("additional_images", [...(form.additional_images || []), ...urls]);
   };
