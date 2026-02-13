@@ -84,11 +84,10 @@ export default function JerseyCard({ jersey, isLiked, onLike, index = 0 }) {
                   >
                     <Edit className="w-4 h-4 text-orange-400/70 hover:text-orange-400" />
                   </button>
-                  <AlertDialog>
+                  <AlertDialog open={open} onOpenChange={setOpen}>
                     <AlertDialogTrigger asChild>
                       <button 
                         onClick={(e) => {
-                          e.preventDefault();
                           e.stopPropagation();
                         }}
                         className="p-2 rounded-full bg-black/30 backdrop-blur-sm hover:bg-red-500/40 transition-all"
