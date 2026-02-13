@@ -37,26 +37,7 @@ Deno.serve(async (req) => {
       const newUser = allUsers.find(u => u.email === pendingUser.email);
       
       if (newUser) {
-        // Update password using Base44 API directly
-        const appId = Deno.env.get('BASE44_APP_ID');
-        const serviceToken = req.headers.get('authorization')?.replace('Bearer ', '');
-        
-        const updatePasswordResponse = await fetch(`https://api.base44.com/apps/${appId}/auth/users/${newUser.id}/password`, {
-          method: 'PUT',
-          headers: {
-            'Authorization': `Bearer ${serviceToken}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            password: pendingUser.password_hash,
-          }),
-        });
-
-        if (!updatePasswordResponse.ok) {
-          console.error('Password update failed:', await updatePasswordResponse.text());
-        }
-
-        // Update user profile data
+        // Update user profile data (skip password - not supported)
         await base44.asServiceRole.entities.User.update(newUser.id, {
           display_name: pendingUser.display_name,
           real_name: pendingUser.real_name,
@@ -65,7 +46,7 @@ Deno.serve(async (req) => {
           accept_messages: pendingUser.accept_messages,
         });
 
-        // Send approval email
+        // Send approval email with instructions
         await base44.asServiceRole.integrations.Core.SendEmail({
           to: pendingUser.email,
           subject: 'Dein Account wurde freigeschaltet - Jersey Collectors',
@@ -74,11 +55,8 @@ Deno.serve(async (req) => {
             <p>Hallo ${pendingUser.display_name},</p>
             <p>Gute Nachrichten! Dein Account wurde von einem Administrator freigeschaltet.</p>
             ${role === 'moderator' ? '<p><strong>Du wurdest als Moderator freigeschaltet</strong> und hast erweiterte Rechte in der Community. Du kannst Trikots und Kommentare bearbeiten und löschen.</p>' : ''}
-            <p>Du kannst dich jetzt mit deinen Zugangsdaten anmelden:</p>
-            <ul>
-              <li><strong>E-Mail:</strong> ${pendingUser.email}</li>
-              <li><strong>Passwort:</strong> Das Passwort, das du bei der Registrierung angegeben hast</li>
-            </ul>
+            <p><strong>Wichtig:</strong> Du hast eine separate E-Mail von Base44 mit einem Einladungslink erhalten. Bitte klicke auf den Link in dieser E-Mail, um dein Passwort zu setzen und dich anzumelden.</p>
+            <p>Falls du die E-Mail nicht findest, schaue bitte auch in deinem Spam-Ordner nach.</p>
             <p>Viel Spaß beim Sammeln und Teilen deiner Trikots!</p>
             <p>Mit freundlichen Grüßen,<br>Das Jersey Collectors Team</p>
           `,
@@ -95,7 +73,7 @@ Deno.serve(async (req) => {
         body: `
           <h2>User erfolgreich freigeschaltet</h2>
           <p>Du hast den User <strong>${pendingUser.display_name}</strong> (${pendingUser.email}) erfolgreich als <strong>${role === 'moderator' ? 'Moderator' : 'User'}</strong> freigeschaltet.</p>
-          <p>Der User wurde per E-Mail benachrichtigt und kann sich nun anmelden.</p>
+          <p>Der User wurde per E-Mail benachrichtigt und erhält eine separate Einladungs-E-Mail von Base44 zum Setzen des Passworts.</p>
         `,
       });
     } else {
