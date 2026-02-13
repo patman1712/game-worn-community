@@ -495,31 +495,42 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
 
       {/* Toggles */}
       <div className="space-y-3">
-        <div className="flex flex-wrap gap-6">
-          <div className="flex items-center gap-3">
-            <Switch checked={form.is_game_worn} onCheckedChange={(v) => handleChange("is_game_worn", v)} />
-            <Label className="text-white/60 text-sm">Game-Worn</Label>
-          </div>
-          <div className="flex items-center gap-3">
-            <Switch checked={form.is_game_issued} onCheckedChange={(v) => handleChange("is_game_issued", v)} />
-            <Label className="text-white/60 text-sm">Game-Issued</Label>
-          </div>
-          <div className="flex items-center gap-3">
-            <Switch checked={form.is_signed} onCheckedChange={(v) => handleChange("is_signed", v)} />
-            <Label className="text-white/60 text-sm">Signiert</Label>
-          </div>
-        </div>
-        <div className="flex flex-wrap gap-6">
-          <div className="flex items-center gap-3">
-            <Switch checked={form.has_loa} onCheckedChange={(v) => handleChange("has_loa", v)} />
-            <Label className="text-white/60 text-sm">Hat LOA Zertifikat</Label>
-          </div>
-        </div>
-        <div className="flex flex-wrap gap-6">
-          <div className="flex items-center gap-3">
-            <Switch checked={form.is_private} onCheckedChange={(v) => handleChange("is_private", v)} />
-            <Label className="text-white/60 text-sm">Privat (nur ich kann es sehen)</Label>
-          </div>
+        <div className="flex flex-wrap gap-3">
+          <Button
+            type="button"
+            onClick={() => handleChange("is_game_worn", !form.is_game_worn)}
+            className={`${form.is_game_worn ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'} transition-colors`}
+          >
+            Game-Worn
+          </Button>
+          <Button
+            type="button"
+            onClick={() => handleChange("is_game_issued", !form.is_game_issued)}
+            className={`${form.is_game_issued ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'} transition-colors`}
+          >
+            Game-Issued
+          </Button>
+          <Button
+            type="button"
+            onClick={() => handleChange("is_signed", !form.is_signed)}
+            className={`${form.is_signed ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'} transition-colors`}
+          >
+            Signiert
+          </Button>
+          <Button
+            type="button"
+            onClick={() => handleChange("has_loa", !form.has_loa)}
+            className={`${form.has_loa ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'} transition-colors`}
+          >
+            Zertifikat (LOA)
+          </Button>
+          <Button
+            type="button"
+            onClick={() => handleChange("is_private", !form.is_private)}
+            className={`${form.is_private ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'} transition-colors`}
+          >
+            Privat
+          </Button>
         </div>
         <div className="flex flex-wrap gap-3">
           <Button
