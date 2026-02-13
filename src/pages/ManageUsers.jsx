@@ -94,13 +94,13 @@ export default function ManageUsers() {
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <p className="text-white font-medium">{u.data?.display_name || u.full_name}</p>
-                        {u.role === 'admin' && (
+                        {(u.role === 'admin' || u.data?.role === 'admin') && (
                           <Badge className="bg-red-500/20 text-red-300 border border-red-500/30 text-xs">
                             <Shield className="w-3 h-3 mr-1" />
                             Admin
                           </Badge>
                         )}
-                        {u.role === 'moderator' && (
+                        {u.data?.role === 'moderator' && (
                           <Badge className="bg-blue-500/20 text-blue-300 border border-blue-500/30 text-xs">
                             <Shield className="w-3 h-3 mr-1" />
                             Moderator
@@ -179,8 +179,11 @@ export default function ManageUsers() {
                             <div>
                               <Label>Rolle</Label>
                               <Select
-                                value={editingUser.role}
-                                onValueChange={(value) => setEditingUser({...editingUser, role: value})}
+                                value={editingUser.data?.role || 'user'}
+                                onValueChange={(value) => setEditingUser({
+                                  ...editingUser, 
+                                  data: {...editingUser.data, role: value}
+                                })}
                               >
                                 <SelectTrigger className="bg-slate-800 border-white/10 text-white">
                                   <SelectValue />
@@ -221,7 +224,7 @@ export default function ManageUsers() {
                                     display_name: editingUser.data?.display_name,
                                     real_name: editingUser.data?.real_name,
                                     location: editingUser.data?.location,
-                                    role: editingUser.role,
+                                    role: editingUser.data?.role || 'user',
                                     show_location: editingUser.data?.show_location,
                                     accept_messages: editingUser.data?.accept_messages,
                                   }

@@ -252,7 +252,7 @@ export default function JerseyDetail() {
               </Link>
               <div className="flex items-center gap-2">
                 {/* Moderator Actions */}
-                {currentUser && (currentUser.role === 'moderator' || currentUser.role === 'admin') && (
+                {currentUser && (currentUser.data?.role === 'moderator' || currentUser.role === 'admin' || currentUser.data?.role === 'admin') && (
                   <Link to={createPageUrl("EditJersey") + `?id=${jersey.id}`}>
                     <Button variant="ghost" size="sm" className="text-orange-400 hover:text-orange-300 hover:bg-orange-500/10">
                       Bearbeiten
@@ -333,7 +333,7 @@ export default function JerseyDetail() {
                           </div>
                         </div>
                         {/* Moderator can delete any comment */}
-                        {(currentUser.role === 'moderator' || currentUser.role === 'admin' || comment.user_email === currentUser.email) && (
+                        {(currentUser.data?.role === 'moderator' || currentUser.role === 'admin' || currentUser.data?.role === 'admin' || comment.user_email === currentUser.email) && (
                           <Button
                             onClick={() => deleteCommentMutation.mutate(comment.id)}
                             variant="ghost"

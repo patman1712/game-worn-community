@@ -18,24 +18,16 @@ Deno.serve(async (req) => {
     }
 
     if (action === 'update') {
-      // Update user data - separate role update from other fields
-      const { role, ...otherUpdates } = updates;
-      
-      // Update profile fields in data object
+      // Update all user data including role in data object
       const currentUserData = await base44.asServiceRole.entities.User.filter({ id: userId });
       if (currentUserData[0]) {
         const userData = currentUserData[0].data || {};
         await base44.asServiceRole.entities.User.update(userId, {
           data: {
             ...userData,
-            ...otherUpdates
+            ...updates
           }
         });
-        
-        // Update role separately if provided
-        if (role) {
-          await base44.asServiceRole.entities.User.update(userId, { role });
-        }
       }
       
       return Response.json({ success: true, message: 'User aktualisiert' });
