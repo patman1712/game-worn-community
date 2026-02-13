@@ -115,32 +115,33 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
     e.currentTarget.classList.remove('border-cyan-500/60', 'bg-cyan-500/5');
   };
 
+  const handleDropFiles = async (files) => {
+    if (files.length === 0) return;
+
+    setUploading(true);
+    const uploadedUrls = [];
+
+    try {
+      for (const file of files) {
+        const { file_url } = await base44.integrations.Core.UploadFile({ file });
+        uploadedUrls.push(file_url);
+      }
+      handleChange("additional_images", [...(form.additional_images || []), ...uploadedUrls]);
+    } catch (error) {
+      console.error("Error uploading images:", error);
+      alert("Fehler beim Hochladen der Bilder");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleDrop = (e) => {
     e.preventDefault();
     e.stopPropagation();
     e.currentTarget.classList.remove('border-cyan-500/60', 'bg-cyan-500/5');
     
     const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
-    if (files.length === 0) return;
-
-    // Pass files to dialog and open it
-    const event = { target: { files } };
-    document.querySelector('input[type="file"][multiple]')?.dispatchEvent(new Event('change', { bubbles: true }));
-    
-    // Manually set files and open dialog
-    const fileInput = document.querySelector('input[type="file"][multiple]');
-    if (fileInput) {
-      Object.defineProperty(fileInput, 'files', {
-        value: new DataTransfer().items.length === 0 ? new DataTransfer() : (() => {
-          const dt = new DataTransfer();
-          files.forEach(f => dt.items.add(f));
-          return dt.files;
-        })(),
-        writable: false,
-      });
-    }
-    
-    setMultiImageDialogOpen(true);
+    handleDropFiles(files);
   };
 
   const handleSubmit = (e) => {
