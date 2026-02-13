@@ -7,6 +7,7 @@ import { createPageUrl } from "@/utils";
 
 export default function JerseyCard({ jersey, isLiked, onLike, index = 0 }) {
   const [imgLoaded, setImgLoaded] = useState(false);
+  const displayName = jersey.owner_name || jersey.created_by;
 
   return (
     <motion.div
@@ -105,7 +106,7 @@ export default function JerseyCard({ jersey, isLiked, onLike, index = 0 }) {
                 <User className="w-3 h-3 text-white" />
               </div>
               <span className="text-white/50 text-xs truncate max-w-[120px]">
-                {jersey.owner_name || "Unbekannt"}
+                {displayName || "Unbekannt"}
               </span>
             </div>
             <div className="flex items-center gap-1 text-white/40 text-xs">

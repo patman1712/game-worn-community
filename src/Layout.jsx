@@ -134,7 +134,7 @@ export default function Layout({ children, currentPageName }) {
                     Anmelden
                   </Button>
                   <Button
-                    onClick={() => window.location.href = 'https://app.base44.com/signup'}
+                    onClick={() => base44.auth.redirectToLogin()}
                     size="sm"
                     className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-xs h-8 px-3"
                   >
