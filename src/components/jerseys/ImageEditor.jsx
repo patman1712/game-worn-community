@@ -1,24 +1,49 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { RotateCw, RotateCcw, Check, X } from "lucide-react";
+import { RotateCw, RotateCcw, Check, X, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function ImageEditor({ imageUrl, onSave, onCancel }) {
   const [rotation, setRotation] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const canvasRef = useRef(null);
   const imageRef = useRef(null);
 
   useEffect(() => {
-    if (imageUrl && canvasRef.current) {
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-      img.onload = () => {
-        imageRef.current = img;
+    loadAndDrawImage();
+  }, [imageUrl]);
+
+  useEffect(() => {
+    if (imageRef.current) {
+      drawImage();
+    }
+  }, [rotation]);
+
+  const loadAndDrawImage = async () => {
+    setLoading(true);
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    
+    img.onload = () => {
+      imageRef.current = img;
+      setLoading(false);
+      drawImage();
+    };
+    
+    img.onerror = () => {
+      // Fallback: try loading without crossOrigin
+      const img2 = new Image();
+      img2.onload = () => {
+        imageRef.current = img2;
+        setLoading(false);
         drawImage();
       };
-      img.src = imageUrl;
-    }
-  }, [imageUrl, rotation]);
+      img2.src = imageUrl;
+    };
+    
+    img.src = imageUrl;
+  };
 
   const drawImage = () => {
     if (!canvasRef.current || !imageRef.current) return;
@@ -27,36 +52,46 @@ export default function ImageEditor({ imageUrl, onSave, onCancel }) {
     const ctx = canvas.getContext("2d");
     const img = imageRef.current;
 
-    // Calculate new dimensions based on rotation
-    const angle = (rotation * Math.PI) / 180;
-    const sin = Math.abs(Math.sin(angle));
-    const cos = Math.abs(Math.cos(angle));
-    
-    const newWidth = img.width * cos + img.height * sin;
-    const newHeight = img.width * sin + img.height * cos;
+    // For 90 degree rotations, swap width and height
+    if (rotation === 90 || rotation === 270) {
+      canvas.width = img.height;
+      canvas.height = img.width;
+    } else {
+      canvas.width = img.width;
+      canvas.height = img.height;
+    }
 
-    canvas.width = newWidth;
-    canvas.height = newHeight;
-
-    ctx.clearRect(0, 0, newWidth, newHeight);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.save();
-    ctx.translate(newWidth / 2, newHeight / 2);
-    ctx.rotate(angle);
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.rotate((rotation * Math.PI) / 180);
     ctx.drawImage(img, -img.width / 2, -img.height / 2);
     ctx.restore();
   };
 
   const handleRotate = (degrees) => {
-    setRotation((prev) => (prev + degrees) % 360);
+    setRotation((prev) => {
+      const newRotation = (prev + degrees) % 360;
+      return newRotation < 0 ? newRotation + 360 : newRotation;
+    });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!canvasRef.current) return;
     
-    canvasRef.current.toBlob((blob) => {
-      const file = new File([blob], "rotated-image.jpg", { type: "image/jpeg" });
-      onSave(file, rotation);
-    }, "image/jpeg", 0.95);
+    setSaving(true);
+    
+    canvasRef.current.toBlob(
+      (blob) => {
+        if (blob) {
+          const file = new File([blob], "rotated-image.jpg", { type: "image/jpeg" });
+          onSave(file);
+        }
+        setSaving(false);
+      },
+      "image/jpeg",
+      0.92
+    );
   };
 
   return (
@@ -82,11 +117,14 @@ export default function ImageEditor({ imageUrl, onSave, onCancel }) {
 
             {/* Canvas Preview */}
             <div className="p-6 flex items-center justify-center bg-slate-950/50 min-h-[300px] max-h-[60vh] overflow-auto">
-              <canvas
-                ref={canvasRef}
-                className="max-w-full max-h-full rounded-lg shadow-2xl"
-                style={{ transform: `rotate(0deg)` }}
-              />
+              {loading ? (
+                <Loader2 className="w-8 h-8 text-cyan-400 animate-spin" />
+              ) : (
+                <canvas
+                  ref={canvasRef}
+                  className="max-w-full max-h-full rounded-lg shadow-2xl"
+                />
+              )}
             </div>
 
             {/* Controls */}
@@ -123,9 +161,14 @@ export default function ImageEditor({ imageUrl, onSave, onCancel }) {
                 <Button
                   onClick={handleSave}
                   size="sm"
+                  disabled={saving}
                   className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white"
                 >
-                  <Check className="w-4 h-4 mr-2" />
+                  {saving ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Check className="w-4 h-4 mr-2" />
+                  )}
                   Speichern
                 </Button>
               </div>
