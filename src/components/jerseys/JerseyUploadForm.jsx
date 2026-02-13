@@ -39,6 +39,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
     for_sale: false,
   });
   const [uploading, setUploading] = useState(false);
+  const [multiImageDialogOpen, setMultiImageDialogOpen] = useState(false);
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   const [editingImage, setEditingImage] = useState(null);
   const [editingImageType, setEditingImageType] = useState(null); // 'main' or index for additional
