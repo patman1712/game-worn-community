@@ -20,22 +20,12 @@ export default function CustomLogin() {
     setLoading(true);
 
     try {
-      const response = await base44.functions.invoke('loginUser', { email, password });
-      
-      if (response.data.error) {
-        throw new Error(response.data.error);
-      }
-
-      if (response.data.token) {
-        localStorage.setItem('base44_token', response.data.token);
-      }
-      
-      // Redirect to home
-      window.location.href = createPageUrl("Home");
+      // Use Base44's built-in auth redirect
+      const nextUrl = createPageUrl("Home");
+      base44.auth.redirectToLogin(nextUrl);
     } catch (err) {
       console.error('Login error:', err);
-      setError(err.response?.data?.error || err.message || 'Login fehlgeschlagen. Bitte überprüfe deine Zugangsdaten.');
-    } finally {
+      setError('Login fehlgeschlagen. Bitte versuche es erneut.');
       setLoading(false);
     }
   };
