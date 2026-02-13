@@ -236,7 +236,7 @@ export default function JerseyDetail() {
               </div>
             )}
 
-            {/* Owner + Actions */}
+            {/* Owner */}
             <div className="flex items-center justify-between pt-4 border-t border-white/5">
               <Link
                 to={createPageUrl("UserProfile") + `?email=${jersey.owner_email || jersey.created_by}`}
@@ -251,44 +251,6 @@ export default function JerseyDetail() {
                 </div>
               </Link>
               <div className="flex items-center gap-2">
-                {/* Moderator Actions */}
-                {currentUser && (currentUser.data?.role === 'moderator' || currentUser.role === 'admin' || currentUser.data?.role === 'admin') && (
-                  <>
-                    <Link to={createPageUrl("EditJersey") + `?id=${jersey.id}`}>
-                      <Button variant="ghost" size="sm" className="text-orange-400 hover:text-orange-300 hover:bg-orange-500/10">
-                        Bearbeiten
-                      </Button>
-                    </Link>
-                    <Button
-                      onClick={async () => {
-                        if (confirm('Trikot wirklich löschen?')) {
-                          try {
-                            // Delete likes
-                            const likes = await base44.entities.JerseyLike.filter({ jersey_id: jersey.id });
-                            for (const like of likes) {
-                              await base44.entities.JerseyLike.delete(like.id);
-                            }
-                            // Delete comments
-                            const comments = await base44.entities.Comment.filter({ jersey_id: jersey.id });
-                            for (const comment of comments) {
-                              await base44.entities.Comment.delete(comment.id);
-                            }
-                            // Delete jersey
-                            await base44.entities.Jersey.delete(jersey.id);
-                            window.location.href = createPageUrl("Home");
-                          } catch (error) {
-                            alert('Fehler beim Löschen: ' + error.message);
-                          }
-                        }
-                      }}
-                      variant="ghost"
-                      size="sm"
-                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                    >
-                      Löschen
-                    </Button>
-                  </>
-                )}
                 {currentUser && (jersey.owner_email !== currentUser.email && jersey.created_by !== currentUser.email) && (
                   <Link
                     to={createPageUrl("Chat") + `?email=${jersey.owner_email || jersey.created_by}`}
@@ -308,6 +270,44 @@ export default function JerseyDetail() {
                 </Button>
               </div>
             </div>
+
+            {/* Moderator Actions - Separate Section */}
+            {currentUser && (currentUser.data?.role === 'moderator' || currentUser.role === 'admin' || currentUser.data?.role === 'admin') && (
+              <div className="pt-6 border-t border-white/5 flex gap-2">
+                <Link to={createPageUrl("EditJersey") + `?id=${jersey.id}`} className="flex-1">
+                  <Button variant="outline" className="w-full text-orange-400 border-orange-500/30 hover:text-orange-300 hover:bg-orange-500/10">
+                    Bearbeiten
+                  </Button>
+                </Link>
+                <Button
+                  onClick={async () => {
+                    if (confirm('Trikot wirklich löschen?')) {
+                      try {
+                        // Delete likes
+                        const likes = await base44.entities.JerseyLike.filter({ jersey_id: jersey.id });
+                        for (const like of likes) {
+                          await base44.entities.JerseyLike.delete(like.id);
+                        }
+                        // Delete comments
+                        const comments = await base44.entities.Comment.filter({ jersey_id: jersey.id });
+                        for (const comment of comments) {
+                          await base44.entities.Comment.delete(comment.id);
+                        }
+                        // Delete jersey
+                        await base44.entities.Jersey.delete(jersey.id);
+                        window.location.href = createPageUrl("Home");
+                      } catch (error) {
+                        alert('Fehler beim Löschen: ' + error.message);
+                      }
+                    }
+                  }}
+                  variant="outline"
+                  className="flex-1 text-red-400 border-red-500/30 hover:text-red-300 hover:bg-red-500/10"
+                >
+                  Löschen
+                </Button>
+              </div>
+            )}
 
             {/* Comments Section - Only for logged in users */}
             {currentUser && (
