@@ -52,6 +52,14 @@ export default function EditJersey() {
     return <div className="text-center py-20 text-white/40">Trikot nicht gefunden.</div>;
   }
 
+  // Check authorization: owner or moderator/admin
+  const isOwner = jersey.owner_email === user?.email || jersey.created_by === user?.email;
+  const isModerator = user?.data?.role === 'moderator' || user?.role === 'admin' || user?.data?.role === 'admin';
+  
+  if (!isOwner && !isModerator) {
+    return <div className="text-center py-20 text-white/40">Du hast keine Berechtigung, dieses Trikot zu bearbeiten.</div>;
+  }
+
   return (
     <div className="min-h-screen">
       <div className="max-w-2xl mx-auto px-4 py-10">
