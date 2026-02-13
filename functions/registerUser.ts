@@ -56,19 +56,8 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Send confirmation email to new user
-    await base44.asServiceRole.integrations.Core.SendEmail({
-      to: email,
-      subject: 'Willkommen bei Jersey Collectors - Registrierung erhalten',
-      body: `
-        <h2>Willkommen bei Jersey Collectors!</h2>
-        <p>Hallo ${display_name},</p>
-        <p>Vielen Dank für deine Registrierung! Deine Anmeldung wurde erfolgreich übermittelt.</p>
-        <p><strong>Wichtig:</strong> Dein Account muss noch von einem Administrator freigeschaltet werden. Du erhältst eine weitere E-Mail, sobald dies geschehen ist und du dich anmelden kannst.</p>
-        <p>Dies kann einige Zeit in Anspruch nehmen. Bitte habe etwas Geduld.</p>
-        <p>Mit freundlichen Grüßen,<br>Das Jersey Collectors Team</p>
-      `,
-    });
+    // Note: Cannot send email to unregistered user yet
+    // Email will be sent after approval
 
     return Response.json({ 
       success: true, 
