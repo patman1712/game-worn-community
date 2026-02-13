@@ -200,7 +200,7 @@ export default function Home() {
             <img 
               src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/698e4ef5392203adc7a32dee/0ceef6558_ChatGPTImage13Feb202614_53_21.png" 
               alt="Jersey Collectors" 
-              className="h-20 md:h-24 w-auto object-contain mx-auto"
+              className="h-28 md:h-36 w-auto object-contain mx-auto drop-shadow-[0_4px_20px_rgba(6,182,212,0.4)]"
             />
             <p className="text-white/40 mt-3 max-w-md mx-auto text-sm">
               Zeige deine Eishockey-Trikots der Welt. Entdecke Sammlungen aus der ganzen Community.

@@ -2,14 +2,14 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
-import { Shirt, Home, Plus, FolderOpen, LogIn, LogOut, ChevronLeft, Settings, MessageCircle } from "lucide-react";
+import { Shirt, Home, Plus, FolderOpen, LogIn, LogOut, ChevronLeft, Settings, MessageCircle, UserCog } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const TABS = [
   { name: "Home", icon: Home, label: "Sammlung", page: "Home" },
   { name: "Messages", icon: MessageCircle, label: "Nachrichten", page: "Messages", authRequired: true },
-  { name: "MyCollection", icon: FolderOpen, label: "Meine", page: "MyCollection", authRequired: true },
-  { name: "AddJersey", icon: Plus, label: "Hinzufügen", page: "AddJersey", authRequired: true },
+  { name: "MyCollection", icon: FolderOpen, label: "Meine Trikots", page: "MyCollection", authRequired: true },
+  { name: "AddJersey", icon: Plus, label: "Trikot hinzufügen", page: "AddJersey", authRequired: true },
 ];
 
 const CHILD_PAGES = ["JerseyDetail", "EditJersey", "UserProfile", "Chat", "Settings"];
@@ -88,7 +88,7 @@ export default function Layout({ children, currentPageName }) {
                 <img 
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/698e4ef5392203adc7a32dee/0ceef6558_ChatGPTImage13Feb202614_53_21.png" 
                   alt="Jersey Collectors" 
-                  className="h-7 w-auto object-contain"
+                  className="h-8 w-auto object-contain drop-shadow-[0_2px_8px_rgba(6,182,212,0.3)]"
                 />
               </div>
               <div className="w-20" />
@@ -98,18 +98,30 @@ export default function Layout({ children, currentPageName }) {
               <img 
                 src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/698e4ef5392203adc7a32dee/0ceef6558_ChatGPTImage13Feb202614_53_21.png" 
                 alt="Jersey Collectors" 
-                className="h-10 w-auto object-contain"
+                className="h-12 w-auto object-contain drop-shadow-[0_2px_8px_rgba(6,182,212,0.3)]"
               />
               {user ? (
-                <Button
-                  onClick={() => base44.auth.logout()}
-                  size="sm"
-                  variant="ghost"
-                  className="text-white/70 hover:text-white hover:bg-white/5 text-xs h-8 px-3"
-                >
-                  <LogOut className="w-3.5 h-3.5 mr-1.5" />
-                  Abmelden
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Link to={createPageUrl("Settings")}>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-white/70 hover:text-white hover:bg-white/5 text-xs h-8 px-3"
+                    >
+                      <UserCog className="w-3.5 h-3.5 mr-1.5" />
+                      Profil
+                    </Button>
+                  </Link>
+                  <Button
+                    onClick={() => base44.auth.logout()}
+                    size="sm"
+                    variant="ghost"
+                    className="text-white/70 hover:text-white hover:bg-white/5 text-xs h-8 px-3"
+                  >
+                    <LogOut className="w-3.5 h-3.5 mr-1.5" />
+                    Abmelden
+                  </Button>
+                </div>
               ) : (
                 <Button
                   onClick={() => base44.auth.redirectToLogin()}
@@ -133,7 +145,7 @@ export default function Layout({ children, currentPageName }) {
       {/* Bottom Tab Navigation */}
       {showBottomNav && (
         <nav className="fixed bottom-0 left-0 right-0 z-50 bg-slate-950/95 backdrop-blur-xl border-t border-white/5 safe-bottom">
-          <div className="grid grid-cols-4 h-16">
+          <div className={`grid h-16 ${visibleTabs.length === 4 ? 'grid-cols-4' : visibleTabs.length === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
             {visibleTabs.map(tab => {
               const isActive = currentPageName === tab.name;
               return (
