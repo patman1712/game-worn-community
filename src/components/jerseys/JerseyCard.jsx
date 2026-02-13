@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Heart, Star, Award, User, Edit } from "lucide-react";
+import { Heart, Star, Award, User, Edit, DollarSign } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -116,6 +116,14 @@ export default function JerseyCard({ jersey, isLiked, onLike, index = 0 }) {
               )}
             </div>
           </div>
+
+          {/* For Sale Badge */}
+          {jersey.for_sale && (
+            <div className="px-4 py-2 flex items-center gap-2 border-t border-white/5 bg-green-500/5">
+              <DollarSign className="w-3.5 h-3.5 text-green-400" />
+              <span className="text-white/70 text-xs font-medium">Zum Verkauf</span>
+            </div>
+          )}
 
           {/* Footer */}
           <div className="px-4 py-3 flex items-center justify-between">
