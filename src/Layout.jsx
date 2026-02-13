@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
+import { useQuery } from "@tanstack/react-query";
 import { Shirt, Home, Plus, FolderOpen, LogIn, LogOut, ChevronLeft, Settings, MessageCircle, UserCog } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -21,6 +22,12 @@ export default function Layout({ children, currentPageName }) {
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => setUser(null));
   }, []);
+
+  const { data: unreadMessages = [] } = useQuery({
+    queryKey: ["unreadMessages", user?.email],
+    queryFn: () => user ? base44.entities.Message.filter({ receiver_email: user.email, read: false }) : [],
+    enabled: !!user,
+  });
 
   const isChildPage = CHILD_PAGES.includes(currentPageName);
   const showBottomNav = !isChildPage;
@@ -92,14 +99,20 @@ export default function Layout({ children, currentPageName }) {
               <div className="flex items-center gap-1">
                 {visibleTabs.map(tab => {
                   const isActive = currentPageName === tab.name;
+                  const unreadCount = tab.name === "Messages" ? unreadMessages.length : 0;
                   return (
                     <Link
                       key={tab.name}
                       to={createPageUrl(tab.page)}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm ${isActive ? 'text-cyan-400 bg-cyan-500/10' : 'text-white/50 hover:text-white/70 hover:bg-white/5'}`}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm relative ${isActive ? 'text-cyan-400 bg-cyan-500/10' : 'text-white/50 hover:text-white/70 hover:bg-white/5'}`}
                     >
                       <tab.icon className="w-4 h-4" />
                       <span className="hidden sm:inline">{tab.label}</span>
+                      {unreadCount > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                          {unreadCount > 99 ? '99+' : unreadCount}
+                        </span>
+                      )}
                     </Link>
                   );
                 })}
