@@ -26,70 +26,81 @@ Deno.serve(async (req) => {
     }
 
     if (approve) {
-      // Invite user with SDK
-      await base44.users.inviteUser(pendingUser.email, role);
-
-      // Wait for user to be created
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // Get the created user
-      const allUsers = await base44.asServiceRole.entities.User.list();
-      const newUser = allUsers.find(u => u.email === pendingUser.email);
+      // Check if user already exists
+      const existingUsers = await base44.asServiceRole.entities.User.filter({ email: pendingUser.email });
       
-      if (newUser) {
-        // Update user profile data (skip password - not supported)
-        await base44.asServiceRole.entities.User.update(newUser.id, {
+      if (existingUsers.length > 0) {
+        // User already exists, just update their data
+        await base44.asServiceRole.entities.User.update(existingUsers[0].id, {
           display_name: pendingUser.display_name,
           real_name: pendingUser.real_name,
           location: pendingUser.location,
           show_location: pendingUser.show_location,
           accept_messages: pendingUser.accept_messages,
+          role: role,
+        });
+      } else {
+        // Create new user with Base44 Auth API
+        const appId = Deno.env.get('BASE44_APP_ID');
+        
+        // Register user via Auth API
+        const authResponse = await fetch(`https://api.base44.com/v1/apps/${appId}/auth/register`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: pendingUser.email,
+            password: pendingUser.password_hash,
+            full_name: pendingUser.display_name,
+          }),
         });
 
-        // Send approval email with instructions
-        await base44.asServiceRole.integrations.Core.SendEmail({
-          to: pendingUser.email,
-          subject: 'Dein Account wurde freigeschaltet - Jersey Collectors',
-          body: `
-            <h2>Dein Account wurde freigeschaltet!</h2>
-            <p>Hallo ${pendingUser.display_name},</p>
-            <p>Gute Nachrichten! Dein Account wurde von einem Administrator freigeschaltet.</p>
-            ${role === 'moderator' ? '<p><strong>Du wurdest als Moderator freigeschaltet</strong> und hast erweiterte Rechte in der Community. Du kannst Trikots und Kommentare bearbeiten und löschen.</p>' : ''}
-            <p><strong>Wichtig:</strong> Du hast eine separate E-Mail von Base44 mit einem Einladungslink erhalten. Bitte klicke auf den Link in dieser E-Mail, um dein Passwort zu setzen und dich anzumelden.</p>
-            <p>Falls du die E-Mail nicht findest, schaue bitte auch in deinem Spam-Ordner nach.</p>
-            <p>Viel Spaß beim Sammeln und Teilen deiner Trikots!</p>
-            <p>Mit freundlichen Grüßen,<br>Das Jersey Collectors Team</p>
-          `,
-        });
+        if (!authResponse.ok) {
+          const errorData = await authResponse.json();
+          throw new Error(errorData.error || 'Fehler beim Erstellen des Users');
+        }
+
+        // Wait a bit for user to be created
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        // Get the newly created user
+        const newUsers = await base44.asServiceRole.entities.User.filter({ email: pendingUser.email });
+        
+        if (newUsers.length > 0) {
+          // Update user with additional data
+          await base44.asServiceRole.entities.User.update(newUsers[0].id, {
+            display_name: pendingUser.display_name,
+            real_name: pendingUser.real_name,
+            location: pendingUser.location,
+            show_location: pendingUser.show_location,
+            accept_messages: pendingUser.accept_messages,
+            role: role,
+          });
+        }
       }
+
+      // Send approval email
+      await base44.asServiceRole.integrations.Core.SendEmail({
+        to: pendingUser.email,
+        subject: 'Dein Account wurde freigeschaltet - Jersey Collectors',
+        body: `
+          <h2>Dein Account wurde freigeschaltet!</h2>
+          <p>Hallo ${pendingUser.display_name},</p>
+          <p>Gute Nachrichten! Dein Account wurde von einem Administrator freigeschaltet.</p>
+          ${role === 'moderator' ? '<p><strong>Du wurdest als Moderator freigeschaltet</strong> und hast erweiterte Rechte in der Community.</p>' : ''}
+          <p>Du kannst dich jetzt mit deinen Zugangsdaten anmelden.</p>
+          <p>Viel Spaß beim Sammeln und Teilen deiner Trikots!</p>
+          <p>Mit freundlichen Grüßen,<br>Das Jersey Collectors Team</p>
+        `,
+      });
 
       // Delete pending user entry
       await base44.asServiceRole.entities.PendingUser.delete(pendingUserId);
 
-      // Notify admin who approved
-      await base44.asServiceRole.integrations.Core.SendEmail({
-        to: user.email,
-        subject: 'User freigeschaltet - Jersey Collectors',
-        body: `
-          <h2>User erfolgreich freigeschaltet</h2>
-          <p>Du hast den User <strong>${pendingUser.display_name}</strong> (${pendingUser.email}) erfolgreich als <strong>${role === 'moderator' ? 'Moderator' : 'User'}</strong> freigeschaltet.</p>
-          <p>Der User wurde per E-Mail benachrichtigt und erhält eine separate Einladungs-E-Mail von Base44 zum Setzen des Passworts.</p>
-        `,
-      });
     } else {
       // Reject user - delete pending entry
       await base44.asServiceRole.entities.PendingUser.delete(pendingUserId);
-
-      // Notify admin who rejected
-      await base44.asServiceRole.integrations.Core.SendEmail({
-        to: user.email,
-        subject: 'User abgelehnt - Jersey Collectors',
-        body: `
-          <h2>User abgelehnt</h2>
-          <p>Du hast die Registrierung von <strong>${pendingUser.display_name}</strong> (${pendingUser.email}) abgelehnt.</p>
-          <p>Der Antrag wurde gelöscht.</p>
-        `,
-      });
     }
 
     return Response.json({ success: true });
