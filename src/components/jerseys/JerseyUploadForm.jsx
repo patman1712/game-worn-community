@@ -524,6 +524,8 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
           >
             Zertifikat (LOA)
           </Button>
+        </div>
+        <div className="flex gap-3">
           <Button
             type="button"
             onClick={() => handleChange("is_private", true)}
