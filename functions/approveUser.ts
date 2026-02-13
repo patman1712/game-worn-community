@@ -31,54 +31,44 @@ Deno.serve(async (req) => {
 
     if (approve) {
       try {
-        // Use inviteUser from SDK - this will create the user properly
+        // Create user account via inviteUser
         console.log('[INFO] Inviting user via SDK:', pendingUser.email, 'with role:', role);
         
         await base44.users.inviteUser(pendingUser.email, role);
         
         console.log('[INFO] User invited, waiting for creation...');
         
-        // Wait longer for user to be created
-        await new Promise(resolve => setTimeout(resolve, 3000));
-
-        // Get the newly created user
-        const allUsers = await base44.asServiceRole.entities.User.list();
-        const newUser = allUsers.find(u => u.email === pendingUser.email);
+        // Wait for user to be created in database
+        let newUser = null;
+        let attempts = 0;
+        
+        while (!newUser && attempts < 10) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          const allUsers = await base44.asServiceRole.entities.User.list();
+          newUser = allUsers.find(u => u.email === pendingUser.email);
+          attempts++;
+        }
 
         console.log('[INFO] Found new user:', newUser?.email, 'with ID:', newUser?.id);
 
         if (newUser) {
-          // Update user with additional profile data
-          console.log('[INFO] Updating user profile...');
-          await base44.asServiceRole.entities.User.update(newUser.id, {
-            display_name: pendingUser.display_name,
-            real_name: pendingUser.real_name,
-            location: pendingUser.location,
-            show_location: pendingUser.show_location,
-            accept_messages: pendingUser.accept_messages,
-          });
-
-          // Update password via auth API
-          console.log('[INFO] Updating user password...');
-          const appId = Deno.env.get('BASE44_APP_ID');
+          // Update the User entity data field with profile information
+          console.log('[INFO] Updating user profile in data field...');
           
-          const passwordResponse = await fetch(`https://api.base44.com/v1/apps/${appId}/auth/users/${newUser.id}/password`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${Deno.env.get('BASE44_SERVICE_ROLE_KEY')}`,
-            },
-            body: JSON.stringify({
-              password: pendingUser.password_hash,
-            }),
+          const currentData = newUser.data || {};
+          
+          await base44.asServiceRole.entities.User.update(newUser.id, {
+            data: {
+              ...currentData,
+              display_name: pendingUser.display_name,
+              real_name: pendingUser.real_name,
+              location: pendingUser.location,
+              show_location: pendingUser.show_location,
+              accept_messages: pendingUser.accept_messages,
+            }
           });
 
-          if (!passwordResponse.ok) {
-            const errorText = await passwordResponse.text();
-            console.error('[ERROR] Password update failed:', errorText);
-          } else {
-            console.log('[INFO] Password updated successfully');
-          }
+          console.log('[INFO] Profile updated successfully');
 
           // Send approval email
           console.log('[INFO] Sending approval email...');
@@ -90,13 +80,15 @@ Deno.serve(async (req) => {
               <p>Hallo ${pendingUser.display_name},</p>
               <p>Gute Nachrichten! Dein Account wurde von einem Administrator freigeschaltet.</p>
               ${role === 'moderator' ? '<p><strong>Du wurdest als Moderator freigeschaltet</strong> und hast erweiterte Rechte in der Community.</p>' : ''}
-              <p><strong>Du kannst dich jetzt mit deinen Anmeldedaten einloggen!</strong></p>
+              <p><strong>Du hast eine Einladungs-Email erhalten.</strong> Bitte klicke auf den Link in dieser Email, um dein Passwort zu setzen und dich anzumelden.</p>
+              <p>Falls du die E-Mail nicht findest, schaue bitte auch in deinem Spam-Ordner nach.</p>
               <p>Viel Spaß beim Sammeln und Teilen deiner Trikots!</p>
               <p>Mit freundlichen Grüßen,<br>Das Jersey Collectors Team</p>
             `,
           });
         } else {
           console.error('[ERROR] User was not found in database after creation');
+          throw new Error('User konnte nicht in der Datenbank gefunden werden');
         }
 
         // Delete pending user entry
