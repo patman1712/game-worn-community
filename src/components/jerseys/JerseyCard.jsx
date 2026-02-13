@@ -143,10 +143,7 @@ export default function JerseyCard({ jersey, isLiked, onLike, index = 0 }) {
                   </Badge>
                 )}
               </div>
-              <h3 className="font-semibold text-white text-sm leading-tight line-clamp-1">
-                {jersey.title}
-              </h3>
-              <p className="text-white/50 text-xs mt-0.5">{jersey.team}</p>
+              <p className="text-white/50 text-xs">{jersey.team}</p>
               {jersey.player_name && (
                 <p className="text-cyan-400/80 text-xs mt-1 font-medium">
                   #{jersey.player_number} {jersey.player_name}
