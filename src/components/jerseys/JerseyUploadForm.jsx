@@ -52,13 +52,24 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    if (isMain) {
-      handleChange("image_url", file_url);
-    } else {
-      handleChange("additional_images", [...(form.additional_images || []), file_url]);
+    try {
+      const reader = new FileReader();
+      const arrayBuffer = await new Promise((resolve) => {
+        reader.onload = () => resolve(reader.result);
+        reader.readAsArrayBuffer(file);
+      });
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: arrayBuffer });
+      if (isMain) {
+        handleChange("image_url", file_url);
+      } else {
+        handleChange("additional_images", [...(form.additional_images || []), file_url]);
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      alert("Fehler beim Hochladen des Bildes");
+    } finally {
+      setUploading(false);
     }
-    setUploading(false);
   };
 
   const handleEditImage = (imageUrl, type) => {
