@@ -6,9 +6,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Upload, X, Image as ImageIcon, Loader2, RotateCw } from "lucide-react";
+import { Upload, X, Image as ImageIcon, Loader2, RotateCw, Images } from "lucide-react";
 import MobileDrawerSelect from "./MobileDrawerSelect";
 import ImageEditor from "./ImageEditor";
+import MultiImageUploadDialog from "./MultiImageUploadDialog";
 
 const LEAGUES = ["NHL", "DEL", "SHL", "KHL", "NLA", "EIHL", "Liiga", "CHL", "IIHF", "AHL", "OHL", "Sonstige"];
 const JERSEY_TYPES = ["Home", "Away", "Third", "Special", "All-Star", "Retro", "Practice"];
