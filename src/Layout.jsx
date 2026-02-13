@@ -84,22 +84,28 @@ export default function Layout({ children, currentPageName }) {
                 <ChevronLeft className="w-5 h-5" />
                 <span className="text-sm font-medium">Zurück</span>
               </button>
-              <div className="absolute left-1/2 -translate-x-1/2">
-                <img 
-                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/698e4ef5392203adc7a32dee/24b61a404_ChatGPTImage13Feb202616_24_03.png" 
-                  alt="Jersey Collectors" 
-                  className="h-10 w-auto object-contain drop-shadow-[0_2px_8px_rgba(6,182,212,0.3)]"
-                />
-              </div>
               <div className="w-20" />
             </>
           ) : (
             <>
-              <img 
-                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/698e4ef5392203adc7a32dee/24b61a404_ChatGPTImage13Feb202616_24_03.png" 
-                alt="Jersey Collectors" 
-                className="h-16 w-auto object-contain drop-shadow-[0_2px_8px_rgba(6,182,212,0.3)]"
-              />
+              {/* Navigation Links */}
+              <div className="flex items-center gap-1">
+                {visibleTabs.map(tab => {
+                  const isActive = currentPageName === tab.name;
+                  return (
+                    <Link
+                      key={tab.name}
+                      to={createPageUrl(tab.page)}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm ${isActive ? 'text-cyan-400 bg-cyan-500/10' : 'text-white/50 hover:text-white/70 hover:bg-white/5'}`}
+                    >
+                      <tab.icon className="w-4 h-4" />
+                      <span className="hidden sm:inline">{tab.label}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+
+              {/* Right Menu */}
               {user ? (
                 <div className="flex items-center gap-2">
                   {user.role === 'admin' && (
@@ -110,7 +116,7 @@ export default function Layout({ children, currentPageName }) {
                         className="text-white/70 hover:text-white hover:bg-white/5 text-xs h-8 px-3"
                       >
                         <Settings className="w-3.5 h-3.5 mr-1.5" />
-                        Admin
+                        <span className="hidden sm:inline">Admin</span>
                       </Button>
                     </Link>
                   )}
@@ -121,7 +127,7 @@ export default function Layout({ children, currentPageName }) {
                       className="text-white/70 hover:text-white hover:bg-white/5 text-xs h-8 px-3"
                     >
                       <UserCog className="w-3.5 h-3.5 mr-1.5" />
-                      Profil
+                      <span className="hidden sm:inline">Profil</span>
                     </Button>
                   </Link>
                   <Button
@@ -131,7 +137,7 @@ export default function Layout({ children, currentPageName }) {
                     className="text-white/70 hover:text-white hover:bg-white/5 text-xs h-8 px-3"
                   >
                     <LogOut className="w-3.5 h-3.5 mr-1.5" />
-                    Abmelden
+                    <span className="hidden sm:inline">Abmelden</span>
                   </Button>
                 </div>
               ) : (
@@ -161,14 +167,19 @@ export default function Layout({ children, currentPageName }) {
         </div>
       </header>
 
-      {/* Content with bottom padding for tab bar */}
-      <main className="relative" style={{ paddingBottom: showBottomNav ? 'calc(4rem + env(safe-area-inset-bottom))' : 0 }}>
+      {/* Content with bottom padding for tab bar on mobile only */}
+      <main className="relative md:pb-0" style={{ paddingBottom: showBottomNav ? 'calc(4rem + env(safe-area-inset-bottom))' : 0 }}>
+        <style>{`
+          @media (min-width: 768px) {
+            main { padding-bottom: 0 !important; }
+          }
+        `}</style>
         {children}
       </main>
 
-      {/* Bottom Tab Navigation */}
+      {/* Bottom Tab Navigation - Only for mobile */}
       {showBottomNav && (
-        <nav className="fixed bottom-0 left-0 right-0 z-50 bg-slate-950/95 backdrop-blur-xl border-t border-white/5 safe-bottom">
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-950/95 backdrop-blur-xl border-t border-white/5 safe-bottom">
           <div className={`grid h-16 ${visibleTabs.length === 4 ? 'grid-cols-4' : visibleTabs.length === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
             {visibleTabs.map(tab => {
               const isActive = currentPageName === tab.name;

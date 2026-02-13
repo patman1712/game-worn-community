@@ -198,7 +198,7 @@ export default function Home() {
               Community Trikot-Sammlung
             </div>
             <img 
-              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/698e4ef5392203adc7a32dee/0ceef6558_ChatGPTImage13Feb202614_53_21.png" 
+              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/698e4ef5392203adc7a32dee/24b61a404_ChatGPTImage13Feb202616_24_03.png" 
               alt="Jersey Collectors" 
               className="h-56 md:h-72 w-auto object-contain mx-auto drop-shadow-[0_4px_20px_rgba(6,182,212,0.4)]"
             />
