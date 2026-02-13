@@ -158,10 +158,12 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
         updateData = { image_url: file_url };
         handleChange("image_url", file_url);
       } else if (typeof editingImageType === 'number') {
-        const newImages = [...(form.additional_images || [])];
-        newImages[editingImageType] = file_url;
-        updateData = { additional_images: newImages };
+        const oldImageUrl = form.additional_images[editingImageType];
+        const newImages = form.additional_images.filter((_, i) => i !== editingImageType);
+        newImages.unshift(file_url);
+        updateData = { additional_images: newImages, image_url: file_url };
         handleChange("additional_images", newImages);
+        handleChange("image_url", file_url);
       }
       
       // Update jersey directly in DB if we have an ID
