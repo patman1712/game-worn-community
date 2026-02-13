@@ -20,24 +20,20 @@ export default function CustomLogin() {
     setLoading(true);
 
     try {
-      // Use Base44 API for login
-      const response = await fetch(`https://api.base44.com/apps/${Deno.env.get('BASE44_APP_ID') || 'your-app-id'}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Login fehlgeschlagen. Bitte überprüfe deine Zugangsdaten.');
+      // Call backend function to handle login
+      const loginResponse = await base44.functions.invoke('loginUser', { email, password });
+      
+      if (loginResponse.data.error) {
+        throw new Error(loginResponse.data.error);
       }
 
-      const data = await response.json();
+      // Store token if provided
+      if (loginResponse.data.token) {
+        localStorage.setItem('base44_token', loginResponse.data.token);
+      }
       
       // Reload to trigger auth state update
-      window.location.href = createPageUrl("Home");
+      window.location.reload();
     } catch (err) {
       setError(err.message || 'Login fehlgeschlagen. Bitte überprüfe deine Zugangsdaten.');
     } finally {
