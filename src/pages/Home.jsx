@@ -23,6 +23,19 @@ export default function Home() {
     base44.auth.me().then(setCurrentUser).catch(() => {});
   }, []);
 
+  // Real-time subscription for jersey updates
+  useEffect(() => {
+    const unsubscribe = base44.entities.Jersey.subscribe((event) => {
+      if (event.type === 'update') {
+        queryClient.setQueryData(['jerseys'], (old) => {
+          if (!Array.isArray(old)) return old;
+          return old.map(j => j.id === event.id ? event.data : j);
+        });
+      }
+    });
+    return () => unsubscribe();
+  }, [queryClient]);
+
   const { data: allJerseys = [], isLoading, refetch } = useQuery({
     queryKey: ["jerseys"],
     queryFn: () => base44.entities.Jersey.list("-created_date", 200),
