@@ -86,9 +86,9 @@ export default function Layout({ children, currentPageName }) {
               </button>
               <div className="absolute left-1/2 -translate-x-1/2">
                 <img 
-                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/698e4ef5392203adc7a32dee/0ceef6558_ChatGPTImage13Feb202614_53_21.png" 
+                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/698e4ef5392203adc7a32dee/24b61a404_ChatGPTImage13Feb202616_24_03.png" 
                   alt="Jersey Collectors" 
-                  className="h-8 w-auto object-contain drop-shadow-[0_2px_8px_rgba(6,182,212,0.3)]"
+                  className="h-10 w-auto object-contain drop-shadow-[0_2px_8px_rgba(6,182,212,0.3)]"
                 />
               </div>
               <div className="w-20" />
@@ -96,9 +96,9 @@ export default function Layout({ children, currentPageName }) {
           ) : (
             <>
               <img 
-                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/698e4ef5392203adc7a32dee/0ceef6558_ChatGPTImage13Feb202614_53_21.png" 
+                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/698e4ef5392203adc7a32dee/24b61a404_ChatGPTImage13Feb202616_24_03.png" 
                 alt="Jersey Collectors" 
-                className="h-12 w-auto object-contain drop-shadow-[0_2px_8px_rgba(6,182,212,0.3)]"
+                className="h-16 w-auto object-contain drop-shadow-[0_2px_8px_rgba(6,182,212,0.3)]"
               />
               {user ? (
                 <div className="flex items-center gap-2">
