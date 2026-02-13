@@ -180,45 +180,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
          )}
        </div>
 
-      {/* Additional Images */}
-      <div>
-        <Label className="text-white/70 text-sm mb-2 block">Weitere Bilder</Label>
-        <div className="flex gap-3 flex-wrap">
-          {form.additional_images?.map((url, i) => (
-            <div key={i} className="relative w-20 h-20 rounded-lg overflow-hidden border border-white/10 group">
-              <img src={url} alt="" className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
-                <button
-                  type="button"
-                  onClick={() => handleEditImage(url, i)}
-                  className="p-1 bg-white/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity mr-1"
-                >
-                  <RotateCw className="w-3 h-3 text-white" />
-                </button>
-              </div>
-              <button
-                type="button"
-                onClick={() => removeAdditionalImage(i)}
-                className="absolute top-1 right-1 p-0.5 bg-black/60 rounded-full"
-              >
-                <X className="w-3 h-3 text-white" />
-              </button>
-            </div>
-          ))}
-          <button
-            type="button"
-            onClick={() => setMultiImageDialogOpen(true)}
-            className="w-20 h-20 flex items-center justify-center rounded-lg border-2 border-dashed border-white/10 hover:border-cyan-500/30 cursor-pointer transition-colors flex-col gap-1"
-          >
-            <Images className="w-5 h-5 text-white/30" />
-            <span className="text-[10px] text-white/30">Mehrere</span>
-          </button>
-          <label className="w-20 h-20 flex items-center justify-center rounded-lg border-2 border-dashed border-white/10 hover:border-cyan-500/30 cursor-pointer transition-colors">
-            {uploading ? <Loader2 className="w-5 h-5 text-cyan-400 animate-spin" /> : <ImageIcon className="w-5 h-5 text-white/30" />}
-            <input type="file" accept="image/*" className="hidden" onChange={(e) => handleImageUpload(e, false)} />
-          </label>
-        </div>
-      </div>
+
 
       {/* Info Fields */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
