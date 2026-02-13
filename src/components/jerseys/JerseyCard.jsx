@@ -1,11 +1,23 @@
 import React, { useState, useEffect } from "react";
-import { Heart, Star, Award, User, Edit, DollarSign } from "lucide-react";
+import { Heart, Star, Award, User, Edit, DollarSign, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function JerseyCard({ jersey, isLiked, onLike, index = 0 }) {
   const [imgLoaded, setImgLoaded] = useState(false);
