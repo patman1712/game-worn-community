@@ -71,8 +71,7 @@ export default function EditJersey() {
           Zurück
         </Link>
 
-        <h1 className="text-2xl font-bold text-white mb-1">Trikot bearbeiten</h1>
-        <p className="text-white/40 text-sm mb-8">{jersey.title}</p>
+        <h1 className="text-2xl font-bold text-white mb-8">Trikot bearbeiten</h1>
 
         <JerseyUploadForm
           initialData={jersey}
