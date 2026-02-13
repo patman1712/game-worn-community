@@ -75,11 +75,15 @@ export default function JerseyCard({ jersey, isLiked, onLike, index = 0 }) {
             <div className="absolute top-3 right-3 flex gap-2">
               {isModerator && (
                 <>
-                  <Link to={createPageUrl("EditJersey") + `?id=${jersey.id}`} onClick={(e) => e.stopPropagation()}>
-                    <button className="p-2 rounded-full bg-black/30 backdrop-blur-sm hover:bg-orange-500/40 transition-all">
-                      <Edit className="w-4 h-4 text-orange-400/70 hover:text-orange-400" />
-                    </button>
-                  </Link>
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.location.href = createPageUrl("EditJersey") + `?id=${jersey.id}`;
+                    }}
+                    className="p-2 rounded-full bg-black/30 backdrop-blur-sm hover:bg-orange-500/40 transition-all"
+                  >
+                    <Edit className="w-4 h-4 text-orange-400/70 hover:text-orange-400" />
+                  </button>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <button 
