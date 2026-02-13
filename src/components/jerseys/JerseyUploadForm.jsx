@@ -62,20 +62,26 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
   };
 
   const handleSaveEditedImage = async (file) => {
-    setUploading(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    
-    if (editingImageType === 'main') {
-      handleChange("image_url", file_url);
-    } else if (typeof editingImageType === 'number') {
-      const newImages = [...(form.additional_images || [])];
-      newImages[editingImageType] = file_url;
-      handleChange("additional_images", newImages);
+    try {
+      setUploading(true);
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      
+      if (editingImageType === 'main') {
+        handleChange("image_url", file_url);
+      } else if (typeof editingImageType === 'number') {
+        const newImages = [...(form.additional_images || [])];
+        newImages[editingImageType] = file_url;
+        handleChange("additional_images", newImages);
+      }
+      
+      setEditingImage(null);
+      setEditingImageType(null);
+    } catch (error) {
+      console.error("Error uploading rotated image:", error);
+      alert("Fehler beim Hochladen des Bildes");
+    } finally {
+      setUploading(false);
     }
-    
-    setEditingImage(null);
-    setEditingImageType(null);
-    setUploading(false);
   };
 
   const removeAdditionalImage = (index) => {

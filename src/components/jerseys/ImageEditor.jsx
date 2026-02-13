@@ -81,17 +81,19 @@ export default function ImageEditor({ imageUrl, onSave, onCancel }) {
     
     setSaving(true);
     
-    canvasRef.current.toBlob(
-      (blob) => {
-        if (blob) {
-          const file = new File([blob], "rotated-image.jpg", { type: "image/jpeg" });
-          onSave(file);
-        }
-        setSaving(false);
-      },
-      "image/jpeg",
-      0.92
-    );
+    try {
+      const blob = await new Promise((resolve) => {
+        canvasRef.current.toBlob(resolve, "image/jpeg", 0.92);
+      });
+      
+      if (blob) {
+        const file = new File([blob], "rotated-image.jpg", { type: "image/jpeg" });
+        await onSave(file);
+      }
+    } catch (error) {
+      console.error("Error saving image:", error);
+      setSaving(false);
+    }
   };
 
   return (
@@ -128,12 +130,13 @@ export default function ImageEditor({ imageUrl, onSave, onCancel }) {
             </div>
 
             {/* Controls */}
-            <div className="px-6 py-4 border-t border-white/10 flex items-center justify-between">
+            <div className="px-6 py-4 border-t border-white/10 flex items-center justify-between flex-wrap gap-3">
               <div className="flex gap-2">
                 <Button
                   onClick={() => handleRotate(-90)}
                   variant="outline"
                   size="sm"
+                  disabled={loading || saving}
                   className="bg-white/5 text-white border-white/10 hover:bg-white/10"
                 >
                   <RotateCcw className="w-4 h-4 mr-2" />
@@ -143,6 +146,7 @@ export default function ImageEditor({ imageUrl, onSave, onCancel }) {
                   onClick={() => handleRotate(90)}
                   variant="outline"
                   size="sm"
+                  disabled={loading || saving}
                   className="bg-white/5 text-white border-white/10 hover:bg-white/10"
                 >
                   <RotateCw className="w-4 h-4 mr-2" />
@@ -154,6 +158,7 @@ export default function ImageEditor({ imageUrl, onSave, onCancel }) {
                   onClick={onCancel}
                   variant="ghost"
                   size="sm"
+                  disabled={saving}
                   className="text-white/50 hover:text-white hover:bg-white/5"
                 >
                   Abbrechen
@@ -161,15 +166,20 @@ export default function ImageEditor({ imageUrl, onSave, onCancel }) {
                 <Button
                   onClick={handleSave}
                   size="sm"
-                  disabled={saving}
-                  className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white"
+                  disabled={saving || loading}
+                  className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white disabled:opacity-50"
                 >
                   {saving ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Wird gespeichert...
+                    </>
                   ) : (
-                    <Check className="w-4 h-4 mr-2" />
+                    <>
+                      <Check className="w-4 h-4 mr-2" />
+                      Speichern
+                    </>
                   )}
-                  Speichern
                 </Button>
               </div>
             </div>
