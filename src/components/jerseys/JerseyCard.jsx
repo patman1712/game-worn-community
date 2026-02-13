@@ -23,12 +23,21 @@ export default function JerseyCard({ jersey, isLiked, onLike, index = 0 }) {
   const [imgLoaded, setImgLoaded] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const displayName = jersey.owner_name || jersey.created_by;
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     base44.auth.me().then(setCurrentUser).catch(() => {});
   }, []);
 
   const isModerator = currentUser?.data?.role === 'moderator' || currentUser?.role === 'admin' || currentUser?.data?.role === 'admin';
+
+  const deleteMutation = useMutation({
+    mutationFn: (id) => base44.entities.Jersey.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["jerseys"] });
+      queryClient.invalidateQueries({ queryKey: ["myJerseys"] });
+    },
+  });
 
   return (
     <motion.div
