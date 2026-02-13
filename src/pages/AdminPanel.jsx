@@ -13,7 +13,7 @@ export default function AdminPanel() {
 
   React.useEffect(() => {
     base44.auth.me().then(u => {
-      if (u?.role !== 'admin') {
+      if (u?.role !== 'admin' && u?.data?.role !== 'admin') {
         window.location.href = '/';
       }
       setUser(u);

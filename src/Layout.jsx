@@ -108,7 +108,7 @@ export default function Layout({ children, currentPageName }) {
               {/* Right Menu */}
               {user ? (
                 <div className="flex items-center gap-2">
-                  {user.role === 'admin' && (
+                  {(user.role === 'admin' || user.data?.role === 'admin') && (
                     <Link to={createPageUrl("AdminPanel")}>
                       <Button
                         size="sm"

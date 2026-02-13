@@ -18,17 +18,19 @@ Deno.serve(async (req) => {
     }
 
     if (action === 'update') {
-      // Update all user data including role in data object
+      // Update all user data including role in data object (not the platform role field)
       const currentUserData = await base44.asServiceRole.entities.User.filter({ id: userId });
-      if (currentUserData[0]) {
-        const userData = currentUserData[0].data || {};
-        await base44.asServiceRole.entities.User.update(userId, {
-          data: {
-            ...userData,
-            ...updates
-          }
-        });
+      if (!currentUserData[0]) {
+        return Response.json({ error: 'User nicht gefunden' }, { status: 404 });
       }
+      
+      const userData = currentUserData[0].data || {};
+      await base44.asServiceRole.entities.User.update(userId, {
+        data: {
+          ...userData,
+          ...updates
+        }
+      });
       
       return Response.json({ success: true, message: 'User aktualisiert' });
     } 

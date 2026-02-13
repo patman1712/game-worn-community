@@ -20,7 +20,7 @@ export default function ManageUsers() {
 
   useEffect(() => {
     base44.auth.me().then((u) => {
-      if (!u || u.role !== 'admin') {
+      if (!u || (u.role !== 'admin' && u.data?.role !== 'admin')) {
         window.location.href = '/';
       } else {
         setUser(u);
