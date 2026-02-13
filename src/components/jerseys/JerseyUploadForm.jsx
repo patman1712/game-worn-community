@@ -301,8 +301,10 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
                              onClick={() => {
                                if (form.image_url === url) {
                                  handleChange("image_url", "");
+                                 handleChange("additional_images", [...(form.additional_images || []), url]);
                                } else {
                                  handleChange("image_url", url);
+                                 handleChange("additional_images", form.additional_images.filter(img => img !== url));
                                }
                              }}
                              className={`absolute top-1 right-1 p-1.5 rounded-full transition-all ${form.image_url === url ? 'bg-yellow-500 text-white' : 'bg-black/40 text-white/50 hover:bg-black/60'}`}
@@ -517,7 +519,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
       <div className="flex gap-3 pt-2">
         <Button
            type="submit"
-           disabled={isSubmitting || !form.title || !form.team || !form.image_url || form.additional_images.length === 0}
+           disabled={isSubmitting || !form.team || !form.image_url}
            className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white px-8"
          >
           {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
