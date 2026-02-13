@@ -58,6 +58,16 @@ export default function Settings() {
     await base44.auth.updateMe(profile);
     const updatedUser = await base44.auth.me();
     setUser(updatedUser);
+    
+    // Update all user's jerseys with new display name
+    if (profile.display_name !== user.display_name) {
+      try {
+        await base44.functions.invoke('updateUserJerseys', { display_name: profile.display_name });
+      } catch (error) {
+        console.error('Error updating jerseys:', error);
+      }
+    }
+    
     setIsSaving(false);
   };
 
