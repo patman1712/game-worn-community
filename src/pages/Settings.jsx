@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,17 +16,40 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { User, Trash2, LogOut, Loader2, AlertTriangle } from "lucide-react";
+import { User, Trash2, LogOut, Loader2, AlertTriangle, MapPin, Mail, Eye, EyeOff, Save } from "lucide-react";
 
 export default function Settings() {
   const [user, setUser] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [profile, setProfile] = useState({
+    display_name: "",
+    location: "",
+    show_email: false,
+    show_location: false,
+  });
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {
+    base44.auth.me().then(u => {
+      setUser(u);
+      setProfile({
+        display_name: u.display_name || u.full_name || "",
+        location: u.location || "",
+        show_email: u.show_email || false,
+        show_location: u.show_location || false,
+      });
+    }).catch(() => {
       base44.auth.redirectToLogin(window.location.href);
     });
   }, []);
+
+  const handleSaveProfile = async () => {
+    setIsSaving(true);
+    await base44.auth.updateMe(profile);
+    const updatedUser = await base44.auth.me();
+    setUser(updatedUser);
+    setIsSaving(false);
+  };
 
   const handleDeleteAccount = async () => {
     setIsDeleting(true);
@@ -59,29 +85,96 @@ export default function Settings() {
     <div className="min-h-screen">
       <div className="max-w-2xl mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold text-white mb-1">Einstellungen</h1>
-        <p className="text-white/40 text-sm mb-8">Verwalte deinen Account und Einstellungen</p>
+        <p className="text-white/40 text-sm mb-8">Verwalte dein Profil und Account</p>
 
-        {/* Account Info */}
+        {/* Profile Edit */}
         <Card className="bg-slate-900/60 border-white/5 mb-4">
           <CardHeader>
             <CardTitle className="text-white text-base flex items-center gap-2">
               <User className="w-4 h-4" />
-              Account
+              Profil bearbeiten
             </CardTitle>
+            <CardDescription className="text-white/40 text-xs">
+              Bestimme, welche Informationen andere sehen können
+            </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-4">
             <div>
-              <p className="text-white/40 text-xs">Name</p>
-              <p className="text-white text-sm mt-0.5">{user.full_name || "Nicht angegeben"}</p>
+              <Label className="text-white/70 text-sm">Anzeigename</Label>
+              <Input
+                value={profile.display_name}
+                onChange={(e) => setProfile({ ...profile, display_name: e.target.value })}
+                placeholder="Dein Name"
+                className="bg-slate-800/50 border-white/10 text-white placeholder:text-white/20 mt-1.5"
+              />
             </div>
+            
             <div>
-              <p className="text-white/40 text-xs">E-Mail</p>
-              <p className="text-white text-sm mt-0.5">{user.email}</p>
+              <Label className="text-white/70 text-sm">E-Mail</Label>
+              <div className="flex items-center gap-2 mt-1.5">
+                <Input
+                  value={user.email}
+                  disabled
+                  className="bg-slate-800/30 border-white/5 text-white/40 flex-1"
+                />
+                <div className="flex items-center gap-2 px-3 py-2 bg-slate-800/50 border border-white/10 rounded-lg">
+                  <Switch
+                    checked={profile.show_email}
+                    onCheckedChange={(v) => setProfile({ ...profile, show_email: v })}
+                  />
+                  {profile.show_email ? (
+                    <Eye className="w-4 h-4 text-cyan-400" />
+                  ) : (
+                    <EyeOff className="w-4 h-4 text-white/40" />
+                  )}
+                </div>
+              </div>
+              <p className="text-white/30 text-xs mt-1">
+                {profile.show_email ? "Öffentlich sichtbar" : "Nur für dich sichtbar"}
+              </p>
             </div>
+
             <div>
-              <p className="text-white/40 text-xs">Rolle</p>
-              <p className="text-white text-sm mt-0.5 capitalize">{user.role}</p>
+              <Label className="text-white/70 text-sm">Wohnort</Label>
+              <div className="flex items-center gap-2 mt-1.5">
+                <div className="relative flex-1">
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                  <Input
+                    value={profile.location}
+                    onChange={(e) => setProfile({ ...profile, location: e.target.value })}
+                    placeholder="z.B. München, Deutschland"
+                    className="bg-slate-800/50 border-white/10 text-white placeholder:text-white/20 pl-10"
+                  />
+                </div>
+                <div className="flex items-center gap-2 px-3 py-2 bg-slate-800/50 border border-white/10 rounded-lg">
+                  <Switch
+                    checked={profile.show_location}
+                    onCheckedChange={(v) => setProfile({ ...profile, show_location: v })}
+                  />
+                  {profile.show_location ? (
+                    <Eye className="w-4 h-4 text-cyan-400" />
+                  ) : (
+                    <EyeOff className="w-4 h-4 text-white/40" />
+                  )}
+                </div>
+              </div>
+              <p className="text-white/30 text-xs mt-1">
+                {profile.show_location ? "Öffentlich sichtbar" : "Nur für dich sichtbar"}
+              </p>
             </div>
+
+            <Button
+              onClick={handleSaveProfile}
+              disabled={isSaving}
+              className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white"
+            >
+              {isSaving ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Save className="w-4 h-4 mr-2" />
+              )}
+              Profil speichern
+            </Button>
           </CardContent>
         </Card>
 

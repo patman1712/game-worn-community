@@ -6,9 +6,10 @@ import { createPageUrl } from "@/utils";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   ArrowLeft, Heart, Star, Award, User, Calendar,
-  Shirt, Tag, Shield, Loader2, ChevronLeft, ChevronRight, MessageCircle
+  Shirt, Tag, Shield, Loader2, ChevronLeft, ChevronRight, MessageCircle, Send
 } from "lucide-react";
 
 export default function JerseyDetail() {
@@ -16,6 +17,7 @@ export default function JerseyDetail() {
   const jerseyId = params.get("id");
   const [currentUser, setCurrentUser] = useState(null);
   const [activeImage, setActiveImage] = useState(0);
+  const [commentText, setCommentText] = useState("");
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -37,6 +39,12 @@ export default function JerseyDetail() {
     enabled: !!currentUser && !!jerseyId,
   });
 
+  const { data: comments = [] } = useQuery({
+    queryKey: ["comments", jerseyId],
+    queryFn: () => base44.entities.Comment.filter({ jersey_id: jerseyId }),
+    enabled: !!jerseyId && !!currentUser,
+  });
+
   const isLiked = likes.length > 0;
 
   const likeMutation = useMutation({
@@ -52,6 +60,21 @@ export default function JerseyDetail() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["jersey", jerseyId] });
       queryClient.invalidateQueries({ queryKey: ["myLike"] });
+    },
+  });
+
+  const commentMutation = useMutation({
+    mutationFn: async (text) => {
+      return base44.entities.Comment.create({
+        jersey_id: jerseyId,
+        user_email: currentUser.email,
+        user_name: currentUser.display_name || currentUser.full_name || currentUser.email,
+        comment: text,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["comments", jerseyId] });
+      setCommentText("");
     },
   });
 
@@ -240,6 +263,70 @@ export default function JerseyDetail() {
                 </Button>
               </div>
             </div>
+
+            {/* Comments Section - Only for logged in users */}
+            {currentUser && (
+              <div className="pt-6 border-t border-white/5">
+                <h3 className="text-white font-medium mb-4">Kommentare ({comments.length})</h3>
+                
+                {/* Comment Input */}
+                <div className="flex gap-2 mb-6">
+                  <Input
+                    value={commentText}
+                    onChange={(e) => setCommentText(e.target.value)}
+                    placeholder="Schreibe einen Kommentar..."
+                    className="bg-slate-800/50 border-white/10 text-white placeholder:text-white/20 flex-1"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && commentText.trim()) {
+                        commentMutation.mutate(commentText);
+                      }
+                    }}
+                  />
+                  <Button
+                    onClick={() => commentMutation.mutate(commentText)}
+                    disabled={!commentText.trim() || commentMutation.isPending}
+                    className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500"
+                  >
+                    {commentMutation.isPending ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Send className="w-4 h-4" />
+                    )}
+                  </Button>
+                </div>
+
+                {/* Comments List */}
+                <div className="space-y-4">
+                  {comments.map((comment, i) => (
+                    <div key={comment.id} className="bg-slate-800/30 rounded-xl p-4 border border-white/5">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center">
+                          <User className="w-4 h-4 text-white" />
+                        </div>
+                        <div>
+                          <p className="text-white text-sm font-medium">{comment.user_name}</p>
+                          <p className="text-white/30 text-xs">
+                            {new Date(comment.created_date).toLocaleDateString('de-DE', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </p>
+                        </div>
+                      </div>
+                      <p className="text-white/70 text-sm leading-relaxed">{comment.comment}</p>
+                    </div>
+                  ))}
+                  {comments.length === 0 && (
+                    <p className="text-white/30 text-sm text-center py-8">
+                      Noch keine Kommentare. Sei der Erste!
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
           </motion.div>
         </div>
       </div>
