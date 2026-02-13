@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Upload, X, Image as ImageIcon, Loader2, RotateCw, Images } from "lucide-react";
+import { Upload, X, Image as ImageIcon, Loader2, RotateCw, Images, Star } from "lucide-react";
 import MobileDrawerSelect from "./MobileDrawerSelect";
 import ImageEditor from "./ImageEditor";
 import MultiImageUploadDialog from "./MultiImageUploadDialog";
