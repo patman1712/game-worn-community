@@ -144,7 +144,7 @@ export default function JerseyCard({ jersey, isLiked, onLike, index = 0 }) {
           </div>
 
           {/* Info Section - Game Worn, For Sale, etc */}
-          {(jersey.is_game_worn || jersey.is_game_issued || jersey.is_signed || jersey.for_sale) && (
+          {(jersey.is_game_worn || jersey.is_game_issued || jersey.is_signed || jersey.for_sale !== false) && (
             <div className="px-4 py-2 flex items-center gap-2 flex-wrap border-t border-white/5 bg-white/[0.02]">
               {jersey.is_game_worn && (
                 <Badge className="bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] px-1.5 py-0">
@@ -168,6 +168,11 @@ export default function JerseyCard({ jersey, isLiked, onLike, index = 0 }) {
                 <Badge className="bg-green-500/20 text-green-300 border border-green-500/30 text-[10px] px-1.5 py-0 flex items-center gap-1">
                   <DollarSign className="w-2.5 h-2.5" />
                   Verkauf
+                </Badge>
+              )}
+              {!jersey.for_sale && (
+                <Badge className="bg-slate-500/20 text-slate-300 border border-slate-500/30 text-[10px] px-1.5 py-0 flex items-center gap-1">
+                  Nicht zum Verkauf
                 </Badge>
               )}
             </div>
