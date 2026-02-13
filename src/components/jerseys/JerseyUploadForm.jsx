@@ -167,6 +167,14 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
               </button>
             </div>
           ))}
+          <button
+            type="button"
+            onClick={() => setMultiImageDialogOpen(true)}
+            className="w-20 h-20 flex items-center justify-center rounded-lg border-2 border-dashed border-white/10 hover:border-cyan-500/30 cursor-pointer transition-colors flex-col gap-1"
+          >
+            <Images className="w-5 h-5 text-white/30" />
+            <span className="text-[10px] text-white/30">Mehrere</span>
+          </button>
           <label className="w-20 h-20 flex items-center justify-center rounded-lg border-2 border-dashed border-white/10 hover:border-cyan-500/30 cursor-pointer transition-colors">
             {uploading ? <Loader2 className="w-5 h-5 text-cyan-400 animate-spin" /> : <ImageIcon className="w-5 h-5 text-white/30" />}
             <input type="file" accept="image/*" className="hidden" onChange={(e) => handleImageUpload(e, false)} />
