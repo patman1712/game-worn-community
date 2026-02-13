@@ -6,9 +6,9 @@ import { Shirt, Home, Plus, FolderOpen, LogIn, LogOut, ChevronLeft, Settings, Me
 import { Button } from "@/components/ui/button";
 
 const TABS = [
-  { name: "Home", icon: Home, label: "Entdecken", page: "Home" },
+  { name: "Home", icon: Home, label: "Sammlung", page: "Home" },
   { name: "Messages", icon: MessageCircle, label: "Nachrichten", page: "Messages", authRequired: true },
-  { name: "MyCollection", icon: FolderOpen, label: "Sammlung", page: "MyCollection", authRequired: true },
+  { name: "MyCollection", icon: FolderOpen, label: "Meine", page: "MyCollection", authRequired: true },
   { name: "AddJersey", icon: Plus, label: "Hinzufügen", page: "AddJersey", authRequired: true },
 ];
 
