@@ -68,19 +68,28 @@ export default function JerseyCard({ jersey, isLiked, onLike, index = 0 }) {
               )}
             </div>
 
-            {/* Like button */}
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onLike?.(jersey.id);
-              }}
-              className="absolute top-3 right-3 p-2 rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/50 transition-all"
-            >
-              <Heart
-                className={`w-4 h-4 transition-all ${isLiked ? 'fill-red-500 text-red-500 scale-110' : 'text-white/70 hover:text-white'}`}
-              />
-            </button>
+            {/* Like and Edit buttons */}
+            <div className="absolute top-3 right-3 flex gap-2">
+              {isModerator && (
+                <Link to={createPageUrl("EditJersey") + `?id=${jersey.id}`} onClick={(e) => e.stopPropagation()}>
+                  <button className="p-2 rounded-full bg-black/30 backdrop-blur-sm hover:bg-orange-500/40 transition-all">
+                    <Edit className="w-4 h-4 text-orange-400/70 hover:text-orange-400" />
+                  </button>
+                </Link>
+              )}
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onLike?.(jersey.id);
+                }}
+                className="p-2 rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/50 transition-all"
+              >
+                <Heart
+                  className={`w-4 h-4 transition-all ${isLiked ? 'fill-red-500 text-red-500 scale-110' : 'text-white/70 hover:text-white'}`}
+                />
+              </button>
+            </div>
 
             {/* Bottom info overlay */}
             <div className="absolute bottom-0 left-0 right-0 p-4">
