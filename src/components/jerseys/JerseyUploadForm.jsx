@@ -526,10 +526,17 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
           </Button>
           <Button
             type="button"
-            onClick={() => handleChange("is_private", !form.is_private)}
+            onClick={() => handleChange("is_private", true)}
             className={`${form.is_private ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'} transition-colors`}
           >
             Privat
+          </Button>
+          <Button
+            type="button"
+            onClick={() => handleChange("is_private", false)}
+            className={`${!form.is_private ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'} transition-colors`}
+          >
+            Öffentlich
           </Button>
         </div>
         <div className="flex flex-wrap gap-3">
