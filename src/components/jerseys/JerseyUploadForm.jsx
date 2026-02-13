@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Upload, X, Image as ImageIcon, Loader2, RotateCw, Images, Star, GripVertical } from "lucide-react";
+import { Upload, X, Image as ImageIcon, Loader2, RotateCw, Images, GripVertical } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import MobileDrawerSelect from "./MobileDrawerSelect";
 import ImageEditor from "./ImageEditor";
@@ -181,10 +181,15 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
     const [removed] = newImages.splice(source.index, 1);
     newImages.splice(destination.index, 0, removed);
     handleChange("additional_images", newImages);
+    handleChange("image_url", newImages[0]);
   };
 
   const handleMultiImageUpload = (urls) => {
-    handleChange("additional_images", [...(form.additional_images || []), ...urls]);
+    const newImages = [...(form.additional_images || []), ...urls];
+    handleChange("additional_images", newImages);
+    if (!form.image_url && newImages.length > 0) {
+      handleChange("image_url", newImages[0]);
+    }
   };
 
   const handleDragOver = (e) => {
@@ -296,19 +301,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
                            >
                              <GripVertical className="w-4 h-4 text-white" />
                            </div>
-                           <button
-                             type="button"
-                             onClick={() => {
-                               if (form.image_url === url) {
-                                 handleChange("image_url", "");
-                               } else {
-                                 handleChange("image_url", url);
-                               }
-                             }}
-                             className={`absolute top-1 right-1 p-1.5 rounded-full transition-all ${form.image_url === url ? 'bg-yellow-500 text-white' : 'bg-black/40 text-white/50 hover:bg-black/60'}`}
-                           >
-                             <Star className="w-4 h-4" fill={form.image_url === url ? "currentColor" : "none"} />
-                           </button>
+
                            <button
                              type="button"
                              onClick={() => removeAdditionalImage(i)}
