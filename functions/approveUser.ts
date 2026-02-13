@@ -13,8 +13,6 @@ Deno.serve(async (req) => {
     const payload = await req.json();
     const { pendingUserId, approve, role = 'user' } = payload;
 
-    console.log('Received payload:', { pendingUserId, approve, role });
-
     if (!pendingUserId) {
       return Response.json({ error: 'Pending User ID fehlt' }, { status: 400 });
     }
@@ -23,29 +21,24 @@ Deno.serve(async (req) => {
     const allPendingUsers = await base44.asServiceRole.entities.PendingUser.list();
     const pendingUser = allPendingUsers.find(p => p.id === pendingUserId);
 
-    console.log('Found pending user:', pendingUser);
-
     if (!pendingUser) {
       return Response.json({ error: 'Pending User nicht gefunden' }, { status: 404 });
     }
 
     if (approve) {
       try {
-        // Invite user with SDK
-        console.log('Inviting user:', pendingUser.email, 'with role:', role);
+        // Invite user with SDK - this creates the user and sends invitation email
         await base44.users.inviteUser(pendingUser.email, role);
 
-        // Wait for user creation
+        // Wait for user creation in database
         await new Promise(resolve => setTimeout(resolve, 2000));
 
-        // Get the created user
+        // Get the created user and update profile
         const allUsers = await base44.asServiceRole.entities.User.list();
         const newUser = allUsers.find(u => u.email === pendingUser.email);
-        
-        console.log('Found created user:', newUser);
 
         if (newUser) {
-          // Update user profile
+          // Update user profile with additional data
           await base44.asServiceRole.entities.User.update(newUser.id, {
             display_name: pendingUser.display_name,
             real_name: pendingUser.real_name,
@@ -53,32 +46,26 @@ Deno.serve(async (req) => {
             show_location: pendingUser.show_location,
             accept_messages: pendingUser.accept_messages,
           });
-          
-          console.log('User profile updated');
+
+          // Now send approval confirmation email (user exists in database now)
+          await base44.asServiceRole.integrations.Core.SendEmail({
+            to: pendingUser.email,
+            subject: 'Dein Account wurde freigeschaltet - Jersey Collectors',
+            body: `
+              <h2>Dein Account wurde freigeschaltet!</h2>
+              <p>Hallo ${pendingUser.display_name},</p>
+              <p>Gute Nachrichten! Dein Account wurde von einem Administrator freigeschaltet.</p>
+              ${role === 'moderator' ? '<p><strong>Du wurdest als Moderator freigeschaltet</strong> und hast erweiterte Rechte in der Community.</p>' : ''}
+              <p><strong>Wichtiger Hinweis:</strong> Du hast eine separate Einladungs-E-Mail erhalten. Bitte klicke auf den Link in dieser E-Mail, um dein Passwort zu setzen und dich erstmalig anzumelden.</p>
+              <p>Falls du die E-Mail nicht findest, schaue bitte auch in deinem Spam-Ordner nach.</p>
+              <p>Viel Spaß beim Sammeln und Teilen deiner Trikots!</p>
+              <p>Mit freundlichen Grüßen,<br>Das Jersey Collectors Team</p>
+            `,
+          });
         }
-
-        // Send approval email
-        await base44.asServiceRole.integrations.Core.SendEmail({
-          to: pendingUser.email,
-          subject: 'Dein Account wurde freigeschaltet - Jersey Collectors',
-          body: `
-            <h2>Dein Account wurde freigeschaltet!</h2>
-            <p>Hallo ${pendingUser.display_name},</p>
-            <p>Gute Nachrichten! Dein Account wurde von einem Administrator freigeschaltet.</p>
-            ${role === 'moderator' ? '<p><strong>Du wurdest als Moderator freigeschaltet</strong> und hast erweiterte Rechte in der Community.</p>' : ''}
-            <p><strong>Wichtiger Hinweis:</strong> Du hast eine separate Einladungs-E-Mail von Base44 erhalten. Bitte klicke auf den Link in dieser E-Mail, um dein Passwort zu setzen und dich erstmalig anzumelden.</p>
-            <p>Falls du die E-Mail nicht findest, schaue bitte auch in deinem Spam-Ordner nach.</p>
-            <p>Viel Spaß beim Sammeln und Teilen deiner Trikots!</p>
-            <p>Mit freundlichen Grüßen,<br>Das Jersey Collectors Team</p>
-          `,
-        });
-
-        console.log('Approval email sent');
 
         // Delete pending user entry
         await base44.asServiceRole.entities.PendingUser.delete(pendingUserId);
-        
-        console.log('Pending user deleted');
 
       } catch (error) {
         console.error('Error during approval:', error);
@@ -87,17 +74,14 @@ Deno.serve(async (req) => {
     } else {
       // Reject user - just delete pending entry
       await base44.asServiceRole.entities.PendingUser.delete(pendingUserId);
-      console.log('User rejected and pending entry deleted');
     }
 
     return Response.json({ success: true });
 
   } catch (error) {
     console.error('Approval error:', error);
-    console.error('Error details:', error.message, error.stack);
     return Response.json({ 
-      error: error.message || 'Fehler bei der Freischaltung',
-      details: error.toString()
+      error: error.message || 'Fehler bei der Freischaltung'
     }, { status: 500 });
   }
 });
