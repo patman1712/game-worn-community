@@ -110,18 +110,29 @@ export default function MultiImageUploadDialog({ open, onOpenChange, onImagesUpl
 
     for (let i = 0; i < files.length; i++) {
       try {
-        setProgress((prev) => ({ ...prev, [i]: 50 }));
+        setProgress((prev) => ({ ...prev, [i]: 30 }));
 
-        // Compress image
-        const compressed = await compressImage(files[i]);
-        setProgress((prev) => ({ ...prev, [i]: 80 }));
+        const compressed = await compressImage(files[i], 1000);
+        setProgress((prev) => ({ ...prev, [i]: 60 }));
 
-        // Upload
-        const { file_url } = await base44.integrations.Core.UploadFile({ file: compressed });
-        uploadedUrls.push(file_url);
-
-        setProgress((prev) => ({ ...prev, [i]: 100 }));
-        setCompleted((prev) => [...prev, i]);
+        let retries = 2;
+        let uploaded = false;
+        
+        while (retries > 0 && !uploaded) {
+          try {
+            const { file_url } = await base44.integrations.Core.UploadFile({ file: compressed });
+            uploadedUrls.push(file_url);
+            uploaded = true;
+            setProgress((prev) => ({ ...prev, [i]: 100 }));
+            setCompleted((prev) => [...prev, i]);
+          } catch (uploadError) {
+            retries--;
+            if (retries === 0) {
+              throw uploadError;
+            }
+            await new Promise(r => setTimeout(r, 800));
+          }
+        }
       } catch (error) {
         console.error(`Error uploading file ${i}:`, error);
         setProgress((prev) => ({ ...prev, [i]: -1 }));
@@ -131,7 +142,6 @@ export default function MultiImageUploadDialog({ open, onOpenChange, onImagesUpl
     setUploading(false);
     onImagesUploaded(uploadedUrls);
 
-    // Reset after 2 seconds
     setTimeout(() => {
       setFiles([]);
       setProgress({});
