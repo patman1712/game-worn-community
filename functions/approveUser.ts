@@ -27,7 +27,10 @@ Deno.serve(async (req) => {
 
     if (approve) {
       // Invite user to the app with the specified role
-      await base44.asServiceRole.users.inviteUser(pendingUser.email, role);
+      await base44.users.inviteUser(pendingUser.email, role);
+
+      // Wait a moment for user to be created
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       // Update user profile data after invitation
       const allUsers = await base44.asServiceRole.entities.User.list();
@@ -41,25 +44,25 @@ Deno.serve(async (req) => {
           show_location: pendingUser.show_location,
           accept_messages: pendingUser.accept_messages,
         });
+
+        // Send approval email to the new user
+        await base44.asServiceRole.integrations.Core.SendEmail({
+          to: pendingUser.email,
+          subject: 'Dein Account wurde freigeschaltet - Jersey Collectors',
+          body: `
+            <h2>Dein Account wurde freigeschaltet!</h2>
+            <p>Hallo ${pendingUser.display_name},</p>
+            <p>Gute Nachrichten! Dein Account wurde von einem Administrator freigeschaltet.</p>
+            ${role === 'moderator' ? '<p><strong>Du wurdest als Moderator freigeschaltet</strong> und hast erweiterte Rechte in der Community. Du kannst Trikots und Kommentare bearbeiten und löschen.</p>' : ''}
+            <p>Du kannst dich jetzt mit deinen Zugangsdaten anmelden und die Jersey Collectors Community nutzen.</p>
+            <p>Viel Spaß beim Sammeln und Teilen deiner Trikots!</p>
+            <p>Mit freundlichen Grüßen,<br>Das Jersey Collectors Team</p>
+          `,
+        });
       }
 
       // Delete pending user entry
       await base44.asServiceRole.entities.PendingUser.delete(pendingUserId);
-
-      // Send approval email
-      await base44.asServiceRole.integrations.Core.SendEmail({
-        to: pendingUser.email,
-        subject: 'Dein Account wurde freigeschaltet - Jersey Collectors',
-        body: `
-          <h2>Dein Account wurde freigeschaltet!</h2>
-          <p>Hallo ${pendingUser.display_name},</p>
-          <p>Gute Nachrichten! Dein Account wurde von einem Administrator freigeschaltet.</p>
-          ${role === 'moderator' ? '<p><strong>Du wurdest als Moderator freigeschaltet</strong> und hast erweiterte Rechte in der Community.</p>' : ''}
-          <p>Du kannst dich jetzt mit deinen Zugangsdaten anmelden und die Jersey Collectors Community nutzen.</p>
-          <p>Viel Spaß beim Sammeln und Teilen deiner Trikots!</p>
-          <p>Mit freundlichen Grüßen,<br>Das Jersey Collectors Team</p>
-        `,
-      });
 
       // Notify admin who approved
       await base44.asServiceRole.integrations.Core.SendEmail({
@@ -72,21 +75,8 @@ Deno.serve(async (req) => {
         `,
       });
     } else {
-      // Reject user - delete pending entry
+      // Reject user - delete pending entry only (don't send email to non-user)
       await base44.asServiceRole.entities.PendingUser.delete(pendingUserId);
-
-      // Send rejection email
-      await base44.asServiceRole.integrations.Core.SendEmail({
-        to: pendingUser.email,
-        subject: 'Registrierung abgelehnt - Jersey Collectors',
-        body: `
-          <h2>Registrierung abgelehnt</h2>
-          <p>Hallo ${pendingUser.display_name},</p>
-          <p>Leider konnte deine Registrierung bei Jersey Collectors nicht genehmigt werden.</p>
-          <p>Bei Fragen kannst du dich gerne an einen Administrator wenden.</p>
-          <p>Mit freundlichen Grüßen,<br>Das Jersey Collectors Team</p>
-        `,
-      });
 
       // Notify admin who rejected
       await base44.asServiceRole.integrations.Core.SendEmail({
@@ -95,7 +85,7 @@ Deno.serve(async (req) => {
         body: `
           <h2>User abgelehnt</h2>
           <p>Du hast die Registrierung von <strong>${pendingUser.display_name}</strong> (${pendingUser.email}) abgelehnt.</p>
-          <p>Der User wurde per E-Mail benachrichtigt.</p>
+          <p>Der Antrag wurde gelöscht.</p>
         `,
       });
     }

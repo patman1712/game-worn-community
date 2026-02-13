@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   ArrowLeft, Heart, Star, Award, User, Calendar,
-  Shirt, Tag, Shield, Loader2, ChevronLeft, ChevronRight, MessageCircle, Send
+  Shirt, Tag, Shield, Loader2, ChevronLeft, ChevronRight, MessageCircle, Send, Trash2
 } from "lucide-react";
 
 export default function JerseyDetail() {
@@ -75,6 +75,13 @@ export default function JerseyDetail() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["comments", jerseyId] });
       setCommentText("");
+    },
+  });
+
+  const deleteCommentMutation = useMutation({
+    mutationFn: (commentId) => base44.entities.Comment.delete(commentId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["comments", jerseyId] });
     },
   });
 
@@ -244,6 +251,14 @@ export default function JerseyDetail() {
                 </div>
               </Link>
               <div className="flex items-center gap-2">
+                {/* Moderator Actions */}
+                {currentUser && (currentUser.role === 'moderator' || currentUser.role === 'admin') && (
+                  <Link to={createPageUrl("EditJersey") + `?id=${jersey.id}`}>
+                    <Button variant="ghost" size="sm" className="text-orange-400 hover:text-orange-300 hover:bg-orange-500/10">
+                      Bearbeiten
+                    </Button>
+                  </Link>
+                )}
                 {currentUser && (jersey.owner_email !== currentUser.email && jersey.created_by !== currentUser.email) && (
                   <Link
                     to={createPageUrl("Chat") + `?email=${jersey.owner_email || jersey.created_by}`}
@@ -299,22 +314,35 @@ export default function JerseyDetail() {
                 <div className="space-y-4">
                   {comments.map((comment, i) => (
                     <div key={comment.id} className="bg-slate-800/30 rounded-xl p-4 border border-white/5">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center">
-                          <User className="w-4 h-4 text-white" />
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center">
+                            <User className="w-4 h-4 text-white" />
+                          </div>
+                          <div>
+                            <p className="text-white text-sm font-medium">{comment.user_name}</p>
+                            <p className="text-white/30 text-xs">
+                              {new Date(comment.created_date).toLocaleDateString('de-DE', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-white text-sm font-medium">{comment.user_name}</p>
-                          <p className="text-white/30 text-xs">
-                            {new Date(comment.created_date).toLocaleDateString('de-DE', {
-                              day: '2-digit',
-                              month: '2-digit',
-                              year: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </p>
-                        </div>
+                        {/* Moderator can delete any comment */}
+                        {(currentUser.role === 'moderator' || currentUser.role === 'admin' || comment.user_email === currentUser.email) && (
+                          <Button
+                            onClick={() => deleteCommentMutation.mutate(comment.id)}
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-white/30 hover:text-red-400 hover:bg-white/5"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        )}
                       </div>
                       <p className="text-white/70 text-sm leading-relaxed">{comment.comment}</p>
                     </div>
