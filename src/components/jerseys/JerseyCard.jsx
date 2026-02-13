@@ -78,8 +78,14 @@ export default function JerseyCard({ jersey, isLiked, onLike, index = 0 }) {
                     </button>
                   </Link>
                   <AlertDialog>
-                    <AlertDialogTrigger asChild onClick={(e) => e.stopPropagation()}>
-                      <button className="p-2 rounded-full bg-black/30 backdrop-blur-sm hover:bg-red-500/40 transition-all">
+                    <AlertDialogTrigger asChild>
+                      <button 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}
+                        className="p-2 rounded-full bg-black/30 backdrop-blur-sm hover:bg-red-500/40 transition-all"
+                      >
                         <Trash2 className="w-4 h-4 text-red-400/70 hover:text-red-400" />
                       </button>
                     </AlertDialogTrigger>
