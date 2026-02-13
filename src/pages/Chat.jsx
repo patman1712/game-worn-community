@@ -89,6 +89,7 @@ export default function Chat() {
           </div>
           <div>
             <h2 className="text-white font-medium">{otherEmail}</h2>
+            <p className="text-white/40 text-xs">Chat</p>
           </div>
         </div>
       </div>
