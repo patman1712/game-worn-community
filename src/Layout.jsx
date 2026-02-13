@@ -158,38 +158,10 @@ export default function Layout({ children, currentPageName }) {
         </div>
       </header>
 
-      {/* Content with bottom padding for tab bar on mobile only */}
-      <main className="relative md:pb-0" style={{ paddingBottom: showBottomNav ? 'calc(4rem + env(safe-area-inset-bottom))' : 0 }}>
-        <style>{`
-          @media (min-width: 768px) {
-            main { padding-bottom: 0 !important; }
-          }
-        `}</style>
+      {/* Content */}
+      <main className="relative">
         {children}
       </main>
-
-      {/* Bottom Tab Navigation - Only for mobile */}
-      {showBottomNav && (
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-950/95 backdrop-blur-xl border-t border-white/5 safe-bottom">
-          <div className={`grid h-16 ${visibleTabs.length === 4 ? 'grid-cols-4' : visibleTabs.length === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
-            {visibleTabs.map(tab => {
-              const isActive = currentPageName === tab.name;
-              return (
-                <Link
-                  key={tab.name}
-                  to={createPageUrl(tab.page)}
-                  className="flex flex-col items-center justify-center gap-1 active:bg-white/5 transition-colors"
-                >
-                  <tab.icon className={`w-5 h-5 transition-colors ${isActive ? 'text-cyan-400' : 'text-white/40'}`} />
-                  <span className={`text-[10px] font-medium transition-colors ${isActive ? 'text-cyan-400' : 'text-white/40'}`}>
-                    {tab.label}
-                  </span>
-                </Link>
-              );
-            })}
-          </div>
-        </nav>
-      )}
     </div>
   );
 }
