@@ -120,43 +120,65 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Main Image Upload */}
-      <div>
-        <Label className="text-white/70 text-sm mb-2 block">Hauptbild *</Label>
-        {form.image_url ? (
-          <div className="relative w-full aspect-[3/4] max-w-xs rounded-xl overflow-hidden border border-white/10 group">
-            <img src={form.image_url} alt="Preview" className="w-full h-full object-cover" />
-            <div className="absolute top-2 right-2 flex gap-1.5">
-              <button
-                type="button"
-                onClick={() => handleEditImage(form.image_url, 'main')}
-                className="p-1.5 bg-black/60 rounded-full hover:bg-black/80 transition-opacity opacity-0 group-hover:opacity-100"
-              >
-                <RotateCw className="w-4 h-4 text-white" />
-              </button>
-              <button
-                type="button"
-                onClick={() => handleChange("image_url", "")}
-                className="p-1.5 bg-black/60 rounded-full hover:bg-black/80"
-              >
-                <X className="w-4 h-4 text-white" />
-              </button>
-            </div>
-          </div>
-        ) : (
-          <label className="flex flex-col items-center justify-center w-full aspect-[3/4] max-w-xs rounded-xl border-2 border-dashed border-white/10 hover:border-cyan-500/40 bg-slate-800/50 cursor-pointer transition-colors">
-            {uploading ? (
-              <Loader2 className="w-8 h-8 text-cyan-400 animate-spin" />
-            ) : (
-              <>
-                <Upload className="w-8 h-8 text-white/30 mb-2" />
-                <span className="text-white/40 text-sm">Bild hochladen</span>
-              </>
-            )}
-            <input type="file" accept="image/*" className="hidden" onChange={(e) => handleImageUpload(e, true)} />
-          </label>
-        )}
-      </div>
+      {/* Images Gallery */}
+       <div>
+         <Label className="text-white/70 text-sm mb-2 block">Fotos * (Mindestens 1 erforderlich)</Label>
+         {form.additional_images && form.additional_images.length > 0 ? (
+           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+             {form.additional_images.map((url, i) => (
+               <div key={i} className="relative group">
+                 <div className="aspect-square rounded-lg overflow-hidden border-2 border-white/10 hover:border-cyan-500/30 transition-colors">
+                   <img src={url} alt="" className="w-full h-full object-cover" />
+                 </div>
+                 <button
+                   type="button"
+                   onClick={() => {
+                     if (form.image_url === url) {
+                       handleChange("image_url", "");
+                     } else {
+                       handleChange("image_url", url);
+                     }
+                   }}
+                   className={`absolute top-1 right-1 p-1.5 rounded-full transition-all ${form.image_url === url ? 'bg-yellow-500 text-white' : 'bg-black/40 text-white/50 hover:bg-black/60'}`}
+                 >
+                   <Star className="w-4 h-4" fill={form.image_url === url ? "currentColor" : "none"} />
+                 </button>
+                 <button
+                   type="button"
+                   onClick={() => removeAdditionalImage(i)}
+                   className="absolute bottom-1 right-1 p-1 bg-black/60 rounded-full hover:bg-red-600/80 transition-colors opacity-0 group-hover:opacity-100"
+                 >
+                   <X className="w-3 h-3 text-white" />
+                 </button>
+                 <button
+                   type="button"
+                   onClick={() => handleEditImage(url, i)}
+                   className="absolute bottom-1 left-1 p-1 bg-black/60 rounded-full hover:bg-orange-600/80 transition-colors opacity-0 group-hover:opacity-100"
+                 >
+                   <RotateCw className="w-3 h-3 text-white" />
+                 </button>
+               </div>
+             ))}
+             <button
+               type="button"
+               onClick={() => setMultiImageDialogOpen(true)}
+               className="aspect-square flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-white/10 hover:border-cyan-500/40 bg-slate-800/50 cursor-pointer transition-colors"
+             >
+               <Upload className="w-6 h-6 text-white/30 mb-1" />
+               <span className="text-[10px] text-white/30">+ Fotos</span>
+             </button>
+           </div>
+         ) : (
+           <button
+             type="button"
+             onClick={() => setMultiImageDialogOpen(true)}
+             className="w-full aspect-video flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-white/10 hover:border-cyan-500/40 bg-slate-800/50 cursor-pointer transition-colors"
+           >
+             <Upload className="w-8 h-8 text-white/30 mb-2" />
+             <span className="text-white/40 text-sm">Klick hier oder zieh Fotos rein</span>
+           </button>
+         )}
+       </div>
 
       {/* Additional Images */}
       <div>
