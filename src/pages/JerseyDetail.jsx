@@ -260,11 +260,25 @@ export default function JerseyDetail() {
                       </Button>
                     </Link>
                     <Button
-                      onClick={() => {
+                      onClick={async () => {
                         if (confirm('Trikot wirklich löschen?')) {
-                          base44.entities.Jersey.delete(jersey.id).then(() => {
+                          try {
+                            // Delete likes
+                            const likes = await base44.entities.JerseyLike.filter({ jersey_id: jersey.id });
+                            for (const like of likes) {
+                              await base44.entities.JerseyLike.delete(like.id);
+                            }
+                            // Delete comments
+                            const comments = await base44.entities.Comment.filter({ jersey_id: jersey.id });
+                            for (const comment of comments) {
+                              await base44.entities.Comment.delete(comment.id);
+                            }
+                            // Delete jersey
+                            await base44.entities.Jersey.delete(jersey.id);
                             window.location.href = createPageUrl("Home");
-                          });
+                          } catch (error) {
+                            alert('Fehler beim Löschen: ' + error.message);
+                          }
                         }
                       }}
                       variant="ghost"
