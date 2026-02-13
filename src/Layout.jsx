@@ -85,25 +85,32 @@ export default function Layout({ children, currentPageName }) {
                 <span className="text-sm font-medium">Zurück</span>
               </button>
               <div className="absolute left-1/2 -translate-x-1/2">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center">
-                    <Shirt className="w-3.5 h-3.5 text-white" />
-                  </div>
-                </div>
+                <img 
+                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/698e4ef5392203adc7a32dee/0ceef6558_ChatGPTImage13Feb202614_53_21.png" 
+                  alt="Jersey Collectors" 
+                  className="h-7 w-auto object-contain"
+                />
               </div>
               <div className="w-20" />
             </>
           ) : (
             <>
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center">
-                  <Shirt className="w-4 h-4 text-white" />
-                </div>
-                <span className="font-bold text-white text-base tracking-tight">
-                  Jersey<span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">Vault</span>
-                </span>
-              </div>
-              {!user && (
+              <img 
+                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/698e4ef5392203adc7a32dee/0ceef6558_ChatGPTImage13Feb202614_53_21.png" 
+                alt="Jersey Collectors" 
+                className="h-10 w-auto object-contain"
+              />
+              {user ? (
+                <Button
+                  onClick={() => base44.auth.logout()}
+                  size="sm"
+                  variant="ghost"
+                  className="text-white/70 hover:text-white hover:bg-white/5 text-xs h-8 px-3"
+                >
+                  <LogOut className="w-3.5 h-3.5 mr-1.5" />
+                  Abmelden
+                </Button>
+              ) : (
                 <Button
                   onClick={() => base44.auth.redirectToLogin()}
                   size="sm"

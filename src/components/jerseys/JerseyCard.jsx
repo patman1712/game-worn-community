@@ -25,7 +25,7 @@ export default function JerseyCard({ jersey, isLiked, onLike, index = 0 }) {
             <img
               src={jersey.image_url}
               alt={jersey.title}
-              className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-105 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
+              className={`w-full h-full object-contain transition-all duration-700 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
               onLoad={() => setImgLoaded(true)}
             />
             {/* Gradient overlay */}
