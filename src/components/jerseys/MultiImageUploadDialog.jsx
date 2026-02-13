@@ -65,11 +65,18 @@ export default function MultiImageUploadDialog({ open, onOpenChange, onImagesUpl
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState({});
   const [completed, setCompleted] = useState([]);
+  const fileInputRef = React.useRef(null);
 
   const handleFileSelect = (e) => {
     const selectedFiles = Array.from(e.target.files || []);
     setFiles((prev) => [...prev, ...selectedFiles]);
   };
+
+  React.useEffect(() => {
+    if (open && fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  }, [open]);
 
   const removeFile = (index) => {
     setFiles((prev) => prev.filter((_, i) => i !== index));
