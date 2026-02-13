@@ -12,54 +12,72 @@ import ImageEditor from "./ImageEditor";
 import MultiImageUploadDialog from "./MultiImageUploadDialog";
 
 const compressImage = async (file) => {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = (event) => {
-      const img = new Image();
-      img.src = event.target.result;
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        let width = img.width;
-        let height = img.height;
+  return new Promise((resolve, reject) => {
+    try {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        try {
+          const img = new Image();
+          img.src = event.target.result;
+          img.onload = () => {
+            try {
+              const canvas = document.createElement("canvas");
+              let width = img.width;
+              let height = img.height;
 
-        const maxDimension = 1200;
-        if (width > height) {
-          if (width > maxDimension) {
-            height = (height * maxDimension) / width;
-            width = maxDimension;
-          }
-        } else {
-          if (height > maxDimension) {
-            width = (width * maxDimension) / height;
-            height = maxDimension;
-          }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, width, height);
-
-        let quality = 0.9;
-        const tryCompress = () => {
-          canvas.toBlob(
-            (blob) => {
-              if (blob.size > 1000 * 1024 && quality > 0.1) {
-                quality -= 0.1;
-                tryCompress();
+              const maxDimension = 800;
+              if (width > height) {
+                if (width > maxDimension) {
+                  height = (height * maxDimension) / width;
+                  width = maxDimension;
+                }
               } else {
-                resolve(new File([blob], file.name, { type: "image/jpeg" }));
+                if (height > maxDimension) {
+                  width = (width * maxDimension) / height;
+                  height = maxDimension;
+                }
               }
-            },
-            "image/jpeg",
-            quality
-          );
-        };
 
-        tryCompress();
+              canvas.width = width;
+              canvas.height = height;
+              const ctx = canvas.getContext("2d");
+              ctx.drawImage(img, 0, 0, width, height);
+
+              let quality = 0.75;
+              const tryCompress = () => {
+                canvas.toBlob(
+                  (blob) => {
+                    if (!blob) {
+                      reject(new Error("Blob creation failed"));
+                      return;
+                    }
+                    if (blob.size > 500 * 1024 && quality > 0.4) {
+                      quality -= 0.1;
+                      tryCompress();
+                    } else {
+                      resolve(new File([blob], file.name, { type: "image/jpeg" }));
+                    }
+                  },
+                  "image/jpeg",
+                  quality
+                );
+              };
+
+              tryCompress();
+            } catch (e) {
+              reject(e);
+            }
+          };
+          img.onerror = () => reject(new Error("Image load failed"));
+        } catch (e) {
+          reject(e);
+        }
       };
-    };
+      reader.onerror = () => reject(new Error("File read failed"));
+    } catch (e) {
+      reject(e);
+    }
   });
 };
 
