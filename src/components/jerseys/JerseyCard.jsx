@@ -41,32 +41,7 @@ export default function JerseyCard({ jersey, isLiked, onLike, index = 0 }) {
             {/* Gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-80" />
 
-            {/* Badges top */}
-            <div className="absolute top-3 left-3 flex gap-1.5 flex-wrap max-w-[calc(100%-80px)]">
-              {jersey.is_game_worn && (
-                <Badge className="bg-amber-500/90 text-white border-0 text-[10px] px-2 py-0.5 backdrop-blur-sm">
-                  <Award className="w-3 h-3 mr-1" />
-                  Game-Worn
-                </Badge>
-              )}
-              {jersey.is_game_issued && (
-                <Badge className="bg-orange-500/90 text-white border-0 text-[10px] px-2 py-0.5 backdrop-blur-sm">
-                  <Award className="w-3 h-3 mr-1" />
-                  Game-Issued
-                </Badge>
-              )}
-              {jersey.is_signed && (
-                <Badge className="bg-violet-500/90 text-white border-0 text-[10px] px-2 py-0.5 backdrop-blur-sm">
-                  <Star className="w-3 h-3 mr-1" />
-                  Signiert
-                </Badge>
-              )}
-              {jersey.for_sale && (
-                <Badge className="bg-green-500/90 text-white border-0 text-[10px] px-2 py-0.5 backdrop-blur-sm">
-                  For Sale
-                </Badge>
-              )}
-            </div>
+
 
             {/* Like and Edit buttons */}
             <div className="absolute top-3 right-3 flex gap-2">
@@ -117,11 +92,33 @@ export default function JerseyCard({ jersey, isLiked, onLike, index = 0 }) {
             </div>
           </div>
 
-          {/* For Sale Badge */}
-          {jersey.for_sale && (
-            <div className="px-4 py-2 flex items-center gap-2 border-t border-white/5 bg-green-500/5">
-              <DollarSign className="w-3.5 h-3.5 text-green-400" />
-              <span className="text-white/70 text-xs font-medium">Zum Verkauf</span>
+          {/* Info Section - Game Worn, For Sale, etc */}
+          {(jersey.is_game_worn || jersey.is_game_issued || jersey.is_signed || jersey.for_sale) && (
+            <div className="px-4 py-2 flex items-center gap-2 flex-wrap border-t border-white/5 bg-white/[0.02]">
+              {jersey.is_game_worn && (
+                <Badge className="bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] px-1.5 py-0">
+                  <Award className="w-2.5 h-2.5 mr-1" />
+                  Game-Worn
+                </Badge>
+              )}
+              {jersey.is_game_issued && (
+                <Badge className="bg-orange-500/20 text-orange-300 border border-orange-500/30 text-[10px] px-1.5 py-0">
+                  <Award className="w-2.5 h-2.5 mr-1" />
+                  Game-Issued
+                </Badge>
+              )}
+              {jersey.is_signed && (
+                <Badge className="bg-violet-500/20 text-violet-300 border border-violet-500/30 text-[10px] px-1.5 py-0">
+                  <Star className="w-2.5 h-2.5 mr-1" />
+                  Signiert
+                </Badge>
+              )}
+              {jersey.for_sale && (
+                <Badge className="bg-green-500/20 text-green-300 border border-green-500/30 text-[10px] px-1.5 py-0 flex items-center gap-1">
+                  <DollarSign className="w-2.5 h-2.5" />
+                  Verkauf
+                </Badge>
+              )}
             </div>
           )}
 
