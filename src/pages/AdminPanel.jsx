@@ -3,8 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Loader2, UserCheck, UserX, Shield, Users } from "lucide-react";
+import { Loader2, Shield, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
@@ -21,29 +20,7 @@ export default function AdminPanel() {
     }).catch(() => window.location.href = '/');
   }, []);
 
-  const { data: pendingUsers = [], isLoading } = useQuery({
-    queryKey: ['pendingUsers'],
-    queryFn: async () => {
-      return await base44.entities.PendingUser.list();
-    },
-    enabled: !!user,
-  });
-
-  const approveMutation = useMutation({
-    mutationFn: async ({ pendingUserId, approve, role }) => {
-      const response = await base44.functions.invoke('approveUser', { pendingUserId, approve, role });
-      if (response.data.error) {
-        throw new Error(response.data.error);
-      }
-      return response.data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['pendingUsers'] });
-    },
-    onError: (error) => {
-      alert('Fehler: ' + error.message);
-    },
-  });
+  const isLoading = false;
 
   if (!user || isLoading) {
     return (
@@ -73,62 +50,15 @@ export default function AdminPanel() {
 
         <Card className="bg-slate-900/60 border-white/5">
           <CardHeader>
-            <CardTitle className="text-white text-lg">Ausstehende Registrierungen</CardTitle>
+            <CardTitle className="text-white text-lg">User Verwaltung</CardTitle>
           </CardHeader>
           <CardContent>
-            {pendingUsers.length === 0 ? (
-              <p className="text-white/40 text-sm text-center py-8">
-                Keine ausstehenden Registrierungen
-              </p>
-            ) : (
-              <div className="space-y-3">
-                {pendingUsers.map(u => (
-                  <div key={u.id} className="bg-slate-800/50 rounded-xl p-4 border border-white/10">
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <h3 className="text-white font-medium">{u.display_name || u.email}</h3>
-                        <p className="text-white/50 text-sm">{u.email}</p>
-                        {u.location && (
-                          <p className="text-white/40 text-xs mt-1">{u.location}</p>
-                        )}
-                      </div>
-                      <Badge className="bg-yellow-500/20 text-yellow-300 border border-yellow-500/30">
-                        Ausstehend
-                      </Badge>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        onClick={() => approveMutation.mutate({ pendingUserId: u.id, approve: true, role: 'user' })}
-                        disabled={approveMutation.isPending}
-                        size="sm"
-                        className="bg-green-600 hover:bg-green-700"
-                      >
-                        <UserCheck className="w-4 h-4 mr-2" />
-                        Als User freischalten
-                      </Button>
-                      <Button
-                        onClick={() => approveMutation.mutate({ pendingUserId: u.id, approve: true, role: 'moderator' })}
-                        disabled={approveMutation.isPending}
-                        size="sm"
-                        className="bg-blue-600 hover:bg-blue-700"
-                      >
-                        <Shield className="w-4 h-4 mr-2" />
-                        Als Moderator freischalten
-                      </Button>
-                      <Button
-                        onClick={() => approveMutation.mutate({ pendingUserId: u.id, approve: false })}
-                        disabled={approveMutation.isPending}
-                        size="sm"
-                        variant="destructive"
-                      >
-                        <UserX className="w-4 h-4 mr-2" />
-                        Ablehnen
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+            <p className="text-white/60 text-sm mb-4">
+              Verwalte alle registrierten User über den Button oben rechts.
+            </p>
+            <p className="text-white/40 text-xs">
+              Neue User können direkt über die Base44 Einladungsfunktion hinzugefügt werden.
+            </p>
           </CardContent>
         </Card>
       </div>
