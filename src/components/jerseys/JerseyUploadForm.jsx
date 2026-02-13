@@ -525,14 +525,14 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
           <Button
             type="button"
             onClick={() => handleChange("for_sale", true)}
-            className={`${form.for_sale ? 'bg-red-600 hover:bg-red-700' : 'bg-slate-800/50 hover:bg-slate-800 text-white/40'} transition-colors`}
+            className={`${form.for_sale ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'} transition-colors`}
           >
             Zum Verkauf
           </Button>
           <Button
             type="button"
             onClick={() => handleChange("for_sale", false)}
-            className={`${!form.for_sale ? 'bg-green-600 hover:bg-green-700' : 'bg-slate-800/50 hover:bg-slate-800 text-white/40'} transition-colors`}
+            className={`${!form.for_sale ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'} transition-colors`}
           >
             Nicht zum Verkauf
           </Button>
