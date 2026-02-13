@@ -59,6 +59,7 @@ import Register from './pages/Register';
 import Settings from './pages/Settings';
 import UserProfile from './pages/UserProfile';
 import ManageUsers from './pages/ManageUsers';
+import CustomLogin from './pages/CustomLogin';
 import __Layout from './Layout.jsx';
 
 
@@ -75,6 +76,7 @@ export const PAGES = {
     "Settings": Settings,
     "UserProfile": UserProfile,
     "ManageUsers": ManageUsers,
+    "CustomLogin": CustomLogin,
 }
 
 export const pagesConfig = {

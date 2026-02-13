@@ -136,15 +136,16 @@ export default function Layout({ children, currentPageName }) {
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
-                  <Button
-                    onClick={() => base44.auth.redirectToLogin()}
-                    size="sm"
-                    variant="ghost"
-                    className="text-white/70 hover:text-white hover:bg-white/5 text-xs h-8 px-3"
-                  >
-                    <LogIn className="w-3.5 h-3.5 mr-1.5" />
-                    Anmelden
-                  </Button>
+                  <Link to={createPageUrl("CustomLogin")}>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-white/70 hover:text-white hover:bg-white/5 text-xs h-8 px-3"
+                    >
+                      <LogIn className="w-3.5 h-3.5 mr-1.5" />
+                      Anmelden
+                    </Button>
+                  </Link>
                   <Link to={createPageUrl("Register")}>
                     <Button
                       size="sm"

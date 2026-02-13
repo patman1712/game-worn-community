@@ -26,37 +26,37 @@ Deno.serve(async (req) => {
     }
 
     if (approve) {
-      // Create user directly with password using Base44 API
-      const appId = Deno.env.get('BASE44_APP_ID');
-      const serviceToken = req.headers.get('authorization')?.replace('Bearer ', '');
-      
-      const createUserResponse = await fetch(`https://api.base44.com/apps/${appId}/auth/users`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${serviceToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: pendingUser.email,
-          password: pendingUser.password_hash,
-          full_name: pendingUser.real_name || pendingUser.display_name,
-          role: role,
-        }),
-      });
+      // Invite user with SDK
+      await base44.users.inviteUser(pendingUser.email, role);
 
-      if (!createUserResponse.ok) {
-        const errorData = await createUserResponse.json();
-        throw new Error(`User-Erstellung fehlgeschlagen: ${errorData.message || createUserResponse.statusText}`);
-      }
+      // Wait for user to be created
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
-      // Wait a moment for user to be created
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Update user profile data
+      // Get the created user
       const allUsers = await base44.asServiceRole.entities.User.list();
       const newUser = allUsers.find(u => u.email === pendingUser.email);
       
       if (newUser) {
+        // Update password using Base44 API directly
+        const appId = Deno.env.get('BASE44_APP_ID');
+        const serviceToken = req.headers.get('authorization')?.replace('Bearer ', '');
+        
+        const updatePasswordResponse = await fetch(`https://api.base44.com/apps/${appId}/auth/users/${newUser.id}/password`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${serviceToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            password: pendingUser.password_hash,
+          }),
+        });
+
+        if (!updatePasswordResponse.ok) {
+          console.error('Password update failed:', await updatePasswordResponse.text());
+        }
+
+        // Update user profile data
         await base44.asServiceRole.entities.User.update(newUser.id, {
           display_name: pendingUser.display_name,
           real_name: pendingUser.real_name,
@@ -65,7 +65,7 @@ Deno.serve(async (req) => {
           accept_messages: pendingUser.accept_messages,
         });
 
-        // Send approval email to the new user
+        // Send approval email
         await base44.asServiceRole.integrations.Core.SendEmail({
           to: pendingUser.email,
           subject: 'Dein Account wurde freigeschaltet - Jersey Collectors',
