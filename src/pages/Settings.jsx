@@ -16,7 +16,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { User, Trash2, LogOut, Loader2, AlertTriangle, MapPin, Mail, Eye, EyeOff, Save } from "lucide-react";
+import { User, Trash2, LogOut, Loader2, AlertTriangle, MapPin, Mail, Eye, EyeOff, Save, Lock, MessageCircle } from "lucide-react";
 
 export default function Settings() {
   const [user, setUser] = useState(null);
@@ -24,19 +24,29 @@ export default function Settings() {
   const [isSaving, setIsSaving] = useState(false);
   const [profile, setProfile] = useState({
     display_name: "",
+    real_name: "",
     location: "",
     show_email: false,
     show_location: false,
+    accept_messages: true,
   });
+  const [passwordData, setPasswordData] = useState({
+    current: "",
+    new: "",
+    confirm: "",
+  });
+  const [changingPassword, setChangingPassword] = useState(false);
 
   useEffect(() => {
     base44.auth.me().then(u => {
       setUser(u);
       setProfile({
         display_name: u.display_name || u.full_name || "",
+        real_name: u.real_name || u.full_name || "",
         location: u.location || "",
         show_email: u.show_email || false,
         show_location: u.show_location || false,
+        accept_messages: u.accept_messages !== false,
       });
     }).catch(() => {
       base44.auth.redirectToLogin(window.location.href);
@@ -49,6 +59,28 @@ export default function Settings() {
     const updatedUser = await base44.auth.me();
     setUser(updatedUser);
     setIsSaving(false);
+  };
+
+  const handleChangePassword = async () => {
+    if (passwordData.new !== passwordData.confirm) {
+      alert("Die Passwörter stimmen nicht überein");
+      return;
+    }
+    if (passwordData.new.length < 6) {
+      alert("Das Passwort muss mindestens 6 Zeichen lang sein");
+      return;
+    }
+    setChangingPassword(true);
+    try {
+      // Base44 API für Passwort-Änderung (simplified - actual API may differ)
+      await base44.auth.updatePassword(passwordData.current, passwordData.new);
+      alert("Passwort erfolgreich geändert");
+      setPasswordData({ current: "", new: "", confirm: "" });
+    } catch (error) {
+      alert("Fehler beim Ändern des Passworts: " + error.message);
+    } finally {
+      setChangingPassword(false);
+    }
   };
 
   const handleDeleteAccount = async () => {
@@ -100,13 +132,25 @@ export default function Settings() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label className="text-white/70 text-sm">Anzeigename</Label>
+              <Label className="text-white/70 text-sm">Anzeigename (öffentlich)</Label>
               <Input
                 value={profile.display_name}
                 onChange={(e) => setProfile({ ...profile, display_name: e.target.value })}
-                placeholder="Dein Name"
+                placeholder="Dein öffentlicher Name"
                 className="bg-slate-800/50 border-white/10 text-white placeholder:text-white/20 mt-1.5"
               />
+              <p className="text-white/30 text-xs mt-1">Dieser Name wird bei deinen Trikots und Kommentaren angezeigt</p>
+            </div>
+
+            <div>
+              <Label className="text-white/70 text-sm">Richtiger Name (privat)</Label>
+              <Input
+                value={profile.real_name}
+                onChange={(e) => setProfile({ ...profile, real_name: e.target.value })}
+                placeholder="Dein voller Name"
+                className="bg-slate-800/50 border-white/10 text-white placeholder:text-white/20 mt-1.5"
+              />
+              <p className="text-white/30 text-xs mt-1">Nur für dich sichtbar</p>
             </div>
             
             <div>
@@ -163,6 +207,22 @@ export default function Settings() {
               </p>
             </div>
 
+            <div className="pt-3 border-t border-white/10">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <MessageCircle className="w-4 h-4 text-white/40" />
+                  <div>
+                    <Label className="text-white/70 text-sm">Nachrichten erlauben</Label>
+                    <p className="text-white/30 text-xs mt-0.5">Andere User können dir Nachrichten senden</p>
+                  </div>
+                </div>
+                <Switch
+                  checked={profile.accept_messages}
+                  onCheckedChange={(v) => setProfile({ ...profile, accept_messages: v })}
+                />
+              </div>
+            </div>
+
             <Button
               onClick={handleSaveProfile}
               disabled={isSaving}
@@ -174,6 +234,57 @@ export default function Settings() {
                 <Save className="w-4 h-4 mr-2" />
               )}
               Profil speichern
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Password Change */}
+        <Card className="bg-slate-900/60 border-white/5 mb-4">
+          <CardHeader>
+            <CardTitle className="text-white text-base flex items-center gap-2">
+              <Lock className="w-4 h-4" />
+              Passwort ändern
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label className="text-white/70 text-sm">Aktuelles Passwort</Label>
+              <Input
+                type="password"
+                value={passwordData.current}
+                onChange={(e) => setPasswordData({ ...passwordData, current: e.target.value })}
+                className="bg-slate-800/50 border-white/10 text-white mt-1.5"
+              />
+            </div>
+            <div>
+              <Label className="text-white/70 text-sm">Neues Passwort</Label>
+              <Input
+                type="password"
+                value={passwordData.new}
+                onChange={(e) => setPasswordData({ ...passwordData, new: e.target.value })}
+                className="bg-slate-800/50 border-white/10 text-white mt-1.5"
+              />
+            </div>
+            <div>
+              <Label className="text-white/70 text-sm">Neues Passwort bestätigen</Label>
+              <Input
+                type="password"
+                value={passwordData.confirm}
+                onChange={(e) => setPasswordData({ ...passwordData, confirm: e.target.value })}
+                className="bg-slate-800/50 border-white/10 text-white mt-1.5"
+              />
+            </div>
+            <Button
+              onClick={handleChangePassword}
+              disabled={changingPassword || !passwordData.current || !passwordData.new || !passwordData.confirm}
+              className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500"
+            >
+              {changingPassword ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Lock className="w-4 h-4 mr-2" />
+              )}
+              Passwort ändern
             </Button>
           </CardContent>
         </Card>

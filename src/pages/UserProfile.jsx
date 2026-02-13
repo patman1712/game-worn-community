@@ -21,6 +21,15 @@ export default function UserProfile() {
     enabled: !!email,
   });
 
+  const { data: profileUser } = useQuery({
+    queryKey: ["profileUser", email],
+    queryFn: async () => {
+      const users = await base44.entities.User.filter({ email });
+      return users[0];
+    },
+    enabled: !!email,
+  });
+
   const { data: likes = [] } = useQuery({
     queryKey: ["likes", currentUser?.email],
     queryFn: () => currentUser ? base44.entities.JerseyLike.filter({ user_email: currentUser.email }) : [],
@@ -28,7 +37,7 @@ export default function UserProfile() {
   });
 
   const likedIds = new Set(likes.map(l => l.jersey_id));
-  const ownerName = jerseys[0]?.owner_name || email;
+  const ownerName = profileUser?.display_name || jerseys[0]?.owner_name || email;
   const totalLikes = jerseys.reduce((s, j) => s + (j.likes_count || 0), 0);
 
   return (
