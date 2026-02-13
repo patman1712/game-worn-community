@@ -206,7 +206,7 @@ export default function JerseyCard({ jersey, isLiked, onLike, index = 0 }) {
             </div>
           </div>
         </div>
-      </Link>
+      </div>
     </motion.div>
   );
 }
