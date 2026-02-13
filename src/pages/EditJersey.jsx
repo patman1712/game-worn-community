@@ -14,7 +14,14 @@ export default function EditJersey() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {
+    base44.auth.me().then(u => {
+      if (!u) {
+        base44.auth.redirectToLogin(window.location.href);
+      } else if (u.data?.role !== 'moderator' && u.role !== 'admin' && u.data?.role !== 'admin') {
+        // Not admin/moderator, will check if user owns the jersey later
+      }
+      setUser(u);
+    }).catch(() => {
       base44.auth.redirectToLogin(window.location.href);
     });
   }, []);
