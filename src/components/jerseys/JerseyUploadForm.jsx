@@ -210,14 +210,16 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
              </button>
            </div>
          ) : (
-           <button
-             type="button"
+           <div
+             onDragOver={handleDragOver}
+             onDragLeave={handleDragLeave}
+             onDrop={handleDrop}
              onClick={() => setMultiImageDialogOpen(true)}
              className="w-full aspect-video flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-white/10 hover:border-cyan-500/40 bg-slate-800/50 cursor-pointer transition-colors"
            >
              <Upload className="w-8 h-8 text-white/30 mb-2" />
              <span className="text-white/40 text-sm">Klick hier oder zieh Fotos rein</span>
-           </button>
+           </div>
          )}
        </div>
 
