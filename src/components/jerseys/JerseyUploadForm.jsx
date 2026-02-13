@@ -271,50 +271,75 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
        <div>
          <Label className="text-white/70 text-sm mb-2 block">Fotos * (Mindestens 1 erforderlich)</Label>
          {form.additional_images && form.additional_images.length > 0 ? (
-           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-             {form.additional_images.map((url, i) => (
-               <div key={i} className="relative group">
-                 <div className="aspect-square rounded-lg overflow-hidden border-2 border-white/10 hover:border-cyan-500/30 transition-colors">
-                   <img src={url} alt="" className="w-full h-full object-cover" />
+           <DragDropContext onDragEnd={handleDragEnd}>
+             <Droppable droppableId="images" direction="horizontal" type="IMAGE">
+               {(provided, snapshot) => (
+                 <div
+                   ref={provided.innerRef}
+                   {...provided.droppableProps}
+                   className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 ${snapshot.isDraggingOver ? 'bg-cyan-500/10 p-3 rounded-lg' : ''}`}
+                 >
+                   {form.additional_images.map((url, i) => (
+                     <Draggable key={`image-${i}`} draggableId={`image-${i}`} index={i}>
+                       {(provided, snapshot) => (
+                         <div
+                           ref={provided.innerRef}
+                           {...provided.draggableProps}
+                           className={`relative group ${snapshot.isDragging ? 'opacity-50' : ''}`}
+                         >
+                           <div className="aspect-square rounded-lg overflow-hidden border-2 border-white/10 hover:border-cyan-500/30 transition-colors">
+                             <img src={url} alt="" className="w-full h-full object-cover" />
+                           </div>
+                           <div
+                             {...provided.dragHandleProps}
+                             className="absolute top-1 left-1 p-1.5 bg-black/60 rounded-full hover:bg-cyan-600/80 transition-colors opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing"
+                           >
+                             <GripVertical className="w-4 h-4 text-white" />
+                           </div>
+                           <button
+                             type="button"
+                             onClick={() => {
+                               if (form.image_url === url) {
+                                 handleChange("image_url", "");
+                               } else {
+                                 handleChange("image_url", url);
+                               }
+                             }}
+                             className={`absolute top-1 right-1 p-1.5 rounded-full transition-all ${form.image_url === url ? 'bg-yellow-500 text-white' : 'bg-black/40 text-white/50 hover:bg-black/60'}`}
+                           >
+                             <Star className="w-4 h-4" fill={form.image_url === url ? "currentColor" : "none"} />
+                           </button>
+                           <button
+                             type="button"
+                             onClick={() => removeAdditionalImage(i)}
+                             className="absolute bottom-1 right-1 p-1 bg-black/60 rounded-full hover:bg-red-600/80 transition-colors opacity-0 group-hover:opacity-100"
+                           >
+                             <X className="w-3 h-3 text-white" />
+                           </button>
+                           <button
+                             type="button"
+                             onClick={() => handleEditImage(url, i)}
+                             className="absolute bottom-1 left-1 p-1 bg-black/60 rounded-full hover:bg-orange-600/80 transition-colors opacity-0 group-hover:opacity-100"
+                           >
+                             <RotateCw className="w-3 h-3 text-white" />
+                           </button>
+                         </div>
+                       )}
+                     </Draggable>
+                   ))}
+                   {provided.placeholder}
+                   <button
+                     type="button"
+                     onClick={() => setMultiImageDialogOpen(true)}
+                     className="aspect-square flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-white/10 hover:border-cyan-500/40 bg-slate-800/50 cursor-pointer transition-colors"
+                   >
+                     <Upload className="w-6 h-6 text-white/30 mb-1" />
+                     <span className="text-[10px] text-white/30">+ Fotos</span>
+                   </button>
                  </div>
-                 <button
-                   type="button"
-                   onClick={() => {
-                     if (form.image_url === url) {
-                       handleChange("image_url", "");
-                     } else {
-                       handleChange("image_url", url);
-                     }
-                   }}
-                   className={`absolute top-1 right-1 p-1.5 rounded-full transition-all ${form.image_url === url ? 'bg-yellow-500 text-white' : 'bg-black/40 text-white/50 hover:bg-black/60'}`}
-                 >
-                   <Star className="w-4 h-4" fill={form.image_url === url ? "currentColor" : "none"} />
-                 </button>
-                 <button
-                   type="button"
-                   onClick={() => removeAdditionalImage(i)}
-                   className="absolute bottom-1 right-1 p-1 bg-black/60 rounded-full hover:bg-red-600/80 transition-colors opacity-0 group-hover:opacity-100"
-                 >
-                   <X className="w-3 h-3 text-white" />
-                 </button>
-                 <button
-                   type="button"
-                   onClick={() => handleEditImage(url, i)}
-                   className="absolute bottom-1 left-1 p-1 bg-black/60 rounded-full hover:bg-orange-600/80 transition-colors opacity-0 group-hover:opacity-100"
-                 >
-                   <RotateCw className="w-3 h-3 text-white" />
-                 </button>
-               </div>
-             ))}
-             <button
-               type="button"
-               onClick={() => setMultiImageDialogOpen(true)}
-               className="aspect-square flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-white/10 hover:border-cyan-500/40 bg-slate-800/50 cursor-pointer transition-colors"
-             >
-               <Upload className="w-6 h-6 text-white/30 mb-1" />
-               <span className="text-[10px] text-white/30">+ Fotos</span>
-             </button>
-           </div>
+               )}
+             </Droppable>
+           </DragDropContext>
          ) : (
            <div
              onDragOver={handleDragOver}
