@@ -301,10 +301,8 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
                              onClick={() => {
                                if (form.image_url === url) {
                                  handleChange("image_url", "");
-                                 handleChange("additional_images", [...(form.additional_images || []), url]);
                                } else {
                                  handleChange("image_url", url);
-                                 handleChange("additional_images", form.additional_images.filter(img => img !== url));
                                }
                              }}
                              className={`absolute top-1 right-1 p-1.5 rounded-full transition-all ${form.image_url === url ? 'bg-yellow-500 text-white' : 'bg-black/40 text-white/50 hover:bg-black/60'}`}
