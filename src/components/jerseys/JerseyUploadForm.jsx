@@ -113,6 +113,47 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
     handleChange("additional_images", [...(form.additional_images || []), ...urls]);
   };
 
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.currentTarget.classList.add('border-cyan-500/60', 'bg-cyan-500/5');
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.currentTarget.classList.remove('border-cyan-500/60', 'bg-cyan-500/5');
+  };
+
+  const handleDrop = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.currentTarget.classList.remove('border-cyan-500/60', 'bg-cyan-500/5');
+    
+    const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+    if (files.length === 0) return;
+
+    setUploading(true);
+    try {
+      const uploadedUrls = [];
+      for (const file of files) {
+        const reader = new FileReader();
+        const arrayBuffer = await new Promise((resolve) => {
+          reader.onload = () => resolve(reader.result);
+          reader.readAsArrayBuffer(file);
+        });
+        const { file_url } = await base44.integrations.Core.UploadFile({ file: arrayBuffer });
+        uploadedUrls.push(file_url);
+      }
+      handleChange("additional_images", [...(form.additional_images || []), ...uploadedUrls]);
+    } catch (error) {
+      console.error("Error uploading images:", error);
+      alert("Fehler beim Hochladen der Bilder");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     onSubmit(form);
