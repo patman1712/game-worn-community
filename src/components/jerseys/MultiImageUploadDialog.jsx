@@ -4,59 +4,76 @@ import { Button } from "@/components/ui/button";
 import { Upload, X, CheckCircle2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
-const compressImage = async (file) => {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = (event) => {
-      const img = new Image();
-      img.src = event.target.result;
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        let width = img.width;
-        let height = img.height;
+const compressImage = async (file, targetSizeKB = 1000) => {
+  return new Promise((resolve, reject) => {
+    try {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        try {
+          const img = new Image();
+          img.src = event.target.result;
+          img.onload = () => {
+            try {
+              const canvas = document.createElement("canvas");
+              let width = img.width;
+              let height = img.height;
 
-        // Resize if too large
-        const maxDimension = 1200;
-        if (width > height) {
-          if (width > maxDimension) {
-            height = (height * maxDimension) / width;
-            width = maxDimension;
-          }
-        } else {
-          if (height > maxDimension) {
-            width = (width * maxDimension) / height;
-            height = maxDimension;
-          }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, width, height);
-
-        // Compress to target size (1000kb = 1MB)
-        let quality = 0.9;
-        let compressed;
-        
-        const tryCompress = () => {
-          canvas.toBlob(
-            (blob) => {
-              if (blob.size > 1000 * 1024 && quality > 0.1) {
-                quality -= 0.1;
-                tryCompress();
+              const maxDimension = 1200;
+              if (width > height) {
+                if (width > maxDimension) {
+                  height = (height * maxDimension) / width;
+                  width = maxDimension;
+                }
               } else {
-                resolve(new File([blob], file.name, { type: "image/jpeg" }));
+                if (height > maxDimension) {
+                  width = (width * maxDimension) / height;
+                  height = maxDimension;
+                }
               }
-            },
-            "image/jpeg",
-            quality
-          );
-        };
 
-        tryCompress();
+              canvas.width = width;
+              canvas.height = height;
+              const ctx = canvas.getContext("2d");
+              ctx.drawImage(img, 0, 0, width, height);
+
+              let quality = 0.85;
+              const targetSize = targetSizeKB * 1024;
+              
+              const tryCompress = () => {
+                canvas.toBlob(
+                  (blob) => {
+                    if (!blob) {
+                      reject(new Error("Blob creation failed"));
+                      return;
+                    }
+                    if (blob.size > targetSize && quality > 0.3) {
+                      quality -= 0.08;
+                      tryCompress();
+                    } else {
+                      const compressedFile = new File([blob], file.name, { type: "image/jpeg" });
+                      resolve(compressedFile);
+                    }
+                  },
+                  "image/jpeg",
+                  quality
+                );
+              };
+
+              tryCompress();
+            } catch (e) {
+              reject(e);
+            }
+          };
+          img.onerror = () => reject(new Error("Image load failed"));
+        } catch (e) {
+          reject(e);
+        }
       };
-    };
+      reader.onerror = () => reject(new Error("File read failed"));
+    } catch (e) {
+      reject(e);
+    }
   });
 };
 
