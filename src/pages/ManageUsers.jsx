@@ -38,12 +38,17 @@ export default function ManageUsers() {
 
   const manageMutation = useMutation({
     mutationFn: async ({ action, userId, updates }) => {
-      return base44.functions.invoke('manageUser', { action, userId, updates });
+      const response = await base44.functions.invoke('manageUser', { action, userId, updates });
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['allUsers'] });
       setEditingUser(null);
     },
+    onError: (error) => {
+      console.error('Manage user error:', error);
+      alert('Fehler beim Speichern: ' + (error.response?.data?.error || error.message));
+    }
   });
 
   const filteredUsers = users.filter(u => 
