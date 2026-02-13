@@ -20,20 +20,34 @@ export default function CustomLogin() {
     setLoading(true);
 
     try {
-      // Call backend function to handle login
-      const loginResponse = await base44.functions.invoke('loginUser', { email, password });
+      // Direct Base44 login
+      const appId = window.location.hostname.includes('localhost') ? 
+        '698e4ef5392203adc7a32dee' : 
+        window.location.pathname.split('/')[1];
       
-      if (loginResponse.data.error) {
-        throw new Error(loginResponse.data.error);
+      const response = await fetch(`https://api.base44.com/apps/698e4ef5392203adc7a32dee/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Login fehlgeschlagen. Bitte überprüfe deine Zugangsdaten.');
       }
 
-      // Store token if provided
-      if (loginResponse.data.token) {
-        localStorage.setItem('base44_token', loginResponse.data.token);
+      const data = await response.json();
+      
+      // Store token
+      if (data.access_token) {
+        localStorage.setItem('base44_token', data.access_token);
       }
       
-      // Reload to trigger auth state update
-      window.location.reload();
+      // Redirect to home
+      window.location.href = createPageUrl("Home");
     } catch (err) {
       setError(err.message || 'Login fehlgeschlagen. Bitte überprüfe deine Zugangsdaten.');
     } finally {
