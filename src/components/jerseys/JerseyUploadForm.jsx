@@ -93,6 +93,10 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
     handleChange("additional_images", form.additional_images.filter((_, i) => i !== index));
   };
 
+  const handleMultiImageUpload = (urls) => {
+    handleChange("additional_images", [...(form.additional_images || []), ...urls]);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     onSubmit(form);
