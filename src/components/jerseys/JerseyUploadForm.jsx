@@ -193,14 +193,43 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
 
     setUploading(true);
     const uploadedUrls = [];
+    const errors = [];
 
     try {
-      for (const file of files) {
-        const compressed = await compressImage(file);
-        const { file_url } = await base44.integrations.Core.UploadFile({ file: compressed });
-        uploadedUrls.push(file_url);
+      for (let i = 0; i < files.length; i++) {
+        try {
+          const file = files[i];
+          const compressed = await compressImage(file, 1000);
+          
+          let retries = 2;
+          let uploaded = false;
+          
+          while (retries > 0 && !uploaded) {
+            try {
+              const { file_url } = await base44.integrations.Core.UploadFile({ file: compressed });
+              uploadedUrls.push(file_url);
+              uploaded = true;
+            } catch (uploadError) {
+              retries--;
+              if (retries === 0) {
+                throw uploadError;
+              }
+              await new Promise(r => setTimeout(r, 500));
+            }
+          }
+        } catch (fileError) {
+          console.error(`Error processing file ${i}:`, fileError);
+          errors.push(`Bild ${i + 1}`);
+        }
       }
-      handleChange("additional_images", [...(form.additional_images || []), ...uploadedUrls]);
+      
+      if (uploadedUrls.length > 0) {
+        handleChange("additional_images", [...(form.additional_images || []), ...uploadedUrls]);
+      }
+      
+      if (errors.length > 0) {
+        alert(`${uploadedUrls.length}/${files.length} Bilder hochgeladen.\nFehler bei: ${errors.join(", ")}`);
+      }
     } catch (error) {
       console.error("Error uploading images:", error);
       alert("Fehler beim Hochladen der Bilder");
