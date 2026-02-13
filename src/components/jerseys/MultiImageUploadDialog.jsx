@@ -170,16 +170,13 @@ export default function MultiImageUploadDialog({ open, onOpenChange, onImagesUpl
                   </div>
                 ))}
               </div>
-              <label className="flex items-center justify-center w-full p-3 rounded-lg border border-dashed border-white/10 hover:border-cyan-500/30 cursor-pointer transition-colors">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full p-3 rounded-lg border border-dashed border-white/10 hover:border-cyan-500/30 cursor-pointer transition-colors"
+              >
                 <span className="text-white/40 text-sm">+ Weitere hinzufügen</span>
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleFileSelect}
-                />
-              </label>
+              </button>
             </div>
           )}
 
