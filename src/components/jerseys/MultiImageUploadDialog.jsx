@@ -131,18 +131,22 @@ export default function MultiImageUploadDialog({ open, onOpenChange, onImagesUpl
         </DialogHeader>
 
         <div className="space-y-4">
+          {/* Hidden file input - always present */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept="image/*"
+            className="hidden"
+            onChange={handleFileSelect}
+          />
+
           {/* File selection */}
           {!uploading && files.length === 0 && (
-            <label className="flex flex-col items-center justify-center w-full p-8 rounded-xl border-2 border-dashed border-white/10 hover:border-cyan-500/40 bg-slate-800/50 cursor-pointer transition-colors">
+            <label className="flex flex-col items-center justify-center w-full p-8 rounded-xl border-2 border-dashed border-white/10 hover:border-cyan-500/40 bg-slate-800/50 cursor-pointer transition-colors"
+              onClick={() => fileInputRef.current?.click()}>
               <Upload className="w-8 h-8 text-white/30 mb-2" />
               <span className="text-white/40 text-sm">Klicke oder ziehe Bilder hier hin</span>
-              <input
-                type="file"
-                multiple
-                accept="image/*"
-                className="hidden"
-                onChange={handleFileSelect}
-              />
             </label>
           )}
 
