@@ -7,42 +7,39 @@ Deno.serve(async (req) => {
     const email = 'info@foto-scheiber.de';
     const password = 'demo';
     
-    // Check if user already exists
-    const allUsers = await base44.asServiceRole.entities.User.list();
-    let user = allUsers.find(u => u.email === email);
-    
-    if (!user) {
-      // Invite user first
-      await base44.users.inviteUser(email, 'admin');
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      
-      // Fetch again
-      const updatedUsers = await base44.asServiceRole.entities.User.list();
-      user = updatedUsers.find(u => u.email === email);
-    }
-    
-    if (!user) {
-      return Response.json({ error: 'User konnte nicht gefunden/erstellt werden' }, { status: 500 });
-    }
-    
-    // Update role to admin
-    await base44.asServiceRole.entities.User.update(user.id, {
-      role: 'admin',
-      display_name: 'Admin',
-      real_name: 'Administrator',
-    });
-    
-    // Delete any pending user entries
+    // Check if there's already a pending user
     const pendingUsers = await base44.asServiceRole.entities.PendingUser.filter({ email });
     for (const pu of pendingUsers) {
       await base44.asServiceRole.entities.PendingUser.delete(pu.id);
     }
     
+    // Create a pending user entry with password
+    const pendingUser = await base44.asServiceRole.entities.PendingUser.create({
+      email,
+      password_hash: password,
+      display_name: 'Admin',
+      real_name: 'Administrator',
+      location: '',
+      show_location: false,
+      accept_messages: true,
+    });
+    
+    // Now approve this pending user as admin
+    const approveResponse = await base44.functions.invoke('approveUser', {
+      pendingUserId: pendingUser.id,
+      approve: true,
+      role: 'admin'
+    });
+    
+    if (approveResponse.data.error) {
+      return Response.json({ 
+        error: 'Fehler beim Freischalten: ' + approveResponse.data.error 
+      }, { status: 500 });
+    }
+    
     return Response.json({ 
       success: true, 
-      message: `Admin-User ${email} wurde eingerichtet. Bitte setze das Passwort manuell über das Base44 Dashboard.`,
-      userId: user.id,
-      note: 'Passwort kann nur über das Dashboard gesetzt werden. Gehe zu Users -> info@foto-scheiber.de -> Passwort zurücksetzen'
+      message: `Admin-User ${email} wurde erstellt mit Passwort: ${password}. Du kannst dich jetzt einloggen!`
     });
     
   } catch (error) {
