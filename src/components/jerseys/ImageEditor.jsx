@@ -103,15 +103,26 @@ export default function ImageEditor({ imageUrl, onSave, onCancel }) {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4"
+        onClick={(e) => {
+          // Prevent closing when clicking on backdrop
+          if (e.target === e.currentTarget && !saving) {
+            onCancel();
+          }
+        }}
       >
-        <div className="w-full max-w-2xl">
+        <div className="w-full max-w-2xl" onClick={(e) => e.stopPropagation()}>
           <div className="bg-slate-900 rounded-2xl border border-white/10 overflow-hidden">
             {/* Header */}
             <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between">
               <h3 className="text-white font-semibold">Bild bearbeiten</h3>
               <button
-                onClick={onCancel}
-                className="p-2 text-white/40 hover:text-white/70 transition-colors"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onCancel();
+                }}
+                type="button"
+                className="p-2 text-white/40 hover:text-white/70 transition-colors active:text-white"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -133,21 +144,31 @@ export default function ImageEditor({ imageUrl, onSave, onCancel }) {
             <div className="px-6 py-4 border-t border-white/10 flex items-center justify-between flex-wrap gap-3">
               <div className="flex gap-2">
                 <Button
-                  onClick={() => handleRotate(-90)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleRotate(-90);
+                  }}
+                  type="button"
                   variant="outline"
                   size="sm"
                   disabled={loading || saving}
-                  className="bg-white/5 text-white border-white/10 hover:bg-white/10"
+                  className="bg-white/5 text-white border-white/10 hover:bg-white/10 active:bg-white/20"
                 >
                   <RotateCcw className="w-4 h-4 mr-2" />
                   90° Links
                 </Button>
                 <Button
-                  onClick={() => handleRotate(90)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleRotate(90);
+                  }}
+                  type="button"
                   variant="outline"
                   size="sm"
                   disabled={loading || saving}
-                  className="bg-white/5 text-white border-white/10 hover:bg-white/10"
+                  className="bg-white/5 text-white border-white/10 hover:bg-white/10 active:bg-white/20"
                 >
                   <RotateCw className="w-4 h-4 mr-2" />
                   90° Rechts
@@ -155,7 +176,12 @@ export default function ImageEditor({ imageUrl, onSave, onCancel }) {
               </div>
               <div className="flex gap-2">
                 <Button
-                  onClick={onCancel}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onCancel();
+                  }}
+                  type="button"
                   variant="ghost"
                   size="sm"
                   disabled={saving}
@@ -164,7 +190,12 @@ export default function ImageEditor({ imageUrl, onSave, onCancel }) {
                   Abbrechen
                 </Button>
                 <Button
-                  onClick={handleSave}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleSave();
+                  }}
+                  type="button"
                   size="sm"
                   disabled={saving || loading}
                   className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white disabled:opacity-50"
