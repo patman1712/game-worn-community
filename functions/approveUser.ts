@@ -26,58 +26,26 @@ Deno.serve(async (req) => {
     }
 
     if (approve) {
-      // Check if user already exists
-      const existingUsers = await base44.asServiceRole.entities.User.filter({ email: pendingUser.email });
+      // Invite user with SDK - this creates the user account
+      await base44.users.inviteUser(pendingUser.email, role);
+
+      // Wait for user to be created
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // Get the created user
+      const allUsers = await base44.asServiceRole.entities.User.filter({ email: pendingUser.email });
       
-      if (existingUsers.length > 0) {
-        // User already exists, just update their data
-        await base44.asServiceRole.entities.User.update(existingUsers[0].id, {
+      if (allUsers.length > 0) {
+        const newUser = allUsers[0];
+        
+        // Update user profile with pending user data
+        await base44.asServiceRole.entities.User.update(newUser.id, {
           display_name: pendingUser.display_name,
           real_name: pendingUser.real_name,
           location: pendingUser.location,
           show_location: pendingUser.show_location,
           accept_messages: pendingUser.accept_messages,
-          role: role,
         });
-      } else {
-        // Create new user with Base44 Auth API
-        const appId = Deno.env.get('BASE44_APP_ID');
-        
-        // Register user via Auth API
-        const authResponse = await fetch(`https://api.base44.com/v1/apps/${appId}/auth/register`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            email: pendingUser.email,
-            password: pendingUser.password_hash,
-            full_name: pendingUser.display_name,
-          }),
-        });
-
-        if (!authResponse.ok) {
-          const errorData = await authResponse.json();
-          throw new Error(errorData.error || 'Fehler beim Erstellen des Users');
-        }
-
-        // Wait a bit for user to be created
-        await new Promise(resolve => setTimeout(resolve, 1500));
-
-        // Get the newly created user
-        const newUsers = await base44.asServiceRole.entities.User.filter({ email: pendingUser.email });
-        
-        if (newUsers.length > 0) {
-          // Update user with additional data
-          await base44.asServiceRole.entities.User.update(newUsers[0].id, {
-            display_name: pendingUser.display_name,
-            real_name: pendingUser.real_name,
-            location: pendingUser.location,
-            show_location: pendingUser.show_location,
-            accept_messages: pendingUser.accept_messages,
-            role: role,
-          });
-        }
       }
 
       // Send approval email
@@ -89,7 +57,8 @@ Deno.serve(async (req) => {
           <p>Hallo ${pendingUser.display_name},</p>
           <p>Gute Nachrichten! Dein Account wurde von einem Administrator freigeschaltet.</p>
           ${role === 'moderator' ? '<p><strong>Du wurdest als Moderator freigeschaltet</strong> und hast erweiterte Rechte in der Community.</p>' : ''}
-          <p>Du kannst dich jetzt mit deinen Zugangsdaten anmelden.</p>
+          <p><strong>Wichtiger Hinweis:</strong> Du hast eine separate Einladungs-E-Mail von Base44 erhalten. Bitte klicke auf den Link in dieser E-Mail, um dein Passwort zu setzen und dich erstmalig anzumelden.</p>
+          <p>Falls du die E-Mail nicht findest, schaue bitte auch in deinem Spam-Ordner nach.</p>
           <p>Viel Spaß beim Sammeln und Teilen deiner Trikots!</p>
           <p>Mit freundlichen Grüßen,<br>Das Jersey Collectors Team</p>
         `,
@@ -99,7 +68,7 @@ Deno.serve(async (req) => {
       await base44.asServiceRole.entities.PendingUser.delete(pendingUserId);
 
     } else {
-      // Reject user - delete pending entry
+      // Reject user - just delete pending entry
       await base44.asServiceRole.entities.PendingUser.delete(pendingUserId);
     }
 
