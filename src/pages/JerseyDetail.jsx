@@ -88,11 +88,11 @@ export default function JerseyDetail() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           {/* Images */}
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-            <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-slate-800 border border-white/5">
+            <div className="relative aspect-square rounded-2xl overflow-hidden bg-slate-800 border border-white/5">
               <img
                 src={allImages[activeImage]}
                 alt={jersey.title}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
               />
               {allImages.length > 1 && (
                 <>

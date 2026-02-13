@@ -197,9 +197,11 @@ export default function Home() {
               <Shirt className="w-3.5 h-3.5" />
               Community Trikot-Sammlung
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight">
-              Jersey<span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">Vault</span>
-            </h1>
+            <img 
+              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/698e4ef5392203adc7a32dee/0ceef6558_ChatGPTImage13Feb202614_53_21.png" 
+              alt="Jersey Collectors" 
+              className="h-20 md:h-24 w-auto object-contain mx-auto"
+            />
             <p className="text-white/40 mt-3 max-w-md mx-auto text-sm">
               Zeige deine Eishockey-Trikots der Welt. Entdecke Sammlungen aus der ganzen Community.
             </p>
