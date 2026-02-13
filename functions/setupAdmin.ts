@@ -7,13 +7,13 @@ Deno.serve(async (req) => {
     const email = 'info@foto-scheiber.de';
     const password = 'demo';
     
-    // Check if there's already a pending user
-    const pendingUsers = await base44.asServiceRole.entities.PendingUser.filter({ email });
-    for (const pu of pendingUsers) {
+    // Delete any existing pending users
+    const existingPending = await base44.asServiceRole.entities.PendingUser.filter({ email });
+    for (const pu of existingPending) {
       await base44.asServiceRole.entities.PendingUser.delete(pu.id);
     }
     
-    // Create a pending user entry with password
+    // Create pending user
     const pendingUser = await base44.asServiceRole.entities.PendingUser.create({
       email,
       password_hash: password,
@@ -24,22 +24,50 @@ Deno.serve(async (req) => {
       accept_messages: true,
     });
     
-    // Now approve this pending user as admin
-    const approveResponse = await base44.functions.invoke('approveUser', {
-      pendingUserId: pendingUser.id,
-      approve: true,
-      role: 'admin'
+    // Invite user
+    await base44.users.inviteUser(email, 'admin');
+    
+    // Wait for user creation
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Get the created user
+    const allUsers = await base44.asServiceRole.entities.User.list();
+    const newUser = allUsers.find(u => u.email === email);
+    
+    if (!newUser) {
+      return Response.json({ error: 'User wurde nicht gefunden' }, { status: 500 });
+    }
+    
+    // Update password directly via auth API
+    const appId = Deno.env.get('BASE44_APP_ID');
+    const serviceToken = req.headers.get('authorization')?.replace('Bearer ', '');
+    
+    const updatePasswordResponse = await fetch(`https://api.base44.com/apps/${appId}/auth/users/${newUser.id}/password`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${serviceToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ password }),
     });
     
-    if (approveResponse.data.error) {
-      return Response.json({ 
-        error: 'Fehler beim Freischalten: ' + approveResponse.data.error 
-      }, { status: 500 });
-    }
+    const pwResponseText = await updatePasswordResponse.text();
+    console.log('Password update response:', updatePasswordResponse.status, pwResponseText);
+    
+    // Update user profile
+    await base44.asServiceRole.entities.User.update(newUser.id, {
+      display_name: 'Admin',
+      real_name: 'Administrator',
+      accept_messages: true,
+    });
+    
+    // Delete pending user
+    await base44.asServiceRole.entities.PendingUser.delete(pendingUser.id);
     
     return Response.json({ 
       success: true, 
-      message: `Admin-User ${email} wurde erstellt mit Passwort: ${password}. Du kannst dich jetzt einloggen!`
+      message: `Admin-User ${email} wurde erstellt. Versuche dich jetzt mit dem Passwort: ${password} einzuloggen.`,
+      passwordUpdateStatus: updatePasswordResponse.status
     });
     
   } catch (error) {
