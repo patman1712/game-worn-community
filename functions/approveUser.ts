@@ -11,31 +11,48 @@ Deno.serve(async (req) => {
     }
 
     const payload = await req.json();
-    const { userId, approve, role = 'user' } = payload;
+    const { pendingUserId, approve, role = 'user' } = payload;
 
-    if (!userId) {
-      return Response.json({ error: 'User ID fehlt' }, { status: 400 });
+    if (!pendingUserId) {
+      return Response.json({ error: 'Pending User ID fehlt' }, { status: 400 });
     }
 
-    // Get user details first
-    const users = await base44.asServiceRole.entities.User.filter({ id: userId });
-    const userDetails = users[0];
+    // Get pending user details
+    const pendingUsers = await base44.asServiceRole.entities.PendingUser.filter({ id: pendingUserId });
+    const pendingUser = pendingUsers[0];
 
-    if (!userDetails) {
-      return Response.json({ error: 'User nicht gefunden' }, { status: 404 });
+    if (!pendingUser) {
+      return Response.json({ error: 'Pending User nicht gefunden' }, { status: 404 });
     }
 
     if (approve) {
-      // Approve user and set role (user or moderator)
-      await base44.asServiceRole.entities.User.update(userId, { role });
+      // Invite user to the app with the specified role
+      await base44.asServiceRole.users.inviteUser(pendingUser.email, role);
+
+      // Update user profile data after invitation
+      const allUsers = await base44.asServiceRole.entities.User.list();
+      const newUser = allUsers.find(u => u.email === pendingUser.email);
+      
+      if (newUser) {
+        await base44.asServiceRole.entities.User.update(newUser.id, {
+          display_name: pendingUser.display_name,
+          real_name: pendingUser.real_name,
+          location: pendingUser.location,
+          show_location: pendingUser.show_location,
+          accept_messages: pendingUser.accept_messages,
+        });
+      }
+
+      // Delete pending user entry
+      await base44.asServiceRole.entities.PendingUser.delete(pendingUserId);
 
       // Send approval email
       await base44.asServiceRole.integrations.Core.SendEmail({
-        to: userDetails.email,
+        to: pendingUser.email,
         subject: 'Dein Account wurde freigeschaltet - Jersey Collectors',
         body: `
           <h2>Dein Account wurde freigeschaltet!</h2>
-          <p>Hallo ${userDetails.display_name || userDetails.email},</p>
+          <p>Hallo ${pendingUser.display_name},</p>
           <p>Gute Nachrichten! Dein Account wurde von einem Administrator freigeschaltet.</p>
           ${role === 'moderator' ? '<p><strong>Du wurdest als Moderator freigeschaltet</strong> und hast erweiterte Rechte in der Community.</p>' : ''}
           <p>Du kannst dich jetzt mit deinen Zugangsdaten anmelden und die Jersey Collectors Community nutzen.</p>
@@ -50,21 +67,21 @@ Deno.serve(async (req) => {
         subject: 'User freigeschaltet - Jersey Collectors',
         body: `
           <h2>User erfolgreich freigeschaltet</h2>
-          <p>Du hast den User <strong>${userDetails.display_name}</strong> (${userDetails.email}) erfolgreich als <strong>${role === 'moderator' ? 'Moderator' : 'User'}</strong> freigeschaltet.</p>
-          <p>Der User wurde per E-Mail benachrichtigt.</p>
+          <p>Du hast den User <strong>${pendingUser.display_name}</strong> (${pendingUser.email}) erfolgreich als <strong>${role === 'moderator' ? 'Moderator' : 'User'}</strong> freigeschaltet.</p>
+          <p>Der User wurde per E-Mail benachrichtigt und kann sich nun anmelden.</p>
         `,
       });
     } else {
-      // Reject user - delete account
-      await base44.asServiceRole.entities.User.delete(userId);
+      // Reject user - delete pending entry
+      await base44.asServiceRole.entities.PendingUser.delete(pendingUserId);
 
       // Send rejection email
       await base44.asServiceRole.integrations.Core.SendEmail({
-        to: userDetails.email,
+        to: pendingUser.email,
         subject: 'Registrierung abgelehnt - Jersey Collectors',
         body: `
           <h2>Registrierung abgelehnt</h2>
-          <p>Hallo ${userDetails.display_name || 'dort'},</p>
+          <p>Hallo ${pendingUser.display_name},</p>
           <p>Leider konnte deine Registrierung bei Jersey Collectors nicht genehmigt werden.</p>
           <p>Bei Fragen kannst du dich gerne an einen Administrator wenden.</p>
           <p>Mit freundlichen Grüßen,<br>Das Jersey Collectors Team</p>
@@ -77,8 +94,8 @@ Deno.serve(async (req) => {
         subject: 'User abgelehnt - Jersey Collectors',
         body: `
           <h2>User abgelehnt</h2>
-          <p>Du hast die Registrierung von <strong>${userDetails.display_name}</strong> (${userDetails.email}) abgelehnt.</p>
-          <p>Der User wurde per E-Mail benachrichtigt und aus der Datenbank gelöscht.</p>
+          <p>Du hast die Registrierung von <strong>${pendingUser.display_name}</strong> (${pendingUser.email}) abgelehnt.</p>
+          <p>Der User wurde per E-Mail benachrichtigt.</p>
         `,
       });
     }

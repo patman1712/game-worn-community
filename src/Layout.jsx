@@ -102,6 +102,18 @@ export default function Layout({ children, currentPageName }) {
               />
               {user ? (
                 <div className="flex items-center gap-2">
+                  {user.role === 'admin' && (
+                    <Link to={createPageUrl("AdminPanel")}>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-white/70 hover:text-white hover:bg-white/5 text-xs h-8 px-3"
+                      >
+                        <Settings className="w-3.5 h-3.5 mr-1.5" />
+                        Admin
+                      </Button>
+                    </Link>
+                  )}
                   <Link to={createPageUrl("Settings")}>
                     <Button
                       size="sm"

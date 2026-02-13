@@ -11,20 +11,30 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Erforderliche Felder fehlen' }, { status: 400 });
     }
 
-    // Create user entity record with pending role
-    const newUser = await base44.asServiceRole.entities.User.create({
+    // Check if email already exists in pending or active users
+    const existingPending = await base44.asServiceRole.entities.PendingUser.filter({ email });
+    if (existingPending.length > 0) {
+      return Response.json({ error: 'Diese E-Mail wartet bereits auf Freischaltung' }, { status: 400 });
+    }
+
+    const allUsers = await base44.asServiceRole.entities.User.list();
+    const existingUser = allUsers.find(u => u.email === email);
+    if (existingUser) {
+      return Response.json({ error: 'Diese E-Mail ist bereits registriert' }, { status: 400 });
+    }
+
+    // Create pending user entry
+    await base44.asServiceRole.entities.PendingUser.create({
       email,
-      role: 'pending',
+      password_hash: password,
       display_name,
       real_name: real_name || display_name,
       location: location || '',
       show_location: show_location || false,
       accept_messages: accept_messages !== false,
-      password_hash: password, // Store temporarily, will be handled by auth system
     });
 
     // Get admin users
-    const allUsers = await base44.asServiceRole.entities.User.list();
     const admins = allUsers.filter(u => u.role === 'admin');
     
     // Send email to all admins

@@ -22,15 +22,14 @@ export default function AdminPanel() {
   const { data: pendingUsers = [], isLoading } = useQuery({
     queryKey: ['pendingUsers'],
     queryFn: async () => {
-      const users = await base44.entities.User.list();
-      return users.filter(u => u.role === 'pending');
+      return await base44.entities.PendingUser.list();
     },
     enabled: !!user,
   });
 
   const approveMutation = useMutation({
-    mutationFn: async ({ userId, approve, role }) => {
-      return base44.functions.invoke('approveUser', { userId, approve, role });
+    mutationFn: async ({ pendingUserId, approve, role }) => {
+      return base44.functions.invoke('approveUser', { pendingUserId, approve, role });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pendingUsers'] });
@@ -82,7 +81,7 @@ export default function AdminPanel() {
                     </div>
                     <div className="flex gap-2">
                       <Button
-                        onClick={() => approveMutation.mutate({ userId: u.id, approve: true, role: 'user' })}
+                        onClick={() => approveMutation.mutate({ pendingUserId: u.id, approve: true, role: 'user' })}
                         disabled={approveMutation.isPending}
                         size="sm"
                         className="bg-green-600 hover:bg-green-700"
@@ -91,7 +90,7 @@ export default function AdminPanel() {
                         Als User freischalten
                       </Button>
                       <Button
-                        onClick={() => approveMutation.mutate({ userId: u.id, approve: true, role: 'moderator' })}
+                        onClick={() => approveMutation.mutate({ pendingUserId: u.id, approve: true, role: 'moderator' })}
                         disabled={approveMutation.isPending}
                         size="sm"
                         className="bg-blue-600 hover:bg-blue-700"
@@ -100,7 +99,7 @@ export default function AdminPanel() {
                         Als Moderator freischalten
                       </Button>
                       <Button
-                        onClick={() => approveMutation.mutate({ userId: u.id, approve: false })}
+                        onClick={() => approveMutation.mutate({ pendingUserId: u.id, approve: false })}
                         disabled={approveMutation.isPending}
                         size="sm"
                         variant="destructive"
