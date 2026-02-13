@@ -12,7 +12,7 @@ const TABS = [
   { name: "AddJersey", icon: Plus, label: "Trikot hinzufügen", page: "AddJersey", authRequired: true },
 ];
 
-const CHILD_PAGES = ["JerseyDetail", "EditJersey", "UserProfile", "Chat", "Settings"];
+const CHILD_PAGES = [];
 
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
@@ -123,14 +123,24 @@ export default function Layout({ children, currentPageName }) {
                   </Button>
                 </div>
               ) : (
-                <Button
-                  onClick={() => base44.auth.redirectToLogin()}
-                  size="sm"
-                  className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-xs h-8 px-3"
-                >
-                  <LogIn className="w-3.5 h-3.5 mr-1.5" />
-                  Anmelden
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    onClick={() => base44.auth.redirectToLogin()}
+                    size="sm"
+                    variant="ghost"
+                    className="text-white/70 hover:text-white hover:bg-white/5 text-xs h-8 px-3"
+                  >
+                    <LogIn className="w-3.5 h-3.5 mr-1.5" />
+                    Anmelden
+                  </Button>
+                  <Button
+                    onClick={() => window.location.href = 'https://app.base44.com/signup'}
+                    size="sm"
+                    className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-xs h-8 px-3"
+                  >
+                    Registrieren
+                  </Button>
+                </div>
               )}
             </>
           )}

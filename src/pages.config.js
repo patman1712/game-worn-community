@@ -48,27 +48,27 @@
  * The mainPage value must match a key in the PAGES object exactly.
  */
 import AddJersey from './pages/AddJersey';
+import Chat from './pages/Chat';
 import EditJersey from './pages/EditJersey';
 import Home from './pages/Home';
 import JerseyDetail from './pages/JerseyDetail';
+import Messages from './pages/Messages';
 import MyCollection from './pages/MyCollection';
 import Settings from './pages/Settings';
 import UserProfile from './pages/UserProfile';
-import Messages from './pages/Messages';
-import Chat from './pages/Chat';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "AddJersey": AddJersey,
+    "Chat": Chat,
     "EditJersey": EditJersey,
     "Home": Home,
     "JerseyDetail": JerseyDetail,
+    "Messages": Messages,
     "MyCollection": MyCollection,
     "Settings": Settings,
     "UserProfile": UserProfile,
-    "Messages": Messages,
-    "Chat": Chat,
 }
 
 export const pagesConfig = {
