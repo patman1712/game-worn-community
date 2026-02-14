@@ -43,10 +43,21 @@ export default function Home() {
     queryFn: () => base44.entities.Jersey.list("-created_date", 200),
   });
 
+  const { data: allCollectionItems = [] } = useQuery({
+    queryKey: ["collectionItems"],
+    queryFn: () => base44.entities.CollectionItem.list("-created_date", 200),
+  });
+
   // Filter out private jerseys (unless they belong to the current user or user is admin)
   const jerseys = allJerseys.filter(j => 
     !j.is_private || j.owner_email === currentUser?.email || j.created_by === currentUser?.email || currentUser?.data?.role === 'admin' || currentUser?.role === 'admin'
   );
+
+  const collectionItems = allCollectionItems.filter(item => 
+    !item.is_private || item.owner_email === currentUser?.email || item.created_by === currentUser?.email || currentUser?.data?.role === 'admin' || currentUser?.role === 'admin'
+  );
+
+  const allProducts = [...jerseys, ...collectionItems];
 
   const { data: likes = [] } = useQuery({
     queryKey: ["likes", currentUser?.email],
@@ -234,7 +245,7 @@ export default function Home() {
           </motion.div>
 
           <StatsBar
-            totalJerseys={jerseys.length}
+            totalJerseys={allProducts.length}
             totalCollectors={collectors}
             totalLikes={totalLikes}
             topLeague={topLeague}
