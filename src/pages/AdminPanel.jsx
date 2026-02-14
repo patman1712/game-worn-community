@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, Shield, Users } from "lucide-react";
+import { Loader2, Shield, Users, Euro } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
@@ -33,17 +33,25 @@ export default function AdminPanel() {
   return (
     <div className="min-h-screen">
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
-              <Shield className="w-5 h-5 text-white" />
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
+                <Shield className="w-5 h-5 text-white" />
+              </div>
+              <h1 className="text-2xl font-bold text-white">Admin Panel</h1>
             </div>
-            <h1 className="text-2xl font-bold text-white">Admin Panel</h1>
+            <Link to={createPageUrl("ManageUsers")}>
+              <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500">
+                <Users className="w-4 h-4 mr-2" />
+                Registrierte User
+              </Button>
+            </Link>
           </div>
-          <Link to={createPageUrl("ManageUsers")}>
-            <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500">
-              <Users className="w-4 h-4 mr-2" />
-              Registrierte User
+          <Link to={createPageUrl("UserPurchases")}>
+            <Button variant="outline" className="text-cyan-400 border-cyan-500/30 hover:bg-cyan-500/10">
+              <Euro className="w-4 h-4 mr-2" />
+              User Käufe
             </Button>
           </Link>
         </div>
