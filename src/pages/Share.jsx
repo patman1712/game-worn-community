@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
@@ -27,6 +27,46 @@ export default function Share() {
     },
     enabled: !!itemId,
   });
+
+  // Update meta tags for social sharing
+  useEffect(() => {
+    if (item) {
+      const title = item.player_name && item.team 
+        ? `${item.player_name} - ${item.team}` 
+        : item.team || item.title || "Sportartikel";
+      
+      const description = item.description || 
+        `${item.league || ''} ${item.season || ''} ${item.jersey_type || ''}`.trim() ||
+        "Sportartikel aus meiner Sammlung";
+
+      // Update page title
+      document.title = title;
+
+      // Remove existing meta tags
+      const existingMetas = document.querySelectorAll('meta[property^="og:"], meta[name="twitter:"]');
+      existingMetas.forEach(meta => meta.remove());
+
+      // Add Open Graph tags
+      const metaTags = [
+        { property: 'og:title', content: title },
+        { property: 'og:description', content: description },
+        { property: 'og:image', content: item.image_url },
+        { property: 'og:type', content: 'website' },
+        { name: 'twitter:card', content: 'summary_large_image' },
+        { name: 'twitter:title', content: title },
+        { name: 'twitter:description', content: description },
+        { name: 'twitter:image', content: item.image_url },
+      ];
+
+      metaTags.forEach(({ property, name, content }) => {
+        const meta = document.createElement('meta');
+        if (property) meta.setAttribute('property', property);
+        if (name) meta.setAttribute('name', name);
+        meta.setAttribute('content', content);
+        document.head.appendChild(meta);
+      });
+    }
+  }, [item]);
 
   if (isLoading) {
     return (
