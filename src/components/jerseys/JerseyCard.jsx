@@ -173,16 +173,21 @@ export default function JerseyCard({ jersey, isLiked, onLike, index = 0 }) {
                   Signiert
                 </Badge>
               )}
+              {jersey.is_photomatch && (
+               <Badge className="bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] px-1.5 py-0">
+                 📸 Photomatch
+               </Badge>
+              )}
               {jersey.for_sale && (
-                <Badge className="bg-green-500/20 text-green-300 border border-green-500/30 text-[10px] px-1.5 py-0 flex items-center gap-1">
-                  <DollarSign className="w-2.5 h-2.5" />
-                  Verkauf
-                </Badge>
+               <Badge className="bg-green-500/20 text-green-300 border border-green-500/30 text-[10px] px-1.5 py-0 flex items-center gap-1">
+                 <DollarSign className="w-2.5 h-2.5" />
+                 Verkauf
+               </Badge>
               )}
               {!jersey.for_sale && (
-                <Badge className="bg-slate-500/20 text-slate-300 border border-slate-500/30 text-[10px] px-1.5 py-0 flex items-center gap-1">
-                  Nicht zum Verkauf
-                </Badge>
+               <Badge className="bg-slate-500/20 text-slate-300 border border-slate-500/30 text-[10px] px-1.5 py-0 flex items-center gap-1">
+                 Nicht zum Verkauf
+               </Badge>
               )}
             </div>
           )}
