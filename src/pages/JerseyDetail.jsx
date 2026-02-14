@@ -9,8 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   ArrowLeft, Heart, Star, Award, User, Calendar,
-  Shirt, Tag, Shield, Loader2, ChevronLeft, ChevronRight, MessageCircle, Send, Trash2
+  Shirt, Tag, Shield, Loader2, ChevronLeft, ChevronRight, MessageCircle, Send, Trash2, X
 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 export default function JerseyDetail() {
   const params = new URLSearchParams(window.location.search);
@@ -18,6 +23,8 @@ export default function JerseyDetail() {
   const [currentUser, setCurrentUser] = useState(null);
   const [activeImage, setActiveImage] = useState(0);
   const [commentText, setCommentText] = useState("");
+  const [photomatchModalOpen, setPhotomatchModalOpen] = useState(false);
+  const [selectedPhotomatchImage, setSelectedPhotomatchImage] = useState(null);
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -250,9 +257,18 @@ export default function JerseyDetail() {
                 </h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {jersey.photomatch_images.map((url, i) => (
-                    <div key={i} className="aspect-square rounded-lg overflow-hidden border-2 border-purple-500/30">
-                      <img src={url} alt="" className="w-full h-full object-cover" />
-                    </div>
+                    <Dialog key={i}>
+                      <DialogTrigger asChild>
+                        <button className="aspect-square rounded-lg overflow-hidden border-2 border-purple-500/30 hover:border-purple-500/50 transition-colors cursor-pointer">
+                          <img src={url} alt="" className="w-full h-full object-cover" />
+                        </button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-4xl bg-slate-950/95 border-white/10">
+                        <div className="relative w-full aspect-square">
+                          <img src={url} alt="" className="w-full h-full object-contain" />
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   ))}
                 </div>
               </div>
