@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 
 export default function StatsBar({ totalJerseys, totalCollectors, totalLikes, topLeague }) {
   const stats = [
-    { icon: Shirt, label: "Trikots", value: totalJerseys, color: "from-cyan-400 to-blue-500" },
+    { icon: Shirt, label: "Objekte", value: totalJerseys, color: "from-cyan-400 to-blue-500" },
     { icon: Users, label: "Sammler", value: totalCollectors, color: "from-violet-400 to-purple-500" },
     { icon: Heart, label: "Likes", value: totalLikes, color: "from-rose-400 to-pink-500" },
     { icon: Trophy, label: "Top Liga", value: topLeague || "–", color: "from-amber-400 to-orange-500" },
