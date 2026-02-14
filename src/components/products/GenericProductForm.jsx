@@ -243,7 +243,7 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
   const handleSubmit = (e) => {
     e.preventDefault();
     const currentImageCount = form.additional_images?.length || 0;
-    if (initialData && currentImageCount > initialImageCount && !copyrightAgreed) {
+    if (currentImageCount > 0 && !copyrightAgreed) {
       setCopyrightDialogOpen(true);
       return;
     }
@@ -407,7 +407,7 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
 
       {/* Actions */}
       <div className="flex gap-3 pt-2">
-        <Button type="submit" disabled={isSubmitting || !form.image_url || (!copyrightAgreed && !initialData) || (!copyrightAgreed && initialData && (form.additional_images?.length || 0) > initialImageCount)} className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white px-8 disabled:opacity-50 disabled:cursor-not-allowed">
+        <Button type="submit" disabled={isSubmitting || !form.image_url} className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white px-8 disabled:opacity-50 disabled:cursor-not-allowed">
           {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
           {initialData ? "Aktualisieren" : "Veröffentlichen"}
         </Button>
