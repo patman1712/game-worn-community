@@ -153,7 +153,7 @@ export default function JerseyCard({ jersey, isLiked, onLike, index = 0 }) {
           </div>
 
           {/* Info Section - Game Worn, For Sale, etc */}
-          {(jersey.is_game_worn || jersey.is_game_issued || jersey.is_signed || jersey.for_sale !== false) && (
+          {(jersey.is_game_worn || jersey.is_game_issued || jersey.is_authentic || jersey.is_fan_jersey || jersey.is_signed || jersey.for_sale !== false) && (
             <div className="px-4 py-2 flex items-center gap-2 flex-wrap border-t border-white/5 bg-white/[0.02]">
               {jersey.is_game_worn && (
                 <Badge className="bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] px-1.5 py-0">
@@ -165,6 +165,18 @@ export default function JerseyCard({ jersey, isLiked, onLike, index = 0 }) {
                 <Badge className="bg-orange-500/20 text-orange-300 border border-orange-500/30 text-[10px] px-1.5 py-0">
                   <Award className="w-2.5 h-2.5 mr-1" />
                   Game-Issued
+                </Badge>
+              )}
+              {jersey.is_authentic && (
+                <Badge className="bg-blue-500/20 text-blue-300 border border-blue-500/30 text-[10px] px-1.5 py-0">
+                  <Award className="w-2.5 h-2.5 mr-1" />
+                  Authentic
+                </Badge>
+              )}
+              {jersey.is_fan_jersey && (
+                <Badge className="bg-pink-500/20 text-pink-300 border border-pink-500/30 text-[10px] px-1.5 py-0">
+                  <Award className="w-2.5 h-2.5 mr-1" />
+                  Fan-Jersey
                 </Badge>
               )}
               {jersey.is_signed && (

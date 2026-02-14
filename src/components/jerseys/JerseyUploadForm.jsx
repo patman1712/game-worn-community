@@ -308,9 +308,10 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
       setCopyrightDialogOpen(true);
       return;
     }
-    // Validate at least one jersey type is selected
-    if (!form.is_game_worn && !form.is_game_issued && !form.is_authentic && !form.is_fan_jersey) {
-      alert('Bitte wähle mindestens einen Trikot-Typ aus (Game-Worn, Game-Issued, Authentic oder Fan-Jersey)');
+    // Validate exactly one jersey type is selected
+    const selectedTypes = [form.is_game_worn, form.is_game_issued, form.is_authentic, form.is_fan_jersey].filter(Boolean).length;
+    if (selectedTypes !== 1) {
+      alert('Bitte wähle genau einen Trikot-Typ aus (Game-Worn, Game-Issued, Authentic oder Fan-Jersey)');
       return;
     }
     onSubmit(form);
@@ -504,33 +505,53 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
       {/* Toggles */}
       <div className="space-y-3">
         <div>
-          <Label className="text-white/70 text-sm mb-2 block">Trikot-Typ * (Mindestens einer erforderlich)</Label>
+          <Label className="text-white/70 text-sm mb-2 block">Trikot-Typ * (Genau einer erforderlich)</Label>
           <div className="flex flex-wrap gap-3">
             <Button
               type="button"
-              onClick={() => handleChange("is_game_worn", !form.is_game_worn)}
-              className={`${form.is_game_worn ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'} transition-colors`}
+              onClick={() => {
+                handleChange("is_game_worn", true);
+                handleChange("is_game_issued", false);
+                handleChange("is_authentic", false);
+                handleChange("is_fan_jersey", false);
+              }}
+              className={`${form.is_game_worn ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-slate-600 hover:bg-slate-700 text-white'} transition-colors`}
             >
               Game-Worn
             </Button>
             <Button
               type="button"
-              onClick={() => handleChange("is_game_issued", !form.is_game_issued)}
-              className={`${form.is_game_issued ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'} transition-colors`}
+              onClick={() => {
+                handleChange("is_game_worn", false);
+                handleChange("is_game_issued", true);
+                handleChange("is_authentic", false);
+                handleChange("is_fan_jersey", false);
+              }}
+              className={`${form.is_game_issued ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-slate-600 hover:bg-slate-700 text-white'} transition-colors`}
             >
               Game-Issued
             </Button>
             <Button
               type="button"
-              onClick={() => handleChange("is_authentic", !form.is_authentic)}
-              className={`${form.is_authentic ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'} transition-colors`}
+              onClick={() => {
+                handleChange("is_game_worn", false);
+                handleChange("is_game_issued", false);
+                handleChange("is_authentic", true);
+                handleChange("is_fan_jersey", false);
+              }}
+              className={`${form.is_authentic ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-slate-600 hover:bg-slate-700 text-white'} transition-colors`}
             >
               Authentic
             </Button>
             <Button
               type="button"
-              onClick={() => handleChange("is_fan_jersey", !form.is_fan_jersey)}
-              className={`${form.is_fan_jersey ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'} transition-colors`}
+              onClick={() => {
+                handleChange("is_game_worn", false);
+                handleChange("is_game_issued", false);
+                handleChange("is_authentic", false);
+                handleChange("is_fan_jersey", true);
+              }}
+              className={`${form.is_fan_jersey ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-slate-600 hover:bg-slate-700 text-white'} transition-colors`}
             >
               Fan-Jersey
             </Button>
