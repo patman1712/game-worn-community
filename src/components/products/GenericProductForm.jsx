@@ -109,6 +109,7 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
     additional_images: [],
     is_game_worn: false,
     is_game_issued: false,
+    is_fan_jersey: false,
     is_signed: false,
     has_loa: false,
     is_photomatch: false,
@@ -251,6 +252,14 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
       setCopyrightDialogOpen(true);
       return;
     }
+    // Validate exactly one jersey type is selected for jerseys
+    if (showGameWornFields) {
+      const selectedTypes = [form.is_game_worn, form.is_game_issued, form.is_fan_jersey].filter(Boolean).length;
+      if (selectedTypes !== 1) {
+        alert('Bitte wähle genau einen Trikot-Typ aus');
+        return;
+      }
+    }
     onSubmit(form);
   };
 
@@ -362,13 +371,45 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
       {/* Toggles */}
       {showGameWornFields && (
         <div className="space-y-3">
+          <div>
+            <Label className="text-white/70 text-sm mb-2 block">Trikot-Typ * (Genau einer erforderlich)</Label>
+            <div className="flex flex-wrap gap-3">
+              <Button
+                type="button"
+                onClick={() => {
+                  handleChange("is_game_worn", true);
+                  handleChange("is_game_issued", false);
+                  handleChange("is_fan_jersey", false);
+                }}
+                className={`${form.is_game_worn ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-slate-600 hover:bg-slate-700 text-white'} transition-colors`}
+              >
+                {sportType === 'soccer' ? 'Matchworn' : 'Game-Worn'}
+              </Button>
+              <Button
+                type="button"
+                onClick={() => {
+                  handleChange("is_game_worn", false);
+                  handleChange("is_game_issued", true);
+                  handleChange("is_fan_jersey", false);
+                }}
+                className={`${form.is_game_issued ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-slate-600 hover:bg-slate-700 text-white'} transition-colors`}
+              >
+                {sportType === 'soccer' ? 'Player Edition' : 'Game-Issued'}
+              </Button>
+              <Button
+                type="button"
+                onClick={() => {
+                  handleChange("is_game_worn", false);
+                  handleChange("is_game_issued", false);
+                  handleChange("is_fan_jersey", true);
+                }}
+                className={`${form.is_fan_jersey ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-slate-600 hover:bg-slate-700 text-white'} transition-colors`}
+              >
+                Fantrikot
+              </Button>
+            </div>
+          </div>
           <div className="flex flex-wrap gap-3">
-            <Button type="button" onClick={() => handleChange("is_game_worn", !form.is_game_worn)} className={`${form.is_game_worn ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'} transition-colors`}>
-              Game-Worn
-            </Button>
-            <Button type="button" onClick={() => handleChange("is_game_issued", !form.is_game_issued)} className={`${form.is_game_issued ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'} transition-colors`}>
-              Game-Issued
-            </Button>
             <Button type="button" onClick={() => handleChange("is_signed", !form.is_signed)} className={`${form.is_signed ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'} transition-colors`}>
               Signiert
             </Button>
