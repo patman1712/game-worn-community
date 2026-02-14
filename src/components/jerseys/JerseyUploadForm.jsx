@@ -227,8 +227,8 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
     if (newImages.length > 0) {
       handleChange("image_url", newImages[0]);
     }
-    // Show copyright dialog if not agreed yet and images were uploaded
-    if (!copyrightAgreed && urls.length > 0) {
+    // Show copyright dialog immediately when images are uploaded
+    if (urls.length > 0) {
       setCopyrightDialogOpen(true);
     }
   };
@@ -286,10 +286,8 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
         if (newImages.length > 0) {
           handleChange("image_url", newImages[0]);
         }
-        // Show copyright dialog if not agreed yet
-        if (!copyrightAgreed) {
-          setCopyrightDialogOpen(true);
-        }
+        // Show copyright dialog immediately
+        setCopyrightDialogOpen(true);
       }
       
       if (errors.length > 0) {
@@ -329,7 +327,11 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
       alert('Bitte wähle genau einen Trikot-Typ aus (Game-Worn, Game-Issued, Authentic oder Fan-Jersey)');
       return;
     }
-    onSubmit(form);
+    
+    // If copyright dialog was just confirmed, submit immediately
+    if (copyrightAgreed || !hasNewImages) {
+      onSubmit(form);
+    }
   };
 
   return (
@@ -731,10 +733,6 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
         onConfirm={() => {
           setCopyrightAgreed(true);
           setCopyrightDialogOpen(false);
-          // If submitted from form, submit now
-          if (initialData && (form.additional_images?.length || 0) > initialImageCount) {
-            onSubmit(form);
-          }
         }}
         onCancel={() => {
           // Remove newly uploaded images if user cancels

@@ -181,7 +181,7 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
     if (newImages.length > 0) {
       handleChange("image_url", newImages[0]);
     }
-    if (!copyrightAgreed && urls.length > 0) {
+    if (urls.length > 0) {
       setCopyrightDialogOpen(true);
     }
   };
@@ -210,9 +210,7 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
         if (newImages.length > 0) {
           handleChange("image_url", newImages[0]);
         }
-        if (!copyrightAgreed) {
-          setCopyrightDialogOpen(true);
-        }
+        setCopyrightDialogOpen(true);
       }
     } catch (error) {
       console.error("Error uploading images:", error);
@@ -261,7 +259,11 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
         return;
       }
     }
-    onSubmit(form);
+    
+    // Submit if copyright agreed or no new images
+    if (copyrightAgreed || !hasNewImages) {
+      onSubmit(form);
+    }
   };
 
   const showTeamFields = productType === "jersey" || productType === "jersey";
@@ -500,7 +502,7 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
 
       <MultiImageUploadDialog open={multiImageDialogOpen} onOpenChange={setMultiImageDialogOpen} onImagesUploaded={handleMultiImageUpload} />
 
-      <CopyrightDialog open={copyrightDialogOpen} onConfirm={() => { setCopyrightAgreed(true); setCopyrightDialogOpen(false); if (initialData && (form.additional_images?.length || 0) > initialImageCount) { onSubmit(form); } }} onCancel={() => { if (initialData) { handleChange("additional_images", initialData.additional_images || []); if (initialData.image_url) handleChange("image_url", initialData.image_url); } else { handleChange("additional_images", []); handleChange("image_url", ""); } setCopyrightDialogOpen(false); }} />
+      <CopyrightDialog open={copyrightDialogOpen} onConfirm={() => { setCopyrightAgreed(true); setCopyrightDialogOpen(false); }} onCancel={() => { if (initialData) { handleChange("additional_images", initialData.additional_images || []); if (initialData.image_url) handleChange("image_url", initialData.image_url); } else { handleChange("additional_images", []); handleChange("image_url", ""); } setCopyrightDialogOpen(false); }} />
     </form>
   );
 }
