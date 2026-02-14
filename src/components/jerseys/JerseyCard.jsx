@@ -32,13 +32,33 @@ export default function JerseyCard({ jersey, isLiked, onLike, index = 0 }) {
 
   const isModerator = currentUser?.data?.role === 'moderator' || currentUser?.role === 'admin' || currentUser?.data?.role === 'admin';
 
+  const isCollectionItem = !!jersey.product_type;
+
   const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.Jersey.delete(id),
+    mutationFn: async (id) => {
+      const entity = isCollectionItem ? base44.entities.CollectionItem : base44.entities.Jersey;
+      
+      // Delete likes
+      const likes = await base44.entities.JerseyLike.filter({ jersey_id: id });
+      for (const like of likes) {
+        await base44.entities.JerseyLike.delete(like.id);
+      }
+      
+      // Delete comments
+      const comments = await base44.entities.Comment.filter({ jersey_id: id });
+      for (const comment of comments) {
+        await base44.entities.Comment.delete(comment.id);
+      }
+      
+      // Delete item
+      await entity.delete(id);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["jerseys"] });
+      queryClient.invalidateQueries({ queryKey: ["collectionItems"] });
       queryClient.invalidateQueries({ queryKey: ["myJerseys"] });
+      queryClient.invalidateQueries({ queryKey: ["myItems"] });
       setOpen(false);
-      window.location.href = createPageUrl("Home");
     },
   });
 
@@ -97,15 +117,19 @@ export default function JerseyCard({ jersey, isLiked, onLike, index = 0 }) {
                     </AlertDialogTrigger>
                     <AlertDialogContent className="bg-slate-900 border-white/10">
                       <AlertDialogHeader>
-                        <AlertDialogTitle className="text-white">Trikot löschen?</AlertDialogTitle>
+                        <AlertDialogTitle className="text-white">Objekt löschen?</AlertDialogTitle>
                         <AlertDialogDescription className="text-white/50">
-                          Das Trikot wird unwiderruflich gelöscht.
+                          Das Objekt wird unwiderruflich gelöscht.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel className="bg-white/5 text-white border-white/10 hover:bg-white/10">Abbrechen</AlertDialogCancel>
                         <AlertDialogAction
-                          onClick={() => deleteMutation.mutate(jersey.id)}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            deleteMutation.mutate(jersey.id);
+                          }}
                           className="bg-red-600 hover:bg-red-700"
                         >
                           Löschen

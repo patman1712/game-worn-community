@@ -195,6 +195,9 @@ export default function Home() {
       result.sort((a, b) => (b.likes_count || 0) - (a.likes_count || 0));
     } else if (sortBy === "team") {
       result.sort((a, b) => (a.team || "").localeCompare(b.team || ""));
+    } else {
+      // Default: newest first
+      result.sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
     }
 
     return result;
