@@ -373,8 +373,12 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
               <Label className="text-white/70 text-sm mb-1.5 block">Spielername</Label>
               <Input value={form.player_name} onChange={(e) => handleChange("player_name", e.target.value)} placeholder="z.B. Wayne Gretzky" className="bg-slate-800/50 border-white/10 text-white placeholder:text-white/20 focus:border-cyan-500/50" />
             </div>
-          </>
-        )}
+            <div>
+              <Label className="text-white/70 text-sm mb-1.5 block">{sportType === 'soccer' ? 'Trikotnummer' : 'Rückennummer'}</Label>
+              <Input value={form.player_number} onChange={(e) => handleChange("player_number", e.target.value)} placeholder={sportType === 'soccer' ? "z.B. 7" : "z.B. 99"} className="bg-slate-800/50 border-white/10 text-white placeholder:text-white/20 focus:border-cyan-500/50" />
+            </div>
+            </>
+            )}
 
         <div>
           <Label className="text-white/70 text-sm mb-1.5 block">Marke/Hersteller</Label>
