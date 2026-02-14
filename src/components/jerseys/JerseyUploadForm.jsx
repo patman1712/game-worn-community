@@ -285,6 +285,56 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
     }
   };
 
+  const handleDropPhotomatchFiles = async (files) => {
+    if (files.length === 0) return;
+
+    setUploading(true);
+    const uploadedUrls = [];
+    const errors = [];
+
+    try {
+      for (let i = 0; i < files.length; i++) {
+        try {
+          const file = files[i];
+          const compressed = await compressImage(file, 1000);
+          
+          let retries = 2;
+          let uploaded = false;
+          
+          while (retries > 0 && !uploaded) {
+            try {
+              const { file_url } = await base44.integrations.Core.UploadFile({ file: compressed });
+              uploadedUrls.push(file_url);
+              uploaded = true;
+            } catch (uploadError) {
+              retries--;
+              if (retries === 0) {
+                throw uploadError;
+              }
+              await new Promise(r => setTimeout(r, 500));
+            }
+          }
+        } catch (fileError) {
+          console.error(`Error processing file ${i}:`, fileError);
+          errors.push(`Bild ${i + 1}`);
+        }
+      }
+      
+      if (uploadedUrls.length > 0) {
+        handleChange("photomatch_images", [...(form.photomatch_images || []), ...uploadedUrls]);
+      }
+      
+      if (errors.length > 0) {
+        alert(`${uploadedUrls.length}/${files.length} Bilder hochgeladen.\nFehler bei: ${errors.join(", ")}`);
+      }
+    } catch (error) {
+      console.error("Error uploading images:", error);
+      alert("Fehler beim Hochladen der Bilder");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     // Validierung: Photomatch benötigt mindestens ein Bild
@@ -585,7 +635,20 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
       <div>
         <Label className="text-white/70 text-sm mb-2 block">Photomatch Vergleichsbilder</Label>
         {form.photomatch_images && form.photomatch_images.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+          <div 
+            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              e.currentTarget.classList.remove('border-purple-500/60', 'bg-purple-500/5');
+              const files = Array.from(e.dataTransfer?.files || []).filter(f => f.type.startsWith('image/'));
+              if (files.length > 0) {
+                handleDropPhotomatchFiles(files);
+              }
+            }}
+          >
             {form.photomatch_images.map((url, i) => (
               <div key={i} className="relative group">
                 <div className="aspect-square rounded-lg overflow-hidden border-2 border-purple-500/30 hover:border-purple-500/50 transition-colors">
@@ -629,8 +692,23 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
             </label>
           </div>
         ) : (
-          <label className="w-full aspect-video flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-purple-500/30 hover:border-purple-500/50 bg-slate-800/50 cursor-pointer transition-colors">
+          <div
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              e.currentTarget.classList.remove('border-purple-500/60', 'bg-purple-500/5');
+              const files = Array.from(e.dataTransfer?.files || []).filter(f => f.type.startsWith('image/'));
+              if (files.length > 0) {
+                handleDropPhotomatchFiles(files);
+              }
+            }}
+            onClick={() => document.getElementById('photomatch-upload').click()}
+            className="w-full aspect-video flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-purple-500/30 hover:border-purple-500/50 bg-slate-800/50 cursor-pointer transition-colors"
+          >
             <input
+              id="photomatch-upload"
               type="file"
               accept="image/*"
               multiple
@@ -656,7 +734,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
             {uploading && <Loader2 className="w-8 h-8 text-purple-400 mb-2 animate-spin" />}
             {!uploading && <Upload className="w-8 h-8 text-purple-400/50 mb-2" />}
             <span className="text-white/40 text-sm">{uploading ? "Wird hochgeladen..." : "Photomatch-Bilder hochladen"}</span>
-          </label>
+          </div>
         )}
       </div>
 
