@@ -173,6 +173,15 @@ export default function JerseyDetail() {
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
             <div>
               <div className="flex items-center gap-2 mb-3 flex-wrap">
+                {jersey.sport_type && (
+                  <Badge className="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs">
+                    {jersey.sport_type === 'icehockey' ? 'Eishockey' :
+                     jersey.sport_type === 'soccer' ? 'Fussball' :
+                     jersey.sport_type === 'football' ? 'Football' :
+                     jersey.sport_type === 'basketball' ? 'Basketball' :
+                     jersey.sport_type === 'baseball' ? 'Baseball' : jersey.sport_type}
+                  </Badge>
+                )}
                 {jersey.league && (
                   <Badge className="bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-xs">
                     {jersey.league}
