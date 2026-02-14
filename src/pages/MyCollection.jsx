@@ -28,33 +28,43 @@ export default function MyCollection() {
     });
   }, []);
 
-  const { data: jerseys = [], isLoading } = useQuery({
+  const { data: jerseys = [], isLoading: jerseysLoading } = useQuery({
     queryKey: ["myJerseys", user?.email],
     queryFn: () => base44.entities.Jersey.filter({ owner_email: user.email }, "-created_date"),
     enabled: !!user,
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.Jersey.delete(id),
-    onMutate: async (id) => {
-      // Optimistic delete
-      await queryClient.cancelQueries({ queryKey: ["myJerseys"] });
-      const previousJerseys = queryClient.getQueryData(["myJerseys", user?.email]);
-      
-      queryClient.setQueryData(["myJerseys", user?.email], (old = []) => 
-        old.filter(j => j.id !== id)
-      );
+  const { data: items = [], isLoading: itemsLoading } = useQuery({
+    queryKey: ["myItems", user?.email],
+    queryFn: () => base44.entities.CollectionItem.filter({ owner_email: user.email }, "-created_date"),
+    enabled: !!user,
+  });
 
-      return { previousJerseys };
-    },
-    onError: (err, id, context) => {
-      // Rollback on error
-      queryClient.setQueryData(["myJerseys", user?.email], context.previousJerseys);
-    },
+  const allProducts = [...jerseys, ...items];
+  const isLoading = jerseysLoading || itemsLoading;
+
+  const deleteJerseyMutation = useMutation({
+    mutationFn: (id) => base44.entities.Jersey.delete(id),
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["myJerseys"] });
     },
   });
+
+  const deleteItemMutation = useMutation({
+    mutationFn: (id) => base44.entities.CollectionItem.delete(id),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["myItems"] });
+    },
+  });
+
+  const handleDelete = (product) => {
+    // Check if it's a Jersey or CollectionItem
+    if (jerseys.some(j => j.id === product.id)) {
+      deleteJerseyMutation.mutate(product.id);
+    } else {
+      deleteItemMutation.mutate(product.id);
+    }
+  };
 
   if (!user) return null;
 
@@ -65,12 +75,12 @@ export default function MyCollection() {
           <div className="flex items-center justify-between mb-4">
             <div>
               <h1 className="text-2xl font-bold text-white">Meine Sammlung</h1>
-              <p className="text-white/40 text-sm mt-1">{jerseys.length} Trikot{jerseys.length !== 1 ? "s" : ""}</p>
+              <p className="text-white/40 text-sm mt-1">{allProducts.length} Objekt{allProducts.length !== 1 ? "e" : ""}</p>
             </div>
             <Link to={createPageUrl("AddJersey")}>
               <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white">
                 <Plus className="w-4 h-4 mr-2" />
-                Trikot hinzufügen
+                Objekt hinzufügen
               </Button>
             </Link>
           </div>
@@ -85,21 +95,21 @@ export default function MyCollection() {
           <div className="flex justify-center py-20">
             <Loader2 className="w-8 h-8 text-cyan-400 animate-spin" />
           </div>
-        ) : jerseys.length === 0 ? (
+        ) : allProducts.length === 0 ? (
           <div className="text-center py-20 rounded-2xl border border-dashed border-white/10">
             <Shirt className="w-12 h-12 text-white/10 mx-auto mb-4" />
-            <p className="text-white/30 text-sm">Du hast noch keine Trikots.</p>
+            <p className="text-white/30 text-sm">Du hast noch keine Objekte.</p>
             <Link to={createPageUrl("AddJersey")}>
               <Button className="mt-4 bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30">
                 <Plus className="w-4 h-4 mr-2" />
-                Erstes Trikot hinzufügen
+                Erstes Objekt hinzufügen
               </Button>
             </Link>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <AnimatePresence>
-              {jerseys.map((jersey, i) => (
+              {allProducts.map((jersey, i) => (
                 <motion.div
                   key={jersey.id}
                   initial={{ opacity: 0, scale: 0.95 }}
@@ -120,7 +130,7 @@ export default function MyCollection() {
                   <div className="p-4">
                     <div className="flex items-start justify-between">
                       <div className="min-w-0 flex-1">
-                        <h3 className="text-white font-medium text-sm truncate">{jersey.title}</h3>
+                        <h3 className="text-white font-medium text-sm truncate">{jersey.title || jersey.team || "Ohne Titel"}</h3>
                         <p className="text-white/40 text-xs mt-0.5">{jersey.team}</p>
                       </div>
                       <div className="flex items-center gap-2 ml-3">
@@ -147,7 +157,7 @@ export default function MyCollection() {
                             <AlertDialogFooter>
                               <AlertDialogCancel className="bg-white/5 text-white border-white/10 hover:bg-white/10">Abbrechen</AlertDialogCancel>
                               <AlertDialogAction
-                                onClick={() => deleteMutation.mutate(jersey.id)}
+                                onClick={() => handleDelete(jersey)}
                                 className="bg-red-600 hover:bg-red-700"
                               >
                                 Löschen
