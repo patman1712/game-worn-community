@@ -297,7 +297,7 @@ export default function JerseyDetail() {
                 </div>
               </Link>
               <div className="flex items-center gap-2">
-                {currentUser && (jersey.owner_email === currentUser.email || jersey.created_by === currentUser.email || currentUser.data?.role === 'moderator' || currentUser.role === 'admin' || currentUser.data?.role === 'admin') && (
+                {currentUser && ((currentUser.role === 'admin' || currentUser.data?.role === 'admin') || (jersey.owner_email === currentUser.email || jersey.created_by === currentUser.email)) && (
                   <Button
                     onClick={() => {
                       // Use the current hostname, which will be the user's domain when deployed
