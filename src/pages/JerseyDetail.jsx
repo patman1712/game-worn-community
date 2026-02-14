@@ -195,6 +195,11 @@ export default function JerseyDetail() {
                      LOA
                    </Badge>
                  )}
+                 {jersey.is_photomatch && (
+                   <Badge className="bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs">
+                     📸 Photomatch
+                   </Badge>
+                 )}
                  {jersey.for_sale && (
                    <Badge className="bg-green-500/20 text-green-300 border border-green-500/30 text-xs">
                      For Sale
@@ -236,6 +241,22 @@ export default function JerseyDetail() {
                 </div>
               )}
             </div>
+
+            {/* Photomatch Gallery */}
+            {jersey.photomatch_images && jersey.photomatch_images.length > 0 && (
+              <div>
+                <h3 className="text-white/60 text-sm font-medium mb-2 flex items-center gap-2">
+                  📸 Photomatch Vergleichsbilder
+                </h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {jersey.photomatch_images.map((url, i) => (
+                    <div key={i} className="aspect-square rounded-lg overflow-hidden border-2 border-purple-500/30">
+                      <img src={url} alt="" className="w-full h-full object-cover" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Description */}
             {jersey.description && (

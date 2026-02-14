@@ -52,12 +52,12 @@ import AdminPanel from './pages/AdminPanel';
 import Chat from './pages/Chat';
 import EditJersey from './pages/EditJersey';
 import Home from './pages/Home';
+import JerseyDetail from './pages/JerseyDetail';
 import ManageUsers from './pages/ManageUsers';
 import Messages from './pages/Messages';
 import MyCollection from './pages/MyCollection';
 import Settings from './pages/Settings';
 import UserProfile from './pages/UserProfile';
-import JerseyDetail from './pages/JerseyDetail';
 import __Layout from './Layout.jsx';
 
 
@@ -67,12 +67,12 @@ export const PAGES = {
     "Chat": Chat,
     "EditJersey": EditJersey,
     "Home": Home,
+    "JerseyDetail": JerseyDetail,
     "ManageUsers": ManageUsers,
     "Messages": Messages,
     "MyCollection": MyCollection,
     "Settings": Settings,
     "UserProfile": UserProfile,
-    "JerseyDetail": JerseyDetail,
 }
 
 export const pagesConfig = {
