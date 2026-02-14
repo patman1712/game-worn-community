@@ -169,6 +169,17 @@ export default function Home() {
       result = result.filter(j => j.league === league);
     }
 
+    if (sport !== "all") {
+      result = result.filter(j => j.sport_type === sport);
+    }
+
+    if (productType !== "all") {
+      result = result.filter(j => 
+        (productType === "jersey" && !j.product_type) || 
+        j.product_type === productType
+      );
+    }
+
     if (sortBy === "popular") {
       result.sort((a, b) => (b.likes_count || 0) - (a.likes_count || 0));
     } else if (sortBy === "team") {
@@ -176,7 +187,7 @@ export default function Home() {
     }
 
     return result;
-  }, [jerseys, search, league, sortBy]);
+  }, [jerseys, search, league, sport, productType, sortBy]);
 
   // Stats
   const totalLikes = jerseys.reduce((s, j) => s + (j.likes_count || 0), 0);
