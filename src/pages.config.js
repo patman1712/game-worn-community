@@ -60,6 +60,7 @@ import MyPurchases from './pages/MyPurchases';
 import Settings from './pages/Settings';
 import UserProfile from './pages/UserProfile';
 import UserPurchases from './pages/UserPurchases';
+import Share from './pages/Share';
 import __Layout from './Layout.jsx';
 
 
@@ -77,6 +78,7 @@ export const PAGES = {
     "Settings": Settings,
     "UserProfile": UserProfile,
     "UserPurchases": UserPurchases,
+    "Share": Share,
 }
 
 export const pagesConfig = {

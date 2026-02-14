@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   ArrowLeft, Heart, Star, Award, User, Calendar,
-  Shirt, Tag, Shield, Loader2, ChevronLeft, ChevronRight, MessageCircle, Send, Trash2
+  Shirt, Tag, Shield, Loader2, ChevronLeft, ChevronRight, MessageCircle, Send, Trash2, Share2
 } from "lucide-react";
 
 export default function JerseyDetail() {
@@ -297,6 +297,19 @@ export default function JerseyDetail() {
                 </div>
               </Link>
               <div className="flex items-center gap-2">
+                {currentUser && (jersey.owner_email === currentUser.email || jersey.created_by === currentUser.email || currentUser.data?.role === 'moderator' || currentUser.role === 'admin' || currentUser.data?.role === 'admin') && (
+                  <Button
+                    onClick={() => {
+                      const shareUrl = window.location.origin + createPageUrl("Share") + `?id=${jersey.id}`;
+                      navigator.clipboard.writeText(shareUrl);
+                      alert('Link kopiert! Du kannst ihn jetzt teilen.');
+                    }}
+                    variant="ghost"
+                    className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
+                  >
+                    <Share2 className="w-5 h-5" />
+                  </Button>
+                )}
                 {currentUser && (jersey.owner_email !== currentUser.email && jersey.created_by !== currentUser.email) && (
                   <Link
                     to={createPageUrl("Chat") + `?email=${jersey.owner_email || jersey.created_by}`}

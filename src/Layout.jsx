@@ -13,7 +13,7 @@ const TABS = [
   { name: "AddJersey", icon: Plus, label: "Objekt hinzufügen", page: "AddJersey", authRequired: true },
 ];
 
-const CHILD_PAGES = [];
+const CHILD_PAGES = ["Share"];
 
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
