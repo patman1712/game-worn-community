@@ -224,7 +224,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
   const handleMultiImageUpload = (urls) => {
     const newImages = [...(form.additional_images || []), ...urls];
     handleChange("additional_images", newImages);
-    if (!form.image_url && newImages.length > 0) {
+    if (newImages.length > 0) {
       handleChange("image_url", newImages[0]);
     }
     // Show copyright dialog if not agreed yet and images were uploaded
@@ -281,7 +281,11 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
       }
       
       if (uploadedUrls.length > 0) {
-        handleChange("additional_images", [...(form.additional_images || []), ...uploadedUrls]);
+        const newImages = [...(form.additional_images || []), ...uploadedUrls];
+        handleChange("additional_images", newImages);
+        if (newImages.length > 0) {
+          handleChange("image_url", newImages[0]);
+        }
         // Show copyright dialog if not agreed yet
         if (!copyrightAgreed) {
           setCopyrightDialogOpen(true);

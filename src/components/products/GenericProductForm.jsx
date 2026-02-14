@@ -177,7 +177,7 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
   const handleMultiImageUpload = (urls) => {
     const newImages = [...(form.additional_images || []), ...urls];
     handleChange("additional_images", newImages);
-    if (!form.image_url && newImages.length > 0) {
+    if (newImages.length > 0) {
       handleChange("image_url", newImages[0]);
     }
     if (!copyrightAgreed && urls.length > 0) {
@@ -204,7 +204,11 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
       }
       
       if (uploadedUrls.length > 0) {
-        handleChange("additional_images", [...(form.additional_images || []), ...uploadedUrls]);
+        const newImages = [...(form.additional_images || []), ...uploadedUrls];
+        handleChange("additional_images", newImages);
+        if (newImages.length > 0) {
+          handleChange("image_url", newImages[0]);
+        }
         if (!copyrightAgreed) {
           setCopyrightDialogOpen(true);
         }
