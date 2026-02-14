@@ -56,9 +56,9 @@ import JerseyDetail from './pages/JerseyDetail';
 import ManageUsers from './pages/ManageUsers';
 import Messages from './pages/Messages';
 import MyCollection from './pages/MyCollection';
+import MyPurchases from './pages/MyPurchases';
 import Settings from './pages/Settings';
 import UserProfile from './pages/UserProfile';
-import MyPurchases from './pages/MyPurchases';
 import UserPurchases from './pages/UserPurchases';
 import __Layout from './Layout.jsx';
 
@@ -73,9 +73,9 @@ export const PAGES = {
     "ManageUsers": ManageUsers,
     "Messages": Messages,
     "MyCollection": MyCollection,
+    "MyPurchases": MyPurchases,
     "Settings": Settings,
     "UserProfile": UserProfile,
-    "MyPurchases": MyPurchases,
     "UserPurchases": UserPurchases,
 }
 
