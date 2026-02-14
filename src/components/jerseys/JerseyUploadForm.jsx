@@ -318,7 +318,8 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
     e.preventDefault();
     // Check if new images were added and copyright needs to be agreed
     const currentImageCount = form.additional_images?.length || 0;
-    if (currentImageCount > 0 && !copyrightAgreed) {
+    const hasNewImages = currentImageCount > initialImageCount;
+    if (hasNewImages && !copyrightAgreed) {
       setCopyrightDialogOpen(true);
       return;
     }

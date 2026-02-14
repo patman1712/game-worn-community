@@ -248,7 +248,8 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
   const handleSubmit = (e) => {
     e.preventDefault();
     const currentImageCount = form.additional_images?.length || 0;
-    if (currentImageCount > 0 && !copyrightAgreed) {
+    const hasNewImages = currentImageCount > initialImageCount;
+    if (hasNewImages && !copyrightAgreed) {
       setCopyrightDialogOpen(true);
       return;
     }
