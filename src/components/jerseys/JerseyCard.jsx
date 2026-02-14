@@ -132,6 +132,13 @@ export default function JerseyCard({ jersey, isLiked, onLike, index = 0 }) {
             {/* Bottom info overlay */}
             <div className="absolute bottom-0 left-0 right-0 p-4">
               <div className="flex items-center gap-1.5 mb-2">
+                <Badge className="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] px-2 py-0">
+                  {jersey.sport_type === 'icehockey' ? 'Eishockey' :
+                   jersey.sport_type === 'soccer' ? 'Fussball' :
+                   jersey.sport_type === 'football' ? 'Football' :
+                   jersey.sport_type === 'basketball' ? 'Basketball' :
+                   jersey.sport_type === 'baseball' ? 'Baseball' : 'Eishockey'}
+                </Badge>
                 {jersey.league && (
                   <Badge className="bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-[10px] px-2 py-0">
                     {jersey.league}

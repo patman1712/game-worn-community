@@ -99,6 +99,7 @@ const CONDITION_OPTIONS = CONDITIONS.map(c => ({ value: c, label: c }));
 export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSubmitting }) {
   const queryClient = useQueryClient();
   const [form, setForm] = useState(initialData || {
+    sport_type: "icehockey",
     title: "",
     team: "",
     league: "",
