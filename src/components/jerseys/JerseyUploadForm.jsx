@@ -7,11 +7,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Upload, X, Image as ImageIcon, Loader2, RotateCw, Images, GripVertical } from "lucide-react";
+import { Upload, X, Image as ImageIcon, Loader2, RotateCw, Images, GripVertical, AlertCircle } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import MobileDrawerSelect from "./MobileDrawerSelect";
 import ImageEditor from "./ImageEditor";
 import MultiImageUploadDialog from "./MultiImageUploadDialog";
+import CopyrightDialog from "./CopyrightDialog";
 
 const compressImage = async (file, targetSizeKB = 1000) => {
   return new Promise((resolve, reject) => {
@@ -124,6 +125,8 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   const [editingImage, setEditingImage] = useState(null);
   const [editingImageType, setEditingImageType] = useState(null); // 'main' or index for additional
+  const [copyrightDialogOpen, setCopyrightDialogOpen] = useState(false);
+  const [copyrightAgreed, setCopyrightAgreed] = useState(!!initialData); // Already agreed if editing
 
   const handleChange = (field, value) => {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -210,6 +213,10 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
     if (!form.image_url && newImages.length > 0) {
       handleChange("image_url", newImages[0]);
     }
+    // Show copyright dialog if not agreed yet and images were uploaded
+    if (!copyrightAgreed && urls.length > 0) {
+      setCopyrightDialogOpen(true);
+    }
   };
 
   const handleDragOver = (e) => {
@@ -261,6 +268,10 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
       
       if (uploadedUrls.length > 0) {
         handleChange("additional_images", [...(form.additional_images || []), ...uploadedUrls]);
+        // Show copyright dialog if not agreed yet
+        if (!copyrightAgreed) {
+          setCopyrightDialogOpen(true);
+        }
       }
       
       if (errors.length > 0) {
@@ -584,8 +595,8 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
       <div className="flex gap-3 pt-2">
         <Button
            type="submit"
-           disabled={isSubmitting || !form.team || !form.image_url}
-           className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white px-8"
+           disabled={isSubmitting || !form.team || !form.image_url || !copyrightAgreed}
+           className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white px-8 disabled:opacity-50 disabled:cursor-not-allowed"
          >
           {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
           {initialData ? "Aktualisieren" : "Veröffentlichen"}
@@ -596,6 +607,13 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
           </Button>
         )}
       </div>
+      
+      {!copyrightAgreed && form.additional_images?.length > 0 && (
+        <p className="text-amber-400 text-xs flex items-center gap-1">
+          <AlertCircle className="w-3 h-3" />
+          Bitte bestätige die Urheberrechtsbestätigung, um fortzufahren.
+        </p>
+      )}
 
       {/* Image Editor Modal */}
       {editingImage && (
@@ -614,6 +632,21 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
         open={multiImageDialogOpen}
         onOpenChange={setMultiImageDialogOpen}
         onImagesUploaded={handleMultiImageUpload}
+      />
+
+      {/* Copyright Dialog */}
+      <CopyrightDialog
+        open={copyrightDialogOpen}
+        onConfirm={() => {
+          setCopyrightAgreed(true);
+          setCopyrightDialogOpen(false);
+        }}
+        onCancel={() => {
+          // Remove uploaded images if user cancels
+          handleChange("additional_images", []);
+          handleChange("image_url", "");
+          setCopyrightDialogOpen(false);
+        }}
       />
     </form>
   );
