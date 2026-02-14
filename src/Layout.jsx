@@ -29,6 +29,11 @@ export default function Layout({ children, currentPageName }) {
     enabled: !!user,
   });
 
+  // Share page should have no layout at all
+  if (currentPageName === "Share") {
+    return children;
+  }
+
   const isChildPage = CHILD_PAGES.includes(currentPageName);
   const showBottomNav = !isChildPage;
   const visibleTabs = TABS.filter(tab => !tab.authRequired || user);
