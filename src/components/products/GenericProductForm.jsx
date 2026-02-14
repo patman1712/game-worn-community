@@ -436,6 +436,9 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
             <Button type="button" onClick={() => handleChange("has_loa", !form.has_loa)} className={`${form.has_loa ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'} transition-colors`}>
               Zertifikat (LOA)
             </Button>
+            <Button type="button" onClick={() => handleChange("is_photomatch", !form.is_photomatch)} className={`${form.is_photomatch ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'} transition-colors`}>
+              Photomatch
+            </Button>
           </div>
         </div>
       )}
