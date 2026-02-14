@@ -87,12 +87,19 @@ const compressImage = async (file, targetSizeKB = 1000) => {
   });
 };
 
-const LEAGUES = ["NHL", "DEL", "SHL", "KHL", "NLA", "EIHL", "Liiga", "CHL", "IIHF", "AHL", "OHL", "Sonstige"];
+const LEAGUES_BY_SPORT = {
+  icehockey: ["NHL", "DEL", "SHL", "KHL", "NLA", "EIHL", "Liiga", "CHL", "IIHF", "AHL", "OHL", "Sonstige"],
+  soccer: ["Bundesliga", "Premier League", "La Liga", "Serie A", "Ligue 1", "Champions League", "Europa League", "Sonstige"],
+  football: ["NFL", "NCAA", "CFL", "Sonstige"],
+  basketball: ["NBA", "BBL", "EuroLeague", "NCAA", "Sonstige"],
+  baseball: ["MLB", "NPB", "KBO", "Sonstige"],
+  other: ["Sonstige"]
+};
+
 const JERSEY_TYPES = ["Home", "Away", "Third", "Special", "All-Star", "Retro", "Practice", "Warm-Up", "Fan-Jersey"];
 const CONDITIONS = ["Neu mit Etikett", "Neu ohne Etikett", "Sehr gut", "Gut", "Getragen", "Game-Worn"];
 const CAPTAIN_PATCH_OPTIONS = ["Keine", "C", "A"];
 
-const LEAGUE_OPTIONS = LEAGUES.map(l => ({ value: l, label: l }));
 const TYPE_OPTIONS = JERSEY_TYPES.map(t => ({ value: t, label: t }));
 const CONDITION_OPTIONS = CONDITIONS.map(c => ({ value: c, label: c }));
 
@@ -132,6 +139,9 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
   const [copyrightDialogOpen, setCopyrightDialogOpen] = useState(false);
   const [copyrightAgreed, setCopyrightAgreed] = useState(false);
   const [initialImageCount] = useState(initialData?.additional_images?.length || 0);
+  
+  const leagueOptions = LEAGUES_BY_SPORT[form.sport_type] || [];
+  const LEAGUE_OPTIONS = leagueOptions.map(l => ({ value: l, label: l }));
 
   const handleChange = (field, value) => {
     setForm(prev => ({ ...prev, [field]: value }));
