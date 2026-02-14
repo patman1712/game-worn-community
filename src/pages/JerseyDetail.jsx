@@ -300,7 +300,8 @@ export default function JerseyDetail() {
                 {currentUser && (jersey.owner_email === currentUser.email || jersey.created_by === currentUser.email || currentUser.data?.role === 'moderator' || currentUser.role === 'admin' || currentUser.data?.role === 'admin') && (
                   <Button
                     onClick={() => {
-                      const shareUrl = window.location.origin + createPageUrl("Share") + `?id=${jersey.id}`;
+                      // Use the current hostname, which will be the user's domain when deployed
+                      const shareUrl = `${window.location.protocol}//${window.location.host}${createPageUrl("Share")}?id=${jersey.id}`;
                       navigator.clipboard.writeText(shareUrl);
                       alert('Link kopiert! Du kannst ihn jetzt teilen.');
                     }}
