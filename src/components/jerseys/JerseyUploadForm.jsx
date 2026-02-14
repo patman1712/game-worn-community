@@ -126,7 +126,8 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
   const [editingImage, setEditingImage] = useState(null);
   const [editingImageType, setEditingImageType] = useState(null); // 'main' or index for additional
   const [copyrightDialogOpen, setCopyrightDialogOpen] = useState(false);
-  const [copyrightAgreed, setCopyrightAgreed] = useState(!!initialData); // Already agreed if editing
+  const [copyrightAgreed, setCopyrightAgreed] = useState(false);
+  const [initialImageCount] = useState(initialData?.additional_images?.length || 0);
 
   const handleChange = (field, value) => {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -298,6 +299,12 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    // Check if new images were added
+    const currentImageCount = form.additional_images?.length || 0;
+    if (initialData && currentImageCount > initialImageCount && !copyrightAgreed) {
+      setCopyrightDialogOpen(true);
+      return;
+    }
     onSubmit(form);
   };
 
@@ -595,7 +602,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
       <div className="flex gap-3 pt-2">
         <Button
            type="submit"
-           disabled={isSubmitting || !form.team || !form.image_url || !copyrightAgreed}
+           disabled={isSubmitting || !form.team || !form.image_url || (!copyrightAgreed && !initialData) || (!copyrightAgreed && initialData && (form.additional_images?.length || 0) > initialImageCount)}
            className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white px-8 disabled:opacity-50 disabled:cursor-not-allowed"
          >
           {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
@@ -608,10 +615,16 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
         )}
       </div>
       
-      {!copyrightAgreed && form.additional_images?.length > 0 && (
+      {!copyrightAgreed && !initialData && form.additional_images?.length > 0 && (
         <p className="text-amber-400 text-xs flex items-center gap-1">
           <AlertCircle className="w-3 h-3" />
           Bitte bestätige die Urheberrechtsbestätigung, um fortzufahren.
+        </p>
+      )}
+      {!copyrightAgreed && initialData && (form.additional_images?.length || 0) > initialImageCount && (
+        <p className="text-amber-400 text-xs flex items-center gap-1">
+          <AlertCircle className="w-3 h-3" />
+          Bitte bestätige die Urheberrechtsbestätigung für die neuen Bilder.
         </p>
       )}
 
@@ -640,11 +653,21 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
         onConfirm={() => {
           setCopyrightAgreed(true);
           setCopyrightDialogOpen(false);
+          // If submitted from form, submit now
+          if (initialData && (form.additional_images?.length || 0) > initialImageCount) {
+            onSubmit(form);
+          }
         }}
         onCancel={() => {
-          // Remove uploaded images if user cancels
-          handleChange("additional_images", []);
-          handleChange("image_url", "");
+          // Remove newly uploaded images if user cancels
+          if (initialData) {
+            // Restore to initial images
+            handleChange("additional_images", initialData.additional_images || []);
+            if (initialData.image_url) handleChange("image_url", initialData.image_url);
+          } else {
+            handleChange("additional_images", []);
+            handleChange("image_url", "");
+          }
           setCopyrightDialogOpen(false);
         }}
       />
