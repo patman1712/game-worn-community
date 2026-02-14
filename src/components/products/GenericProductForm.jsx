@@ -98,7 +98,6 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
   const [form, setForm] = useState(initialData || {
     sport_type: sportType,
     product_type: productType,
-    title: "",
     team: "",
     league: "",
     season: "",

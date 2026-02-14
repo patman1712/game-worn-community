@@ -107,7 +107,6 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
   const queryClient = useQueryClient();
   const [form, setForm] = useState(initialData || {
     sport_type: "icehockey",
-    title: "",
     team: "",
     league: "",
     season: "",
