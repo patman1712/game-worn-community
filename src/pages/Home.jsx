@@ -165,7 +165,7 @@ export default function Home() {
   const likedIds = new Set(likes.map(l => l.jersey_id));
 
   const filtered = useMemo(() => {
-    let result = [...jerseys];
+    let result = [...allProducts];
 
     if (search) {
       const s = search.toLowerCase();
@@ -198,7 +198,7 @@ export default function Home() {
     }
 
     return result;
-  }, [jerseys, search, league, sport, productType, sortBy]);
+  }, [allProducts, search, league, sport, productType, sortBy]);
 
   // Stats
   const totalLikes = jerseys.reduce((s, j) => s + (j.likes_count || 0), 0);

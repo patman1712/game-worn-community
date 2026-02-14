@@ -27,8 +27,18 @@ export default function JerseyDetail() {
   const { data: jersey, isLoading } = useQuery({
     queryKey: ["jersey", jerseyId],
     queryFn: async () => {
-      const list = await base44.entities.Jersey.filter({ id: jerseyId });
-      return list[0];
+      try {
+        const jerseyList = await base44.entities.Jersey.filter({ id: jerseyId });
+        if (jerseyList.length > 0) return jerseyList[0];
+        
+        const itemList = await base44.entities.CollectionItem.filter({ id: jerseyId });
+        if (itemList.length > 0) return itemList[0];
+        
+        return null;
+      } catch (error) {
+        console.error("Error loading item:", error);
+        return null;
+      }
     },
     enabled: !!jerseyId,
   });
@@ -49,12 +59,13 @@ export default function JerseyDetail() {
 
   const likeMutation = useMutation({
     mutationFn: async () => {
+      const entity = isCollectionItem ? base44.entities.CollectionItem : base44.entities.Jersey;
       if (isLiked) {
         await base44.entities.JerseyLike.delete(likes[0].id);
-        await base44.entities.Jersey.update(jerseyId, { likes_count: Math.max(0, (jersey.likes_count || 0) - 1) });
+        await entity.update(jerseyId, { likes_count: Math.max(0, (jersey.likes_count || 0) - 1) });
       } else {
         await base44.entities.JerseyLike.create({ jersey_id: jerseyId, user_email: currentUser.email });
-        await base44.entities.Jersey.update(jerseyId, { likes_count: (jersey.likes_count || 0) + 1 });
+        await entity.update(jerseyId, { likes_count: (jersey.likes_count || 0) + 1 });
       }
     },
     onSuccess: () => {
@@ -96,11 +107,13 @@ export default function JerseyDetail() {
   if (!jersey) {
     return (
       <div className="text-center py-20">
-        <p className="text-white/40">Trikot nicht gefunden.</p>
+        <p className="text-white/40">Objekt nicht gefunden.</p>
         <Link to={createPageUrl("Home")} className="text-cyan-400 text-sm mt-2 inline-block">Zurück</Link>
       </div>
     );
   }
+
+  const isCollectionItem = !!jersey.product_type;
 
   const allImages = [jersey.image_url, ...(jersey.additional_images || [])].filter((url, index, array) => array.indexOf(url) === index);
 
@@ -295,8 +308,9 @@ export default function JerseyDetail() {
                 </Link>
                 <Button
                   onClick={async () => {
-                    if (confirm('Trikot wirklich löschen?')) {
+                    if (confirm('Objekt wirklich löschen?')) {
                       try {
+                        const entity = isCollectionItem ? base44.entities.CollectionItem : base44.entities.Jersey;
                         // Delete likes
                         const likes = await base44.entities.JerseyLike.filter({ jersey_id: jersey.id });
                         for (const like of likes) {
@@ -307,8 +321,8 @@ export default function JerseyDetail() {
                         for (const comment of comments) {
                           await base44.entities.Comment.delete(comment.id);
                         }
-                        // Delete jersey
-                        await base44.entities.Jersey.delete(jersey.id);
+                        // Delete item
+                        await entity.delete(jersey.id);
                         window.location.href = createPageUrl("Home");
                       } catch (error) {
                         alert('Fehler beim Löschen: ' + error.message);
