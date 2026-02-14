@@ -96,7 +96,6 @@ export default function MyPurchases() {
                     </div>
                     <div className="text-right">
                       <p className="text-cyan-400 font-bold text-lg">{jersey.purchase_price.toFixed(2)} €</p>
-                      <p className="text-white/30 text-xs">{new Date(jersey.created_date).toLocaleDateString('de-DE')}</p>
                     </div>
                   </div>
                 </Link>
