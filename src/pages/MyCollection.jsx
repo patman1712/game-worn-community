@@ -61,15 +61,22 @@ export default function MyCollection() {
   return (
     <div className="min-h-screen">
       <div className="max-w-6xl mx-auto px-4 py-10">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-bold text-white">Meine Sammlung</h1>
-            <p className="text-white/40 text-sm mt-1">{jerseys.length} Trikot{jerseys.length !== 1 ? "s" : ""}</p>
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-2xl font-bold text-white">Meine Sammlung</h1>
+              <p className="text-white/40 text-sm mt-1">{jerseys.length} Trikot{jerseys.length !== 1 ? "s" : ""}</p>
+            </div>
+            <Link to={createPageUrl("AddJersey")}>
+              <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white">
+                <Plus className="w-4 h-4 mr-2" />
+                Trikot hinzufügen
+              </Button>
+            </Link>
           </div>
-          <Link to={createPageUrl("AddJersey")}>
-            <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white">
-              <Plus className="w-4 h-4 mr-2" />
-              Trikot hinzufügen
+          <Link to={createPageUrl("MyPurchases")}>
+            <Button variant="outline" className="text-cyan-400 border-cyan-500/30 hover:bg-cyan-500/10">
+              💰 Meine Käufe
             </Button>
           </Link>
         </div>
