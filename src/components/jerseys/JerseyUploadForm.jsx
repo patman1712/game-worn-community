@@ -285,64 +285,8 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
     }
   };
 
-  const handleDropPhotomatchFiles = async (files) => {
-    if (files.length === 0) return;
-
-    setUploading(true);
-    const uploadedUrls = [];
-    const errors = [];
-
-    try {
-      for (let i = 0; i < files.length; i++) {
-        try {
-          const file = files[i];
-          const compressed = await compressImage(file, 1000);
-          
-          let retries = 2;
-          let uploaded = false;
-          
-          while (retries > 0 && !uploaded) {
-            try {
-              const { file_url } = await base44.integrations.Core.UploadFile({ file: compressed });
-              uploadedUrls.push(file_url);
-              uploaded = true;
-            } catch (uploadError) {
-              retries--;
-              if (retries === 0) {
-                throw uploadError;
-              }
-              await new Promise(r => setTimeout(r, 500));
-            }
-          }
-        } catch (fileError) {
-          console.error(`Error processing file ${i}:`, fileError);
-          errors.push(`Bild ${i + 1}`);
-        }
-      }
-      
-      if (uploadedUrls.length > 0) {
-        handleChange("photomatch_images", [...(form.photomatch_images || []), ...uploadedUrls]);
-      }
-      
-      if (errors.length > 0) {
-        alert(`${uploadedUrls.length}/${files.length} Bilder hochgeladen.\nFehler bei: ${errors.join(", ")}`);
-      }
-    } catch (error) {
-      console.error("Error uploading images:", error);
-      alert("Fehler beim Hochladen der Bilder");
-    } finally {
-      setUploading(false);
-    }
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Validierung: Photomatch benötigt mindestens ein Bild
-    if (form.is_photomatch && (!form.photomatch_images || form.photomatch_images.length === 0)) {
-      alert("Photomatch benötigt mindestens ein Vergleichsbild");
-      handleChange("is_photomatch", false);
-      return;
-    }
     onSubmit(form);
   };
 
@@ -584,14 +528,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
           </Button>
           <Button
             type="button"
-            onClick={() => {
-              const newValue = !form.is_photomatch;
-              if (newValue && (!form.photomatch_images || form.photomatch_images.length === 0)) {
-                alert("Bitte erst Photomatch-Bilder hochladen");
-                return;
-              }
-              handleChange("is_photomatch", newValue);
-            }}
+            onClick={() => handleChange("is_photomatch", !form.is_photomatch)}
             className={`${form.is_photomatch ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'} transition-colors`}
           >
             Photomatch
@@ -629,113 +566,6 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
             Nicht zum Verkauf
           </Button>
         </div>
-      </div>
-
-      {/* Photomatch Gallery */}
-      <div>
-        <Label className="text-white/70 text-sm mb-2 block">Photomatch Vergleichsbilder</Label>
-        {form.photomatch_images && form.photomatch_images.length > 0 ? (
-          <div 
-            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              e.currentTarget.classList.remove('border-purple-500/60', 'bg-purple-500/5');
-              const files = Array.from(e.dataTransfer?.files || []).filter(f => f.type.startsWith('image/'));
-              if (files.length > 0) {
-                handleDropPhotomatchFiles(files);
-              }
-            }}
-          >
-            {form.photomatch_images.map((url, i) => (
-              <div key={i} className="relative group">
-                <div className="aspect-square rounded-lg overflow-hidden border-2 border-purple-500/30 hover:border-purple-500/50 transition-colors">
-                  <img src={url} alt="" className="w-full h-full object-cover" />
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleChange("photomatch_images", form.photomatch_images.filter((_, idx) => idx !== i))}
-                  className="absolute top-1 right-1 p-1 bg-black/60 rounded-full hover:bg-red-600/80 transition-colors opacity-0 group-hover:opacity-100"
-                >
-                  <X className="w-3 h-3 text-white" />
-                </button>
-              </div>
-            ))}
-            <label className="aspect-square flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-purple-500/30 hover:border-purple-500/50 bg-slate-800/50 cursor-pointer transition-colors">
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={async (e) => {
-                  const files = Array.from(e.target.files || []);
-                  if (files.length === 0) return;
-                  setUploading(true);
-                  try {
-                    const urls = [];
-                    for (const file of files) {
-                      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-                      urls.push(file_url);
-                    }
-                    handleChange("photomatch_images", [...(form.photomatch_images || []), ...urls]);
-                  } catch (error) {
-                    alert("Fehler beim Hochladen");
-                  } finally {
-                    setUploading(false);
-                  }
-                }}
-                className="hidden"
-              />
-              <Upload className="w-6 h-6 text-purple-400/50 mb-1" />
-              <span className="text-[10px] text-purple-400/50">+ Bilder</span>
-            </label>
-          </div>
-        ) : (
-          <div
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              e.currentTarget.classList.remove('border-purple-500/60', 'bg-purple-500/5');
-              const files = Array.from(e.dataTransfer?.files || []).filter(f => f.type.startsWith('image/'));
-              if (files.length > 0) {
-                handleDropPhotomatchFiles(files);
-              }
-            }}
-            onClick={() => document.getElementById('photomatch-upload').click()}
-            className="w-full aspect-video flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-purple-500/30 hover:border-purple-500/50 bg-slate-800/50 cursor-pointer transition-colors"
-          >
-            <input
-              id="photomatch-upload"
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={async (e) => {
-                const files = Array.from(e.target.files || []);
-                if (files.length === 0) return;
-                setUploading(true);
-                try {
-                  const urls = [];
-                  for (const file of files) {
-                    const { file_url } = await base44.integrations.Core.UploadFile({ file });
-                    urls.push(file_url);
-                  }
-                  handleChange("photomatch_images", urls);
-                } catch (error) {
-                  alert("Fehler beim Hochladen");
-                } finally {
-                  setUploading(false);
-                }
-              }}
-              className="hidden"
-            />
-            {uploading && <Loader2 className="w-8 h-8 text-purple-400 mb-2 animate-spin" />}
-            {!uploading && <Upload className="w-8 h-8 text-purple-400/50 mb-2" />}
-            <span className="text-white/40 text-sm">{uploading ? "Wird hochgeladen..." : "Photomatch-Bilder hochladen"}</span>
-          </div>
-        )}
       </div>
 
       {/* Description */}
