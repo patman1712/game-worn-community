@@ -485,11 +485,11 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
           />
         </div>
         <div>
-          <Label className="text-white/70 text-sm mb-1.5 block">Rückennummer</Label>
+          <Label className="text-white/70 text-sm mb-1.5 block">{form.sport_type === 'soccer' ? 'Trikotnummer' : 'Rückennummer'}</Label>
           <Input
             value={form.player_number}
             onChange={(e) => handleChange("player_number", e.target.value)}
-            placeholder="z.B. 99"
+            placeholder={form.sport_type === 'soccer' ? "z.B. 7" : "z.B. 99"}
             className="bg-slate-800/50 border-white/10 text-white placeholder:text-white/20 focus:border-cyan-500/50"
           />
         </div>
