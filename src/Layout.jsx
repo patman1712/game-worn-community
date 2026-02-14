@@ -10,7 +10,7 @@ const TABS = [
   { name: "Home", icon: Home, label: "Sammlung", page: "Home" },
   { name: "Messages", icon: MessageCircle, label: "Nachrichten", page: "Messages", authRequired: true },
   { name: "MyCollection", icon: FolderOpen, label: "Meine Trikots", page: "MyCollection", authRequired: true },
-  { name: "AddJersey", icon: Plus, label: "Trikot hinzufügen", page: "AddJersey", authRequired: true },
+  { name: "AddJersey", icon: Plus, label: "Objekt hinzufügen", page: "AddJersey", authRequired: true },
 ];
 
 const CHILD_PAGES = [];
