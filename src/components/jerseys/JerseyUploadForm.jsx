@@ -119,6 +119,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
     photomatch_images: [],
     is_private: false,
     for_sale: false,
+    purchase_price: null,
   });
   const [uploading, setUploading] = useState(false);
   const [multiImageDialogOpen, setMultiImageDialogOpen] = useState(false);
@@ -584,6 +585,19 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
             Nicht zum Verkauf
           </Button>
         </div>
+      </div>
+
+      {/* Purchase Price */}
+      <div>
+        <Label className="text-white/70 text-sm mb-1.5 block">Kaufpreis (optional, nur für dich sichtbar)</Label>
+        <Input
+          type="number"
+          step="0.01"
+          value={form.purchase_price || ""}
+          onChange={(e) => handleChange("purchase_price", e.target.value ? parseFloat(e.target.value) : null)}
+          placeholder="z.B. 150.00"
+          className="bg-slate-800/50 border-white/10 text-white placeholder:text-white/20 focus:border-cyan-500/50"
+        />
       </div>
 
       {/* Description */}

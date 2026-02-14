@@ -58,6 +58,7 @@ import Messages from './pages/Messages';
 import MyCollection from './pages/MyCollection';
 import Settings from './pages/Settings';
 import UserProfile from './pages/UserProfile';
+import MyPurchases from './pages/MyPurchases';
 import __Layout from './Layout.jsx';
 
 
@@ -73,6 +74,7 @@ export const PAGES = {
     "MyCollection": MyCollection,
     "Settings": Settings,
     "UserProfile": UserProfile,
+    "MyPurchases": MyPurchases,
 }
 
 export const pagesConfig = {
