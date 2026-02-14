@@ -427,14 +427,26 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
           <Label className="text-white/70 text-sm mb-1.5 block">Liga</Label>
           {isMobile ? (
             <MobileDrawerSelect
-              value={form.league}
-              onValueChange={(v) => handleChange("league", v)}
+              value={form.league === "Sonstige" || !leagueOptions.includes(form.league) ? "Sonstige" : form.league}
+              onValueChange={(v) => {
+                if (v === "Sonstige") {
+                  handleChange("league", "");
+                } else {
+                  handleChange("league", v);
+                }
+              }}
               options={LEAGUE_OPTIONS}
               label="Liga wählen"
               placeholder="Liga wählen"
             />
           ) : (
-            <Select value={form.league} onValueChange={(v) => handleChange("league", v)}>
+            <Select value={form.league === "Sonstige" || !leagueOptions.includes(form.league) ? "Sonstige" : form.league} onValueChange={(v) => {
+              if (v === "Sonstige") {
+                handleChange("league", "");
+              } else {
+                handleChange("league", v);
+              }
+            }}>
               <SelectTrigger className="bg-slate-800/50 border-white/10 text-white">
                 <SelectValue placeholder="Liga wählen" />
               </SelectTrigger>
@@ -442,6 +454,14 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
                 {leagueOptions.map(l => <SelectItem key={l} value={l}>{l}</SelectItem>)}
               </SelectContent>
             </Select>
+          )}
+          {(form.league === "" || (form.league && form.league !== "" && !leagueOptions.includes(form.league))) && (
+            <Input
+              value={form.league}
+              onChange={(e) => handleChange("league", e.target.value)}
+              placeholder="Liga eingeben"
+              className="bg-slate-800/50 border-white/10 text-white placeholder:text-white/20 focus:border-cyan-500/50 mt-2"
+            />
           )}
         </div>
         <div>
