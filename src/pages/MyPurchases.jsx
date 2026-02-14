@@ -90,9 +90,23 @@ export default function MyPurchases() {
                     <div className="flex-1 min-w-0">
                       <h3 className="text-white font-medium truncate">{jersey.team}</h3>
                       <p className="text-white/50 text-sm truncate">{jersey.player_name || jersey.title}</p>
-                      {jersey.season && (
-                        <p className="text-white/30 text-xs">{jersey.season}</p>
-                      )}
+                      <div className="flex items-center gap-2 mt-1 flex-wrap">
+                        {jersey.jersey_type && (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-white/50 border border-white/10">
+                            {jersey.jersey_type}
+                          </span>
+                        )}
+                        {jersey.is_game_worn && (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                            Game-Worn
+                          </span>
+                        )}
+                        {jersey.is_game_issued && (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-300 border border-orange-500/30">
+                            Game-Issued
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <div className="text-right">
                       <p className="text-cyan-400 font-bold text-lg">{jersey.purchase_price.toFixed(2)} €</p>
