@@ -29,14 +29,27 @@ export default function EditJersey() {
   const { data: jersey, isLoading } = useQuery({
     queryKey: ["jersey", jerseyId],
     queryFn: async () => {
-      const list = await base44.entities.Jersey.filter({ id: jerseyId });
-      return list[0];
+      // Try Jersey first
+      const jerseyList = await base44.entities.Jersey.filter({ id: jerseyId });
+      if (jerseyList.length > 0) return { ...jerseyList[0], entityType: 'Jersey' };
+      
+      // Try CollectionItem
+      const collectionList = await base44.entities.CollectionItem.filter({ id: jerseyId });
+      if (collectionList.length > 0) return { ...collectionList[0], entityType: 'CollectionItem' };
+      
+      return null;
     },
     enabled: !!jerseyId,
   });
 
   const updateMutation = useMutation({
-    mutationFn: (data) => base44.entities.Jersey.update(jerseyId, data),
+    mutationFn: (data) => {
+      const entityType = jersey?.entityType || 'Jersey';
+      if (entityType === 'CollectionItem') {
+        return base44.entities.CollectionItem.update(jerseyId, data);
+      }
+      return base44.entities.Jersey.update(jerseyId, data);
+    },
     onSuccess: () => navigate(createPageUrl("MyCollection")),
   });
 

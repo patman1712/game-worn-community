@@ -245,12 +245,14 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
     const currentImageCount = form.additional_images?.length || 0;
     const hasNewImages = currentImageCount > initialImageCount;
     if (hasNewImages && !copyrightAgreed) {
       setCopyrightDialogOpen(true);
       return;
     }
+    
     // Validate exactly one jersey type is selected for jerseys
     if (showGameWornFields) {
       const selectedTypes = [form.is_game_worn, form.is_game_issued, form.is_fan_jersey].filter(Boolean).length;
@@ -260,10 +262,7 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
       }
     }
     
-    // Submit if copyright agreed or no new images
-    if (copyrightAgreed || !hasNewImages) {
-      onSubmit(form);
-    }
+    onSubmit(form);
   };
 
   const showTeamFields = productType === "jersey" || productType === "jersey";

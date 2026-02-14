@@ -314,6 +314,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
     // Check if new images were added and copyright needs to be agreed
     const currentImageCount = form.additional_images?.length || 0;
     const hasNewImages = currentImageCount > initialImageCount;
@@ -321,6 +322,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
       setCopyrightDialogOpen(true);
       return;
     }
+    
     // Validate exactly one jersey type is selected
     const selectedTypes = [form.is_game_worn, form.is_game_issued, form.is_authentic, form.is_fan_jersey].filter(Boolean).length;
     if (selectedTypes !== 1) {
@@ -328,10 +330,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
       return;
     }
     
-    // If copyright dialog was just confirmed, submit immediately
-    if (copyrightAgreed || !hasNewImages) {
-      onSubmit(form);
-    }
+    onSubmit(form);
   };
 
   return (
