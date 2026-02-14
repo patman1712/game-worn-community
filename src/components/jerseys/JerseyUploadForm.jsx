@@ -436,7 +436,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
                 <SelectValue placeholder="Liga wählen" />
               </SelectTrigger>
               <SelectContent>
-                {LEAGUES.map(l => <SelectItem key={l} value={l}>{l}</SelectItem>)}
+                {leagueOptions.map(l => <SelectItem key={l} value={l}>{l}</SelectItem>)}
               </SelectContent>
             </Select>
           )}
