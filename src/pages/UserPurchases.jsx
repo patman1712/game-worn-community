@@ -95,7 +95,6 @@ export default function UserPurchases() {
                     </div>
                     <div>
                       <h3 className="text-white font-medium">{userData.name}</h3>
-                      <p className="text-white/40 text-sm">{userData.email}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-6">
