@@ -4,11 +4,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, Upload, X, RotateCw, GripVertical, AlertCircle } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import MobileDrawerSelect from "../jerseys/MobileDrawerSelect";
 import ImageEditor from "../jerseys/ImageEditor";
 import MultiImageUploadDialog from "../jerseys/MultiImageUploadDialog";
 import CopyrightDialog from "../jerseys/CopyrightDialog";
+
+const LEAGUES_BY_SPORT = {
+  icehockey: ["NHL", "DEL", "SHL", "KHL", "NLA", "EIHL", "Liiga", "CHL", "IIHF", "AHL", "OHL", "Sonstige"],
+  soccer: ["Bundesliga", "Premier League", "La Liga", "Serie A", "Ligue 1", "Champions League", "Europa League", "Sonstige"],
+  football: ["NFL", "NCAA", "CFL", "Sonstige"],
+  basketball: ["NBA", "BBL", "EuroLeague", "NCAA", "Sonstige"],
+  baseball: ["MLB", "NPB", "KBO", "Sonstige"],
+  other: ["Sonstige"]
+};
 
 const compressImage = async (file, targetSizeKB = 1000) => {
   return new Promise((resolve, reject) => {
@@ -116,6 +127,10 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
   const [copyrightDialogOpen, setCopyrightDialogOpen] = useState(false);
   const [copyrightAgreed, setCopyrightAgreed] = useState(false);
   const [initialImageCount] = useState(initialData?.additional_images?.length || 0);
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  
+  const leagueOptions = LEAGUES_BY_SPORT[sportType] || [];
+  const LEAGUE_OPTIONS = leagueOptions.map(l => ({ value: l, label: l }));
 
   const handleChange = (field, value) => {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -302,7 +317,24 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
             </div>
             <div>
               <Label className="text-white/70 text-sm mb-1.5 block">Liga</Label>
-              <Input value={form.league} onChange={(e) => handleChange("league", e.target.value)} placeholder="z.B. NHL" className="bg-slate-800/50 border-white/10 text-white placeholder:text-white/20 focus:border-cyan-500/50" />
+              {isMobile ? (
+                <MobileDrawerSelect
+                  value={form.league}
+                  onValueChange={(v) => handleChange("league", v)}
+                  options={LEAGUE_OPTIONS}
+                  label="Liga wählen"
+                  placeholder="Liga wählen"
+                />
+              ) : (
+                <Select value={form.league} onValueChange={(v) => handleChange("league", v)}>
+                  <SelectTrigger className="bg-slate-800/50 border-white/10 text-white">
+                    <SelectValue placeholder="Liga wählen" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {leagueOptions.map(l => <SelectItem key={l} value={l}>{l}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
             <div>
               <Label className="text-white/70 text-sm mb-1.5 block">Saison</Label>
