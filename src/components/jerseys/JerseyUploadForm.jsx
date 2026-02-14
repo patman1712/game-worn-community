@@ -565,18 +565,20 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
             >
               {form.sport_type === 'soccer' ? 'Player Edition' : 'Game-Issued'}
             </Button>
-            <Button
-              type="button"
-              onClick={() => {
-                handleChange("is_game_worn", false);
-                handleChange("is_game_issued", false);
-                handleChange("is_authentic", true);
-                handleChange("is_fan_jersey", false);
-              }}
-              className={`${form.is_authentic ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-slate-600 hover:bg-slate-700 text-white'} transition-colors`}
-            >
-              Authentic
-            </Button>
+            {form.sport_type !== 'soccer' && (
+              <Button
+                type="button"
+                onClick={() => {
+                  handleChange("is_game_worn", false);
+                  handleChange("is_game_issued", false);
+                  handleChange("is_authentic", true);
+                  handleChange("is_fan_jersey", false);
+                }}
+                className={`${form.is_authentic ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-slate-600 hover:bg-slate-700 text-white'} transition-colors`}
+              >
+                Authentic
+              </Button>
+            )}
             <Button
               type="button"
               onClick={() => {
