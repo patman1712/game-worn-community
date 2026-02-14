@@ -189,13 +189,13 @@ export default function JerseyCard({ jersey, isLiked, onLike, index = 0 }) {
               {jersey.is_game_worn && (
                 <Badge className="bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] px-1.5 py-0">
                   <Award className="w-2.5 h-2.5 mr-1" />
-                  Game-Worn
+                  {jersey.sport_type === 'soccer' ? 'Matchworn' : 'Game-Worn'}
                 </Badge>
               )}
               {jersey.is_game_issued && (
                 <Badge className="bg-orange-500/20 text-orange-300 border border-orange-500/30 text-[10px] px-1.5 py-0">
                   <Award className="w-2.5 h-2.5 mr-1" />
-                  Game-Issued
+                  {jersey.sport_type === 'soccer' ? 'Player Edition' : 'Game-Issued'}
                 </Badge>
               )}
               {jersey.is_authentic && (
@@ -207,7 +207,7 @@ export default function JerseyCard({ jersey, isLiked, onLike, index = 0 }) {
               {jersey.is_fan_jersey && (
                 <Badge className="bg-pink-500/20 text-pink-300 border border-pink-500/30 text-[10px] px-1.5 py-0">
                   <Award className="w-2.5 h-2.5 mr-1" />
-                  Fan-Jersey
+                  Fantrikot
                 </Badge>
               )}
               {jersey.is_signed && (

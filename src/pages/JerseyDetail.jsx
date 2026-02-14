@@ -194,12 +194,17 @@ export default function JerseyDetail() {
                 )}
                 {jersey.is_game_worn && (
                   <Badge className="bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs">
-                    <Award className="w-3 h-3 mr-1" /> Game-Worn
+                    <Award className="w-3 h-3 mr-1" /> {jersey.sport_type === 'soccer' ? 'Matchworn' : 'Game-Worn'}
                   </Badge>
                 )}
                 {jersey.is_game_issued && (
                   <Badge className="bg-orange-500/20 text-orange-300 border border-orange-500/30 text-xs">
-                    <Award className="w-3 h-3 mr-1" /> Game-Issued
+                    <Award className="w-3 h-3 mr-1" /> {jersey.sport_type === 'soccer' ? 'Player Edition' : 'Game-Issued'}
+                  </Badge>
+                )}
+                {jersey.is_fan_jersey && (
+                  <Badge className="bg-pink-500/20 text-pink-300 border border-pink-500/30 text-xs">
+                    <Award className="w-3 h-3 mr-1" /> Fantrikot
                   </Badge>
                 )}
                 {jersey.is_signed && (

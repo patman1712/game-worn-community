@@ -551,7 +551,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
               }}
               className={`${form.is_game_worn ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-slate-600 hover:bg-slate-700 text-white'} transition-colors`}
             >
-              Game-Worn
+              {form.sport_type === 'soccer' ? 'Matchworn' : 'Game-Worn'}
             </Button>
             <Button
               type="button"
@@ -563,7 +563,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
               }}
               className={`${form.is_game_issued ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-slate-600 hover:bg-slate-700 text-white'} transition-colors`}
             >
-              Game-Issued
+              {form.sport_type === 'soccer' ? 'Player Edition' : 'Game-Issued'}
             </Button>
             <Button
               type="button"
@@ -587,7 +587,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
               }}
               className={`${form.is_fan_jersey ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-slate-600 hover:bg-slate-700 text-white'} transition-colors`}
             >
-              Fan-Jersey
+              Fantrikot
             </Button>
           </div>
         </div>
