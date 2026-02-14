@@ -12,6 +12,8 @@ export default function Home() {
   const [search, setSearch] = useState("");
   const [league, setLeague] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
+  const [sport, setSport] = useState("all");
+  const [productType, setProductType] = useState("all");
   const [currentUser, setCurrentUser] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [pullStartY, setPullStartY] = useState(0);
@@ -239,6 +241,10 @@ export default function Home() {
             onLeagueChange={setLeague}
             sortBy={sortBy}
             onSortChange={setSortBy}
+            sport={sport}
+            onSportChange={setSport}
+            productType={productType}
+            onProductTypeChange={setProductType}
           />
         </div>
 

@@ -17,7 +17,25 @@ const SORT_OPTIONS = [
   { value: "team", label: "Team A-Z" }
 ];
 
-export default function FilterBar({ search, onSearchChange, league, onLeagueChange, sortBy, onSortChange }) {
+const SPORT_OPTIONS = [
+  { value: "all", label: "Alle Sportarten" },
+  { value: "icehockey", label: "Eishockey" },
+  { value: "soccer", label: "Fussball" },
+  { value: "football", label: "Football" },
+  { value: "basketball", label: "Basketball" },
+  { value: "baseball", label: "Baseball" },
+  { value: "other", label: "Andere" }
+];
+
+const PRODUCT_OPTIONS = [
+  { value: "all", label: "Alle Produkte" },
+  { value: "jersey", label: "Trikots" },
+  { value: "stick", label: "Schläger" },
+  { value: "shoes", label: "Schuhe" },
+  { value: "other", label: "Andere" }
+];
+
+export default function FilterBar({ search, onSearchChange, league, onLeagueChange, sortBy, onSortChange, sport, onSportChange, productType, onProductTypeChange }) {
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
   return (
@@ -35,6 +53,20 @@ export default function FilterBar({ search, onSearchChange, league, onLeagueChan
         {isMobile ? (
           <>
             <MobileDrawerSelect
+              value={sport}
+              onValueChange={onSportChange}
+              options={SPORT_OPTIONS}
+              label="Sportart wählen"
+              placeholder="Alle Sportarten"
+            />
+            <MobileDrawerSelect
+              value={productType}
+              onValueChange={onProductTypeChange}
+              options={PRODUCT_OPTIONS}
+              label="Produkttyp wählen"
+              placeholder="Alle Produkte"
+            />
+            <MobileDrawerSelect
               value={league}
               onValueChange={onLeagueChange}
               options={LEAGUE_OPTIONS}
@@ -51,6 +83,22 @@ export default function FilterBar({ search, onSearchChange, league, onLeagueChan
           </>
         ) : (
           <>
+            <Select value={sport} onValueChange={onSportChange}>
+              <SelectTrigger className="bg-slate-800/50 border-white/10 text-white">
+                <SelectValue placeholder="Alle Sportarten" />
+              </SelectTrigger>
+              <SelectContent>
+                {SPORT_OPTIONS.map(s => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Select value={productType} onValueChange={onProductTypeChange}>
+              <SelectTrigger className="bg-slate-800/50 border-white/10 text-white">
+                <SelectValue placeholder="Alle Produkte" />
+              </SelectTrigger>
+              <SelectContent>
+                {PRODUCT_OPTIONS.map(p => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
             <Select value={league} onValueChange={onLeagueChange}>
               <SelectTrigger className="bg-slate-800/50 border-white/10 text-white">
                 <SelectValue placeholder="Alle Ligen" />
