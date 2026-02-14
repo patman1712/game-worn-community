@@ -112,6 +112,8 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
     additional_images: [],
     is_game_worn: false,
     is_game_issued: false,
+    is_authentic: false,
+    is_fan_jersey: false,
     is_signed: false,
     captain_patch: "Keine",
     has_loa: false,
@@ -306,6 +308,11 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
       setCopyrightDialogOpen(true);
       return;
     }
+    // Validate at least one jersey type is selected
+    if (!form.is_game_worn && !form.is_game_issued && !form.is_authentic && !form.is_fan_jersey) {
+      alert('Bitte wähle mindestens einen Trikot-Typ aus (Game-Worn, Game-Issued, Authentic oder Fan-Jersey)');
+      return;
+    }
     onSubmit(form);
   };
 
@@ -449,27 +456,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
             className="bg-slate-800/50 border-white/10 text-white placeholder:text-white/20 focus:border-cyan-500/50"
           />
         </div>
-        <div>
-          <Label className="text-white/70 text-sm mb-1.5 block">Trikot-Typ</Label>
-          {isMobile ? (
-            <MobileDrawerSelect
-              value={form.jersey_type}
-              onValueChange={(v) => handleChange("jersey_type", v)}
-              options={TYPE_OPTIONS}
-              label="Trikot-Typ wählen"
-              placeholder="Typ wählen"
-            />
-          ) : (
-            <Select value={form.jersey_type} onValueChange={(v) => handleChange("jersey_type", v)}>
-              <SelectTrigger className="bg-slate-800/50 border-white/10 text-white">
-                <SelectValue placeholder="Typ wählen" />
-              </SelectTrigger>
-              <SelectContent>
-                {JERSEY_TYPES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          )}
-        </div>
+
         <div>
           <Label className="text-white/70 text-sm mb-1.5 block">Zustand</Label>
           {isMobile ? (
@@ -516,21 +503,40 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
 
       {/* Toggles */}
       <div className="space-y-3">
+        <div>
+          <Label className="text-white/70 text-sm mb-2 block">Trikot-Typ * (Mindestens einer erforderlich)</Label>
+          <div className="flex flex-wrap gap-3">
+            <Button
+              type="button"
+              onClick={() => handleChange("is_game_worn", !form.is_game_worn)}
+              className={`${form.is_game_worn ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'} transition-colors`}
+            >
+              Game-Worn
+            </Button>
+            <Button
+              type="button"
+              onClick={() => handleChange("is_game_issued", !form.is_game_issued)}
+              className={`${form.is_game_issued ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'} transition-colors`}
+            >
+              Game-Issued
+            </Button>
+            <Button
+              type="button"
+              onClick={() => handleChange("is_authentic", !form.is_authentic)}
+              className={`${form.is_authentic ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'} transition-colors`}
+            >
+              Authentic
+            </Button>
+            <Button
+              type="button"
+              onClick={() => handleChange("is_fan_jersey", !form.is_fan_jersey)}
+              className={`${form.is_fan_jersey ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'} transition-colors`}
+            >
+              Fan-Jersey
+            </Button>
+          </div>
+        </div>
         <div className="flex flex-wrap gap-3">
-          <Button
-            type="button"
-            onClick={() => handleChange("is_game_worn", !form.is_game_worn)}
-            className={`${form.is_game_worn ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'} transition-colors`}
-          >
-            Game-Worn
-          </Button>
-          <Button
-            type="button"
-            onClick={() => handleChange("is_game_issued", !form.is_game_issued)}
-            className={`${form.is_game_issued ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'} transition-colors`}
-          >
-            Game-Issued
-          </Button>
           <Button
             type="button"
             onClick={() => handleChange("is_signed", !form.is_signed)}
