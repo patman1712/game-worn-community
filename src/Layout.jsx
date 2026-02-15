@@ -183,7 +183,7 @@ export default function Layout({ children, currentPageName }) {
       </header>
 
       {/* Content */}
-      <main className="relative pb-20">
+      <main className="relative">
         {children}
       </main>
 

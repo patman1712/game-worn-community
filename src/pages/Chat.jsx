@@ -92,9 +92,9 @@ export default function Chat() {
   }
 
   return (
-    <div className="fixed inset-0 top-14 bottom-0 flex flex-col bg-slate-950">
+    <div className="flex flex-col bg-slate-950" style={{ height: 'calc(100vh - 3.5rem)' }}>
       {/* Fixed Chat Header */}
-      <div className="bg-slate-900/95 backdrop-blur-xl border-b border-white/5 px-4 py-3 flex-shrink-0">
+      <div className="bg-slate-900/95 backdrop-blur-xl border-b border-white/5 px-4 py-3 flex-shrink-0 sticky top-0 z-10">
         <div className="max-w-3xl mx-auto flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center">
             <User className="w-5 h-5 text-white" />
