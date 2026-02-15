@@ -95,7 +95,7 @@ const compressImage = async (file, targetSizeKB = 1000) => {
 };
 
 export default function GenericProductForm({ sportType, productType, onSubmit, onCancel, initialData, isSubmitting }) {
-  const [form, setForm] = useState(initialData || {
+  const defaultFormData = {
     sport_type: sportType,
     product_type: productType,
     team: "",
@@ -118,7 +118,9 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
     purchase_price: null,
     brand: "",
     size: "",
-  });
+  };
+  
+  const [form, setForm] = useState(initialData ? { ...defaultFormData, ...initialData } : defaultFormData);
   
   const [uploading, setUploading] = useState(false);
   const [multiImageDialogOpen, setMultiImageDialogOpen] = useState(false);
