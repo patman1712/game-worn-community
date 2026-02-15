@@ -46,12 +46,8 @@ export default function Messages() {
   const { data: allUsers = [], isLoading: isLoadingUsers } = useQuery({
     queryKey: ["messageable-users", currentUser?.email],
     queryFn: async () => {
-      const users = await base44.entities.User.list();
-      return users.filter(u => {
-        if (!u || u.email === currentUser?.email) return false;
-        const acceptsMessages = (u.data?.accept_messages ?? u.accept_messages ?? true);
-        return acceptsMessages;
-      });
+      const response = await base44.functions.invoke('getMessageableUsers');
+      return response.data.users || [];
     },
     enabled: !!currentUser,
     staleTime: 30000,
