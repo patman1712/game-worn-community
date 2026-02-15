@@ -58,9 +58,9 @@ import Messages from './pages/Messages';
 import MyCollection from './pages/MyCollection';
 import MyPurchases from './pages/MyPurchases';
 import Settings from './pages/Settings';
+import Share from './pages/Share';
 import UserProfile from './pages/UserProfile';
 import UserPurchases from './pages/UserPurchases';
-import Share from './pages/Share';
 import __Layout from './Layout.jsx';
 
 
@@ -76,9 +76,9 @@ export const PAGES = {
     "MyCollection": MyCollection,
     "MyPurchases": MyPurchases,
     "Settings": Settings,
+    "Share": Share,
     "UserProfile": UserProfile,
     "UserPurchases": UserPurchases,
-    "Share": Share,
 }
 
 export const pagesConfig = {
