@@ -44,15 +44,16 @@ export default function Messages() {
   });
 
   const { data: allUsers = [] } = useQuery({
-    queryKey: ["messageable-users"],
+    queryKey: ["messageable-users", currentUser?.email],
     queryFn: async () => {
       const users = await base44.entities.User.list();
       return users.filter(u => {
-        const acceptsMessages = u.data?.accept_messages !== false && u.accept_messages !== false;
-        return acceptsMessages && u.email !== currentUser?.email;
+        if (!u || u.email === currentUser?.email) return false;
+        const acceptsMessages = (u.data?.accept_messages ?? u.accept_messages ?? true);
+        return acceptsMessages;
       });
     },
-    enabled: !!currentUser && showUserSearch,
+    enabled: !!currentUser,
   });
 
   const { data: allUsersForNames = [] } = useQuery({
