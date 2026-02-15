@@ -2,15 +2,29 @@ import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Send, Loader2, User } from "lucide-react";
+import { Send, Loader2, User, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useNavigate } from "react-router-dom";
+import { createPageUrl } from "@/utils";
 
 export default function Chat() {
   const [currentUser, setCurrentUser] = useState(null);
   const [messageText, setMessageText] = useState("");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const messagesEndRef = useRef(null);
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const urlParams = new URLSearchParams(window.location.search);
   const otherEmail = urlParams.get("email");
@@ -79,6 +93,19 @@ export default function Chat() {
     sendMutation.mutate(messageText);
   };
 
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      const convId = [currentUser.email, otherEmail].sort().join("_");
+      const allMessages = await base44.entities.Message.filter({ conversation_id: convId });
+      await Promise.all(allMessages.map(msg => base44.entities.Message.delete(msg.id)));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["chat"] });
+      queryClient.invalidateQueries({ queryKey: ["messages"] });
+      navigate(createPageUrl("Messages"));
+    },
+  });
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -93,18 +120,28 @@ export default function Chat() {
 
   return (
     <div className="flex flex-col h-[calc(100vh-3.5rem)]">
-      {/* Chat Header */}
-      <div className="bg-slate-900/80 backdrop-blur-xl border-b border-white/5 px-4 py-3">
-        <div className="max-w-3xl mx-auto flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center">
-            <User className="w-5 h-5 text-white" />
+      {/* Fixed Chat Header */}
+      <div className="bg-slate-900/95 backdrop-blur-xl border-b border-white/5 px-4 py-3 sticky top-0 z-10">
+        <div className="max-w-3xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center">
+              <User className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h2 className="text-white font-medium">
+                {otherUser?.data?.display_name || otherUser?.display_name || otherUser?.full_name || otherEmail}
+              </h2>
+              <p className="text-white/40 text-xs">Chat</p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-white font-medium">
-              {otherUser?.data?.display_name || otherUser?.display_name || otherUser?.full_name || otherEmail}
-            </h2>
-            <p className="text-white/40 text-xs">Chat</p>
-          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setDeleteDialogOpen(true)}
+            className="text-white/50 hover:text-red-400 hover:bg-red-500/10"
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
         </div>
       </div>
 
@@ -154,8 +191,8 @@ export default function Chat() {
         </div>
       </div>
 
-      {/* Input */}
-      <div className="bg-slate-900/80 backdrop-blur-xl border-t border-white/5 px-4 py-4">
+      {/* Fixed Input */}
+      <div className="bg-slate-900/95 backdrop-blur-xl border-t border-white/5 px-4 py-4 sticky bottom-0">
         <form onSubmit={handleSend} className="max-w-3xl mx-auto flex gap-2">
           <Input
             value={messageText}
@@ -177,6 +214,34 @@ export default function Chat() {
           </Button>
         </form>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent className="bg-slate-900 border-white/10 text-white">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Konversation löschen?</AlertDialogTitle>
+            <AlertDialogDescription className="text-white/60">
+              Möchtest du diese Konversation wirklich löschen? Alle Nachrichten werden dauerhaft entfernt.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-slate-800 text-white border-white/10 hover:bg-slate-700">
+              Abbrechen
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteMutation.mutate()}
+              className="bg-red-600 hover:bg-red-700 text-white"
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                "Löschen"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
