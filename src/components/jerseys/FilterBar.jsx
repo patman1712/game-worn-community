@@ -32,10 +32,11 @@ const SPORT_OPTIONS = [
   { value: "all", label: "Alle Sportarten" },
   { value: "icehockey", label: "Eishockey" },
   { value: "soccer", label: "Fussball" },
-  { value: "football", label: "Football" },
-  { value: "basketball", label: "Basketball" },
-  { value: "baseball", label: "Baseball" },
-  { value: "other", label: "Andere" }
+  // Temporarily disabled sports:
+  // { value: "football", label: "Football" },
+  // { value: "basketball", label: "Basketball" },
+  // { value: "baseball", label: "Baseball" },
+  // { value: "other", label: "Andere" }
 ];
 
 const PRODUCT_OPTIONS = [

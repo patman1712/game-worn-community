@@ -189,8 +189,8 @@ export default function Layout({ children, currentPageName }) {
 
       {/* Footer */}
       {!isChildPage && (
-        <footer className="border-t border-white/5 bg-slate-950/95 backdrop-blur-xl mt-auto">
-          <div className="max-w-7xl mx-auto px-4 py-6">
+        <footer className="border-t border-white/5 bg-slate-950/95 backdrop-blur-xl mt-auto safe-bottom">
+          <div className="max-w-7xl mx-auto px-4 py-6 pb-8">
             <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-white/40">
               <Link to={createPageUrl("Impressum")} className="hover:text-white/70 transition-colors">
                 Impressum
