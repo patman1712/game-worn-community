@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 
 export default function UserPurchases() {
   const [user, setUser] = useState(null);
+  const [filter, setFilter] = useState("all"); // "all", "jerseys", "other"
 
   useEffect(() => {
     base44.auth.me().then(u => {
@@ -65,8 +66,14 @@ export default function UserPurchases() {
       return acc;
     }, {});
 
-  // Sort by total cost (highest first)
-  const sortedUsers = Object.values(userPurchases).sort((a, b) => b.totalCost - a.totalCost);
+  // Sort by total cost (highest first) and filter based on selection
+  const sortedUsers = Object.values(userPurchases)
+    .filter(userData => {
+      if (filter === "jerseys") return userData.jerseyCount > 0;
+      if (filter === "other") return userData.otherCount > 0;
+      return true; // "all"
+    })
+    .sort((a, b) => b.totalCost - a.totalCost);
 
   if (isLoading || !user) {
     return (
@@ -88,10 +95,43 @@ export default function UserPurchases() {
         </Link>
 
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-white mb-2">User Käufe Übersicht</h1>
-          <p className="text-white/40 text-sm">
+          <h1 className="text-2xl font-bold text-white mb-4">User Käufe Übersicht</h1>
+          <p className="text-white/40 text-sm mb-4">
             Alle User mit erfassten Kaufpreisen, sortiert nach Gesamtsumme
           </p>
+          
+          <div className="flex gap-2">
+            <button
+              onClick={() => setFilter("all")}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                filter === "all" 
+                  ? "bg-cyan-500 text-white" 
+                  : "bg-slate-800/50 text-white/50 hover:text-white hover:bg-slate-800"
+              }`}
+            >
+              Alle Objekte
+            </button>
+            <button
+              onClick={() => setFilter("jerseys")}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                filter === "jerseys" 
+                  ? "bg-cyan-500 text-white" 
+                  : "bg-slate-800/50 text-white/50 hover:text-white hover:bg-slate-800"
+              }`}
+            >
+              Nur Trikots
+            </button>
+            <button
+              onClick={() => setFilter("other")}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                filter === "other" 
+                  ? "bg-cyan-500 text-white" 
+                  : "bg-slate-800/50 text-white/50 hover:text-white hover:bg-slate-800"
+              }`}
+            >
+              Andere Objekte
+            </button>
+          </div>
         </div>
 
         {sortedUsers.length === 0 ? (
