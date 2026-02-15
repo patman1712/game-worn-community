@@ -22,8 +22,18 @@ export default function Chat() {
   const { data: otherUser } = useQuery({
     queryKey: ["user", otherEmail],
     queryFn: async () => {
-      const users = await base44.entities.User.list();
-      return users.find(u => u.email === otherEmail);
+      try {
+        const users = await base44.entities.User.list();
+        const user = users.find(u => u.email === otherEmail);
+        if (user) return user;
+      } catch (e) {}
+
+      try {
+        const pendingUsers = await base44.entities.PendingUser.list();
+        return pendingUsers.find(u => u.email === otherEmail);
+      } catch (e) {}
+
+      return null;
     },
     enabled: !!otherEmail,
   });
@@ -101,7 +111,7 @@ export default function Chat() {
           </div>
           <div>
             <h2 className="text-white font-medium">
-              {otherUser?.data?.display_name || otherUser?.display_name || otherUser?.full_name}
+              {otherUser?.display_name || otherUser?.full_name || "Chat"}
             </h2>
             <p className="text-white/40 text-xs">Chat</p>
           </div>
