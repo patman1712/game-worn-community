@@ -73,7 +73,17 @@ export default function UserPurchases() {
       if (filter === "other") return userData.otherCount > 0;
       return true; // "all"
     })
-    .sort((a, b) => b.totalCost - a.totalCost);
+    .map(userData => {
+      // Calculate filtered total cost based on current filter
+      let filteredTotalCost = userData.totalCost;
+      if (filter === "jerseys") {
+        filteredTotalCost = userData.jerseys.reduce((sum, j) => sum + j.purchase_price, 0);
+      } else if (filter === "other") {
+        filteredTotalCost = userData.otherItems.reduce((sum, j) => sum + j.purchase_price, 0);
+      }
+      return { ...userData, filteredTotalCost };
+    })
+    .sort((a, b) => b.filteredTotalCost - a.filteredTotalCost);
 
   if (isLoading || !user) {
     return (
@@ -177,7 +187,7 @@ export default function UserPurchases() {
                       <p className="text-white/40 text-xs mb-1">Gesamtsumme</p>
                       <div className="flex items-center gap-1.5">
                         <Euro className="w-4 h-4 text-green-400" />
-                        <p className="text-green-400 font-bold text-lg">{userData.totalCost.toFixed(2)} €</p>
+                        <p className="text-green-400 font-bold text-lg">{userData.filteredTotalCost.toFixed(2)} €</p>
                       </div>
                     </div>
                   </div>
