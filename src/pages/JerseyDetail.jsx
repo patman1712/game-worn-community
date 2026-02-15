@@ -7,9 +7,10 @@ import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
   ArrowLeft, Heart, Star, Award, User, Calendar,
-  Shirt, Tag, Shield, Loader2, ChevronLeft, ChevronRight, MessageCircle, Send, Trash2, Share2
+  Shirt, Tag, Shield, Loader2, ChevronLeft, ChevronRight, MessageCircle, Send, Trash2, Share2, X
 } from "lucide-react";
 
 export default function JerseyDetail() {
@@ -18,6 +19,7 @@ export default function JerseyDetail() {
   const [currentUser, setCurrentUser] = useState(null);
   const [activeImage, setActiveImage] = useState(0);
   const [commentText, setCommentText] = useState("");
+  const [certificateImageOpen, setCertificateImageOpen] = useState(null);
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -483,6 +485,27 @@ export default function JerseyDetail() {
           </motion.div>
         </div>
       </div>
+
+      {/* Certificate Image Viewer Dialog */}
+      <Dialog open={certificateImageOpen !== null} onOpenChange={() => setCertificateImageOpen(null)}>
+        <DialogContent className="max-w-4xl w-[95vw] h-[90vh] bg-slate-900/95 border-white/10 p-0">
+          <button
+            onClick={() => setCertificateImageOpen(null)}
+            className="absolute top-4 right-4 z-50 p-2 rounded-full bg-slate-800/80 hover:bg-slate-700 text-white transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+          {certificateImageOpen && (
+            <div className="w-full h-full flex items-center justify-center p-4">
+              <img 
+                src={certificateImageOpen} 
+                alt="Zertifikat" 
+                className="max-w-full max-h-full object-contain"
+              />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
