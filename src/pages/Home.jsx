@@ -275,6 +275,7 @@ export default function Home() {
             onSportChange={setSport}
             productType={productType}
             onProductTypeChange={setProductType}
+            hiddenSports={currentUser?.hidden_sports || []}
           />
         </div>
 

@@ -47,10 +47,13 @@ const PRODUCT_OPTIONS = [
   { value: "other", label: "Andere" }
 ];
 
-export default function FilterBar({ search, onSearchChange, league, onLeagueChange, sortBy, onSortChange, sport, onSportChange, productType, onProductTypeChange }) {
+export default function FilterBar({ search, onSearchChange, league, onLeagueChange, sortBy, onSortChange, sport, onSportChange, productType, onProductTypeChange, hiddenSports = [] }) {
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   const showExtendedFilters = sport && sport !== "all";
   const leagueOptions = getLeagueOptions(sport);
+  
+  // Filter out hidden sports from the options
+  const visibleSportOptions = SPORT_OPTIONS.filter(s => s.value === "all" || !hiddenSports.includes(s.value));
 
   return (
     <div className="flex flex-col gap-3">
@@ -75,7 +78,7 @@ export default function FilterBar({ search, onSearchChange, league, onLeagueChan
                   onProductTypeChange("all");
                 }
               }}
-              options={SPORT_OPTIONS}
+              options={visibleSportOptions}
               label="Sportart wählen"
               placeholder="Alle Sportarten"
             />
@@ -118,7 +121,7 @@ export default function FilterBar({ search, onSearchChange, league, onLeagueChan
                 <SelectValue placeholder="Alle Sportarten" />
               </SelectTrigger>
               <SelectContent>
-                {SPORT_OPTIONS.map(s => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
+                {visibleSportOptions.map(s => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
               </SelectContent>
             </Select>
             {showExtendedFilters && (
