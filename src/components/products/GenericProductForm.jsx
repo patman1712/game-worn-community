@@ -267,8 +267,8 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
     onSubmit(form);
   };
 
-  const showTeamFields = productType === "jersey" || productType === "jersey";
-  const showGameWornFields = productType === "jersey";
+  const showTeamFields = true; // All products can have team fields
+  const showGameWornFields = true; // All products can be game-worn
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
