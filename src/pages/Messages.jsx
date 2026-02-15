@@ -210,11 +210,9 @@ export default function Messages() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <h3 className="text-white font-medium truncate">
-                          {user.data?.display_name || user.display_name || user.full_name || user.email}
+                          {user.data?.display_name || user.display_name || user.full_name}
                         </h3>
-                        {user.location && user.show_location && (
-                          <p className="text-white/30 text-xs mt-1">{user.location}</p>
-                        )}
+                        <p className="text-white/40 text-xs mt-1">Neue Konversation starten</p>
                       </div>
                     </div>
                   </Link>
@@ -241,9 +239,9 @@ export default function Messages() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1">
                           <h3 className="text-white font-medium truncate">
-                            {conversations.find(c => c.otherEmail === conv.otherEmail)?.otherUser?.display_name || 
-                             conversations.find(c => c.otherEmail === conv.otherEmail)?.otherUser?.full_name || 
-                             conv.otherEmail}
+                            {conv.otherUser?.data?.display_name || 
+                             conv.otherUser?.display_name || 
+                             conv.otherUser?.full_name}
                           </h3>
                           <div className="flex items-center gap-2">
                             {conv.unreadCount > 0 && (
