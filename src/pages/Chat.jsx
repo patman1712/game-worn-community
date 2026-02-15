@@ -19,6 +19,15 @@ export default function Chat() {
     base44.auth.me().then(setCurrentUser).catch(() => {});
   }, []);
 
+  const { data: otherUser } = useQuery({
+    queryKey: ["user", otherEmail],
+    queryFn: async () => {
+      const users = await base44.entities.User.list();
+      return users.find(u => u.email === otherEmail);
+    },
+    enabled: !!otherEmail,
+  });
+
   const { data: messages = [], isLoading } = useQuery({
     queryKey: ["chat", currentUser?.email, otherEmail],
     queryFn: async () => {
@@ -40,9 +49,12 @@ export default function Chat() {
     );
     
     unreadMessages.forEach(msg => {
-      base44.entities.Message.update(msg.id, { read: true });
+      base44.entities.Message.update(msg.id, { read: true }).then(() => {
+        queryClient.invalidateQueries({ queryKey: ["unreadMessages"] });
+        queryClient.invalidateQueries({ queryKey: ["messages"] });
+      });
     });
-  }, [messages, currentUser]);
+  }, [messages, currentUser, queryClient]);
 
   const sendMutation = useMutation({
     mutationFn: async (text) => {
@@ -88,7 +100,9 @@ export default function Chat() {
             <User className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h2 className="text-white font-medium">{otherEmail}</h2>
+            <h2 className="text-white font-medium">
+              {otherUser?.data?.display_name || otherUser?.display_name || otherUser?.full_name || otherEmail}
+            </h2>
             <p className="text-white/40 text-xs">Chat</p>
           </div>
         </div>
