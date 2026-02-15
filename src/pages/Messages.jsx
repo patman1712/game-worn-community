@@ -1,19 +1,32 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { MessageCircle, Search, Loader2, User, Users } from "lucide-react";
+import { MessageCircle, Search, Loader2, User, Users, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import NewMessageDialog from "@/components/messages/NewMessageDialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function Messages() {
   const [currentUser, setCurrentUser] = useState(null);
   const [search, setSearch] = useState("");
   const [showUserSearch, setShowUserSearch] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [conversationToDelete, setConversationToDelete] = useState(null);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     base44.auth.me().then(setCurrentUser).catch(() => {});
@@ -95,6 +108,26 @@ export default function Messages() {
     : conversations.filter(c => 
         !search || c.otherEmail.toLowerCase().includes(search.toLowerCase())
       );
+
+  const deleteMutation = useMutation({
+    mutationFn: async (otherEmail) => {
+      const convId = [currentUser.email, otherEmail].sort().join("_");
+      const allMessages = await base44.entities.Message.filter({ conversation_id: convId });
+      await Promise.all(allMessages.map(msg => base44.entities.Message.delete(msg.id)));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["messages"] });
+      setDeleteDialogOpen(false);
+      setConversationToDelete(null);
+    },
+  });
+
+  const handleDeleteClick = (e, otherEmail) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setConversationToDelete(otherEmail);
+    setDeleteDialogOpen(true);
+  };
 
   if (!currentUser) {
     return (
@@ -197,6 +230,7 @@ export default function Messages() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
+                  className="relative group"
                 >
                   <Link
                     to={createPageUrl("Chat") + `?email=${encodeURIComponent(conv.otherEmail)}`}
@@ -213,11 +247,13 @@ export default function Messages() {
                              conversations.find(c => c.otherEmail === conv.otherEmail)?.otherUser?.full_name || 
                              conv.otherEmail}
                           </h3>
-                          {conv.unreadCount > 0 && (
-                            <Badge className="bg-cyan-500 text-white text-xs px-2 py-0">
-                              {conv.unreadCount}
-                            </Badge>
-                          )}
+                          <div className="flex items-center gap-2">
+                            {conv.unreadCount > 0 && (
+                              <Badge className="bg-cyan-500 text-white text-xs px-2 py-0">
+                                {conv.unreadCount}
+                              </Badge>
+                            )}
+                          </div>
                         </div>
                         <p className="text-white/50 text-sm line-clamp-1">
                           {conv.lastMessage.sender_email === currentUser.email ? "Du: " : ""}
@@ -233,6 +269,14 @@ export default function Messages() {
                           })}
                         </p>
                       </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => handleDeleteClick(e, conv.otherEmail)}
+                        className="opacity-0 group-hover:opacity-100 text-white/40 hover:text-red-400 hover:bg-red-500/10 transition-opacity flex-shrink-0"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </div>
                   </Link>
                 </motion.div>
@@ -241,6 +285,34 @@ export default function Messages() {
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent className="bg-slate-900 border-white/10 text-white">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Konversation löschen?</AlertDialogTitle>
+            <AlertDialogDescription className="text-white/60">
+              Möchtest du diese Konversation wirklich löschen? Alle Nachrichten werden dauerhaft entfernt.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-slate-800 text-white border-white/10 hover:bg-slate-700">
+              Abbrechen
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteMutation.mutate(conversationToDelete)}
+              className="bg-red-600 hover:bg-red-700 text-white"
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                "Löschen"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
