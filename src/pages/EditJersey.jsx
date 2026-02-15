@@ -6,6 +6,7 @@ import { createPageUrl } from "@/utils";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import JerseyUploadForm from "@/components/jerseys/JerseyUploadForm";
+import GenericProductForm from "@/components/products/GenericProductForm";
 
 export default function EditJersey() {
   const params = new URLSearchParams(window.location.search);
@@ -73,6 +74,10 @@ export default function EditJersey() {
     return <div className="text-center py-20 text-white/40">Du hast keine Berechtigung, dieses Trikot zu bearbeiten.</div>;
   }
 
+  // Use old JerseyUploadForm only for old Jersey entities (icehockey jerseys)
+  const useOldJerseyForm = jersey.entityType === 'Jersey';
+  const isCollectionItem = jersey.entityType === 'CollectionItem';
+
   return (
     <div className="min-h-screen">
       <div className="max-w-2xl mx-auto px-4 py-10">
@@ -84,14 +89,27 @@ export default function EditJersey() {
           Zurück
         </Link>
 
-        <h1 className="text-2xl font-bold text-white mb-8">Trikot bearbeiten</h1>
+        <h1 className="text-2xl font-bold text-white mb-8">
+          {isCollectionItem ? 'Objekt bearbeiten' : 'Trikot bearbeiten'}
+        </h1>
 
-        <JerseyUploadForm
-          initialData={jersey}
-          onSubmit={(data) => updateMutation.mutate(data)}
-          onCancel={() => navigate(createPageUrl("MyCollection"))}
-          isSubmitting={updateMutation.isPending}
-        />
+        {useOldJerseyForm ? (
+          <JerseyUploadForm
+            initialData={jersey}
+            onSubmit={(data) => updateMutation.mutate(data)}
+            onCancel={() => navigate(createPageUrl("MyCollection"))}
+            isSubmitting={updateMutation.isPending}
+          />
+        ) : (
+          <GenericProductForm
+            sportType={jersey.sport_type}
+            productType={jersey.product_type}
+            initialData={jersey}
+            onSubmit={(data) => updateMutation.mutate(data)}
+            onCancel={() => navigate(createPageUrl("MyCollection"))}
+            isSubmitting={updateMutation.isPending}
+          />
+        )}
       </div>
     </div>
   );
