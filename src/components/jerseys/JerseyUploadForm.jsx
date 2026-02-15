@@ -124,6 +124,8 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
     is_signed: false,
     captain_patch: "Keine",
     has_loa: false,
+    loa_certificate_images: [],
+    loa_certificates_public: false,
     is_photomatch: false,
     photomatch_images: [],
     is_private: false,
@@ -640,6 +642,80 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
             Photomatch
           </Button>
         </div>
+
+        {/* Certificate Images Section */}
+        {form.has_loa && (
+          <div className="space-y-3 p-4 bg-slate-800/30 rounded-lg border border-white/10">
+            <Label className="text-white/70 text-sm block">Zertifikat-Bilder (max. 2)</Label>
+            <div className="grid grid-cols-2 gap-3">
+              {form.loa_certificate_images?.map((url, i) => (
+                <div key={i} className="relative group">
+                  <div className="aspect-square rounded-lg overflow-hidden border-2 border-white/10">
+                    <img src={url} alt="" className="w-full h-full object-cover" />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleChange("loa_certificate_images", form.loa_certificate_images.filter((_, idx) => idx !== i))}
+                    className="absolute top-1 right-1 p-1 bg-black/60 rounded-full hover:bg-red-600/80 transition-colors opacity-0 group-hover:opacity-100"
+                  >
+                    <X className="w-3 h-3 text-white" />
+                  </button>
+                </div>
+              ))}
+              {(!form.loa_certificate_images || form.loa_certificate_images.length < 2) && (
+                <label className="aspect-square flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-white/10 hover:border-cyan-500/40 bg-slate-800/50 cursor-pointer transition-colors">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      setUploading(true);
+                      try {
+                        const { file_url } = await base44.integrations.Core.UploadFile({ file });
+                        handleChange("loa_certificate_images", [...(form.loa_certificate_images || []), file_url]);
+                      } catch (error) {
+                        alert("Fehler beim Hochladen");
+                      } finally {
+                        setUploading(false);
+                      }
+                    }}
+                  />
+                  {uploading ? (
+                    <Loader2 className="w-5 h-5 text-cyan-400 animate-spin" />
+                  ) : (
+                    <>
+                      <Upload className="w-5 h-5 text-white/30 mb-1" />
+                      <span className="text-[10px] text-white/30">Bild hochladen</span>
+                    </>
+                  )}
+                </label>
+              )}
+            </div>
+            <div className="flex items-center justify-between pt-2">
+              <Label className="text-white/70 text-sm">Zertifikate öffentlich zeigen</Label>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => handleChange("loa_certificates_public", false)}
+                  className={`${!form.loa_certificates_public ? 'bg-green-600 hover:bg-green-700' : 'bg-slate-600 hover:bg-slate-700'} text-white text-xs`}
+                >
+                  Privat
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => handleChange("loa_certificates_public", true)}
+                  className={`${form.loa_certificates_public ? 'bg-green-600 hover:bg-green-700' : 'bg-slate-600 hover:bg-slate-700'} text-white text-xs`}
+                >
+                  Öffentlich
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
         <div className="flex gap-3">
           <Button
             type="button"
