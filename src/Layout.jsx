@@ -36,7 +36,7 @@ export default function Layout({ children, currentPageName }) {
 
   const isChildPage = CHILD_PAGES.includes(currentPageName);
   const showBottomNav = !isChildPage;
-  const userAcceptsMessages = user?.data?.accept_messages !== false && user?.accept_messages !== false;
+  const userAcceptsMessages = user ? (user.data?.accept_messages ?? user.accept_messages ?? true) : false;
   const visibleTabs = TABS.filter(tab => {
     if (!tab.authRequired) return true;
     if (!user) return false;
