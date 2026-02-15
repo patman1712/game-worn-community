@@ -678,12 +678,17 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
                     e.preventDefault();
                     e.stopPropagation();
                     e.currentTarget.classList.remove('border-cyan-500/60', 'bg-cyan-500/5');
-                    const file = e.dataTransfer?.files?.[0];
-                    if (!file || !file.type.startsWith('image/')) return;
+                    const files = Array.from(e.dataTransfer?.files || []).filter(f => f.type.startsWith('image/'));
+                    if (files.length === 0) return;
+                    const currentCount = form.loa_certificate_images?.length || 0;
+                    const maxAllowed = 2 - currentCount;
+                    const filesToUpload = files.slice(0, maxAllowed);
                     setUploading(true);
                     try {
-                      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-                      handleChange("loa_certificate_images", [...(form.loa_certificate_images || []), file_url]);
+                      const uploadPromises = filesToUpload.map(file => base44.integrations.Core.UploadFile({ file }));
+                      const results = await Promise.all(uploadPromises);
+                      const newUrls = results.map(r => r.file_url);
+                      handleChange("loa_certificate_images", [...(form.loa_certificate_images || []), ...newUrls]);
                       setCopyrightDialogOpen(true);
                     } catch (error) {
                       alert("Fehler beim Hochladen");
@@ -726,7 +731,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
               )}
             </div>
             <div className="flex items-center justify-between pt-2">
-              <Label className="text-white/70 text-sm">Zertifikate öffentlich zeigen</Label>
+              <Label className="text-white/70 text-sm">Wie soll das Zertifikat angezeigt werden</Label>
               <div className="flex gap-2">
                 <Button
                   type="button"
