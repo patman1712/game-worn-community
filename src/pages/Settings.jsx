@@ -246,11 +246,7 @@ export default function Settings() {
               <div className="flex flex-wrap gap-2">
                 {[
                   { value: "icehockey", label: "Eishockey" },
-                  { value: "soccer", label: "Fussball" },
-                  { value: "football", label: "Football" },
-                  { value: "basketball", label: "Basketball" },
-                  { value: "baseball", label: "Baseball" },
-                  { value: "other", label: "Andere" }
+                  { value: "soccer", label: "Fussball" }
                 ].map(sport => (
                   <Button
                     key={sport.value}
