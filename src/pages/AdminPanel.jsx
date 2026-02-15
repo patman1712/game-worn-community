@@ -48,12 +48,19 @@ export default function AdminPanel() {
               </Button>
             </Link>
           </div>
-          <Link to={createPageUrl("UserPurchases")}>
-            <Button variant="outline" className="text-cyan-400 border-cyan-500/30 hover:bg-cyan-500/10">
-              <Euro className="w-4 h-4 mr-2" />
-              User Käufe
-            </Button>
-          </Link>
+          <div className="flex gap-2">
+            <Link to={createPageUrl("UserPurchases")}>
+              <Button variant="outline" className="text-cyan-400 border-cyan-500/30 hover:bg-cyan-500/10">
+                <Euro className="w-4 h-4 mr-2" />
+                User Käufe
+              </Button>
+            </Link>
+            <Link to={createPageUrl("EditSiteContent")}>
+              <Button variant="outline" className="text-purple-400 border-purple-500/30 hover:bg-purple-500/10">
+                Impressum & AGB
+              </Button>
+            </Link>
+          </div>
         </div>
 
         <Card className="bg-slate-900/60 border-white/5">
