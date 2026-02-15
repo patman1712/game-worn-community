@@ -169,20 +169,24 @@ export default function UserPurchases() {
                     </div>
                   </div>
                   <div className="flex items-center gap-6">
-                    <div className="text-right">
-                      <p className="text-white/40 text-xs mb-1">Trikots</p>
-                      <div className="flex items-center gap-1.5">
-                        <Shirt className="w-4 h-4 text-cyan-400" />
-                        <p className="text-white font-bold text-lg">{userData.jerseyCount}</p>
+                    {(filter === "all" || filter === "jerseys") && (
+                      <div className="text-right">
+                        <p className="text-white/40 text-xs mb-1">Trikots</p>
+                        <div className="flex items-center gap-1.5">
+                          <Shirt className="w-4 h-4 text-cyan-400" />
+                          <p className="text-white font-bold text-lg">{userData.jerseyCount}</p>
+                        </div>
                       </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-white/40 text-xs mb-1">Andere Objekte</p>
-                      <div className="flex items-center gap-1.5">
-                        <Package className="w-4 h-4 text-purple-400" />
-                        <p className="text-white font-bold text-lg">{userData.otherCount}</p>
+                    )}
+                    {(filter === "all" || filter === "other") && (
+                      <div className="text-right">
+                        <p className="text-white/40 text-xs mb-1">Andere Objekte</p>
+                        <div className="flex items-center gap-1.5">
+                          <Package className="w-4 h-4 text-purple-400" />
+                          <p className="text-white font-bold text-lg">{userData.otherCount}</p>
+                        </div>
                       </div>
-                    </div>
+                    )}
                     <div className="text-right">
                       <p className="text-white/40 text-xs mb-1">Gesamtsumme</p>
                       <div className="flex items-center gap-1.5">
