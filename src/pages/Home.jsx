@@ -238,13 +238,9 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center mb-10"
           >
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-medium mb-4">
-              <Shirt className="w-3.5 h-3.5" />
-              Community Trikot-Sammlung
-            </div>
             <img 
-              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/698e4ef5392203adc7a32dee/24b61a404_ChatGPTImage13Feb202616_24_03.png" 
-              alt="Jersey Collectors" 
+              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/698e4ef5392203adc7a32dee/7c3640279_logogamewordcummunity.PNG" 
+              alt="Game-Worn Community" 
               className="h-56 md:h-72 w-auto object-contain mx-auto drop-shadow-[0_4px_20px_rgba(6,182,212,0.4)]"
             />
             <p className="text-white/40 mt-3 max-w-md mx-auto text-sm">
