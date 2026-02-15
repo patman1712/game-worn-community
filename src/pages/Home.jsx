@@ -167,6 +167,11 @@ export default function Home() {
   const filtered = useMemo(() => {
     let result = [...allProducts];
 
+    // Filter by user's hidden sports
+    if (currentUser?.hidden_sports && currentUser.hidden_sports.length > 0) {
+      result = result.filter(j => !currentUser.hidden_sports.includes(j.sport_type));
+    }
+
     if (search) {
       const s = search.toLowerCase();
       result = result.filter(j =>
@@ -201,7 +206,7 @@ export default function Home() {
     }
 
     return result;
-  }, [allProducts, search, league, sport, productType, sortBy]);
+  }, [allProducts, search, league, sport, productType, sortBy, currentUser]);
 
   // Stats
   const totalLikes = jerseys.reduce((s, j) => s + (j.likes_count || 0), 0);

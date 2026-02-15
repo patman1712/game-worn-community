@@ -16,7 +16,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { User, Trash2, LogOut, Loader2, AlertTriangle, MapPin, Mail, Eye, EyeOff, Save, Lock, MessageCircle } from "lucide-react";
+import { User, Trash2, LogOut, Loader2, AlertTriangle, MapPin, Mail, Eye, EyeOff, Save, Lock, MessageCircle, FilterX } from "lucide-react";
 
 export default function Settings() {
   const [user, setUser] = useState(null);
@@ -29,6 +29,7 @@ export default function Settings() {
     show_email: false,
     show_location: false,
     accept_messages: true,
+    hidden_sports: [],
   });
   const [passwordData, setPasswordData] = useState({
     current: "",
@@ -47,6 +48,7 @@ export default function Settings() {
         show_email: u.show_email || false,
         show_location: u.show_location || false,
         accept_messages: u.accept_messages !== false,
+        hidden_sports: u.hidden_sports || [],
       });
     }).catch(() => {
       base44.auth.redirectToLogin(window.location.href);
@@ -230,6 +232,43 @@ export default function Settings() {
                   checked={profile.accept_messages}
                   onCheckedChange={(v) => setProfile({ ...profile, accept_messages: v })}
                 />
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-white/10">
+              <div className="flex items-center gap-3 mb-3">
+                <FilterX className="w-4 h-4 text-white/40" />
+                <div>
+                  <Label className="text-white/70 text-sm">Sportarten ausblenden</Label>
+                  <p className="text-white/30 text-xs mt-0.5">Wähle Sportarten, die du nicht sehen möchtest</p>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { value: "icehockey", label: "Eishockey" },
+                  { value: "soccer", label: "Fussball" },
+                  { value: "football", label: "Football" },
+                  { value: "basketball", label: "Basketball" },
+                  { value: "baseball", label: "Baseball" },
+                  { value: "other", label: "Andere" }
+                ].map(sport => (
+                  <Button
+                    key={sport.value}
+                    type="button"
+                    size="sm"
+                    onClick={() => {
+                      const hidden = profile.hidden_sports || [];
+                      if (hidden.includes(sport.value)) {
+                        setProfile({ ...profile, hidden_sports: hidden.filter(s => s !== sport.value) });
+                      } else {
+                        setProfile({ ...profile, hidden_sports: [...hidden, sport.value] });
+                      }
+                    }}
+                    className={`${(profile.hidden_sports || []).includes(sport.value) ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-green-600 hover:bg-green-700 text-white'} transition-colors`}
+                  >
+                    {sport.label}
+                  </Button>
+                ))}
               </div>
             </div>
 
