@@ -20,15 +20,23 @@ export default function MyPurchases() {
     });
   }, []);
 
-  const { data: jerseys = [], isLoading } = useQuery({
+  const { data: jerseys = [], isLoading: jerseysLoading } = useQuery({
     queryKey: ["myPurchases", user?.email],
     queryFn: () => base44.entities.Jersey.filter({ owner_email: user.email }),
     enabled: !!user,
   });
 
-  // Filter jerseys with purchase price
-  const purchasedJerseys = jerseys.filter(j => j.purchase_price != null && j.purchase_price > 0);
-  const totalCost = purchasedJerseys.reduce((sum, j) => sum + (j.purchase_price || 0), 0);
+  const { data: collectionItems = [], isLoading: itemsLoading } = useQuery({
+    queryKey: ["myPurchasesItems", user?.email],
+    queryFn: () => base44.entities.CollectionItem.filter({ owner_email: user.email }),
+    enabled: !!user,
+  });
+
+  // Filter all items with purchase price
+  const allItems = [...jerseys, ...collectionItems];
+  const purchasedItems = allItems.filter(j => j.purchase_price != null && j.purchase_price > 0);
+  const totalCost = purchasedItems.reduce((sum, j) => sum + (j.purchase_price || 0), 0);
+  const isLoading = jerseysLoading || itemsLoading;
 
   if (isLoading || !user) {
     return (
@@ -46,7 +54,7 @@ export default function MyPurchases() {
           className="inline-flex items-center gap-2 text-white/40 hover:text-white/70 text-sm mb-8 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          Zurück zu Meine Trikots
+          Zurück zu Meine Objekte
         </Link>
 
         <div className="flex items-center justify-between mb-8">
@@ -60,15 +68,15 @@ export default function MyPurchases() {
           </div>
         </div>
 
-        {purchasedJerseys.length === 0 ? (
+        {purchasedItems.length === 0 ? (
           <div className="text-center py-20">
             <Euro className="w-12 h-12 text-white/10 mx-auto mb-4" />
             <p className="text-white/30 text-sm">Noch keine Käufe erfasst.</p>
-            <p className="text-white/20 text-xs mt-1">Füge bei deinen Trikots einen Kaufpreis hinzu.</p>
+            <p className="text-white/20 text-xs mt-1">Füge bei deinen Objekten einen Kaufpreis hinzu.</p>
           </div>
         ) : (
           <div className="space-y-3">
-            {purchasedJerseys.map((jersey, i) => (
+            {purchasedItems.map((jersey, i) => (
               <motion.div
                 key={jersey.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -98,12 +106,22 @@ export default function MyPurchases() {
                         )}
                         {jersey.is_game_worn && (
                           <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                            Game-Worn
+                            {jersey.sport_type === 'soccer' ? 'Matchworn' : 'Game-Worn'}
                           </span>
                         )}
                         {jersey.is_game_issued && (
                           <span className="text-[10px] px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-300 border border-orange-500/30">
-                            Game-Issued
+                            {jersey.sport_type === 'soccer' ? 'Player Edition' : 'Game-Issued'}
+                          </span>
+                        )}
+                        {jersey.is_authentic && (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                            Authentic
+                          </span>
+                        )}
+                        {jersey.is_fan_jersey && (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-pink-500/20 text-pink-300 border border-pink-500/30">
+                            Fantrikot
                           </span>
                         )}
                       </div>
