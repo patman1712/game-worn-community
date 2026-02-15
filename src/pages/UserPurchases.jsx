@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { ArrowLeft, Loader2, Euro, User, Shirt } from "lucide-react";
+import { ArrowLeft, Loader2, Euro, User, Shirt, Package } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function UserPurchases() {
@@ -18,29 +18,50 @@ export default function UserPurchases() {
     }).catch(() => window.location.href = '/');
   }, []);
 
-  const { data: jerseys = [], isLoading } = useQuery({
+  const { data: jerseys = [], isLoading: jerseysLoading } = useQuery({
     queryKey: ["allJerseys"],
     queryFn: () => base44.entities.Jersey.list(),
     enabled: !!user,
   });
 
-  // Group jerseys by owner
-  const userPurchases = jerseys
+  const { data: collectionItems = [], isLoading: itemsLoading } = useQuery({
+    queryKey: ["allCollectionItems"],
+    queryFn: () => base44.entities.CollectionItem.list(),
+    enabled: !!user,
+  });
+
+  const isLoading = jerseysLoading || itemsLoading;
+
+  // Combine all items and group by owner
+  const allItems = [...jerseys, ...collectionItems];
+  const userPurchases = allItems
     .filter(j => j.purchase_price != null && j.purchase_price > 0)
-    .reduce((acc, jersey) => {
-      const ownerEmail = jersey.owner_email || jersey.created_by;
+    .reduce((acc, item) => {
+      const ownerEmail = item.owner_email || item.created_by;
       if (!acc[ownerEmail]) {
         acc[ownerEmail] = {
           email: ownerEmail,
-          name: jersey.owner_name || ownerEmail,
+          name: item.owner_name || ownerEmail,
           jerseys: [],
+          otherItems: [],
           totalCost: 0,
-          count: 0,
+          jerseyCount: 0,
+          otherCount: 0,
         };
       }
-      acc[ownerEmail].jerseys.push(jersey);
-      acc[ownerEmail].totalCost += jersey.purchase_price;
-      acc[ownerEmail].count++;
+      
+      // Check if it's a jersey or collection item
+      if (item.product_type) {
+        // It's a CollectionItem
+        acc[ownerEmail].otherItems.push(item);
+        acc[ownerEmail].otherCount++;
+      } else {
+        // It's a Jersey
+        acc[ownerEmail].jerseys.push(item);
+        acc[ownerEmail].jerseyCount++;
+      }
+      
+      acc[ownerEmail].totalCost += item.purchase_price;
       return acc;
     }, {});
 
@@ -102,7 +123,14 @@ export default function UserPurchases() {
                       <p className="text-white/40 text-xs mb-1">Trikots</p>
                       <div className="flex items-center gap-1.5">
                         <Shirt className="w-4 h-4 text-cyan-400" />
-                        <p className="text-white font-bold text-lg">{userData.count}</p>
+                        <p className="text-white font-bold text-lg">{userData.jerseyCount}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-white/40 text-xs mb-1">Andere Objekte</p>
+                      <div className="flex items-center gap-1.5">
+                        <Package className="w-4 h-4 text-purple-400" />
+                        <p className="text-white font-bold text-lg">{userData.otherCount}</p>
                       </div>
                     </div>
                     <div className="text-right">
