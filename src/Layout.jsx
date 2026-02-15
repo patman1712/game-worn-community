@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 
 const TABS = [
   { name: "Home", icon: Home, label: "Sammlung", page: "Home" },
-  { name: "Messages", icon: MessageCircle, label: "Nachrichten", page: "Messages", authRequired: true },
+  { name: "Messages", icon: MessageCircle, label: "Nachrichten", page: "Messages", authRequired: true, requiresMessages: true },
   { name: "MyCollection", icon: FolderOpen, label: "Meine Objekte", page: "MyCollection", authRequired: true },
   { name: "AddJersey", icon: Plus, label: "Objekt hinzufügen", page: "AddJersey", authRequired: true },
 ];
@@ -36,7 +36,13 @@ export default function Layout({ children, currentPageName }) {
 
   const isChildPage = CHILD_PAGES.includes(currentPageName);
   const showBottomNav = !isChildPage;
-  const visibleTabs = TABS.filter(tab => !tab.authRequired || user);
+  const userAcceptsMessages = user?.data?.accept_messages !== false && user?.accept_messages !== false;
+  const visibleTabs = TABS.filter(tab => {
+    if (!tab.authRequired) return true;
+    if (!user) return false;
+    if (tab.requiresMessages && !userAcceptsMessages) return false;
+    return true;
+  });
 
   return (
     <div className="min-h-screen bg-slate-950">

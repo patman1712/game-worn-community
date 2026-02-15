@@ -47,11 +47,14 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
+import AGB from './pages/AGB';
 import AddJersey from './pages/AddJersey';
 import AdminPanel from './pages/AdminPanel';
 import Chat from './pages/Chat';
 import EditJersey from './pages/EditJersey';
+import EditSiteContent from './pages/EditSiteContent';
 import Home from './pages/Home';
+import Impressum from './pages/Impressum';
 import JerseyDetail from './pages/JerseyDetail';
 import ManageUsers from './pages/ManageUsers';
 import Messages from './pages/Messages';
@@ -61,18 +64,18 @@ import Settings from './pages/Settings';
 import Share from './pages/Share';
 import UserProfile from './pages/UserProfile';
 import UserPurchases from './pages/UserPurchases';
-import Impressum from './pages/Impressum';
-import AGB from './pages/AGB';
-import EditSiteContent from './pages/EditSiteContent';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
+    "AGB": AGB,
     "AddJersey": AddJersey,
     "AdminPanel": AdminPanel,
     "Chat": Chat,
     "EditJersey": EditJersey,
+    "EditSiteContent": EditSiteContent,
     "Home": Home,
+    "Impressum": Impressum,
     "JerseyDetail": JerseyDetail,
     "ManageUsers": ManageUsers,
     "Messages": Messages,
@@ -82,9 +85,6 @@ export const PAGES = {
     "Share": Share,
     "UserProfile": UserProfile,
     "UserPurchases": UserPurchases,
-    "Impressum": Impressum,
-    "AGB": AGB,
-    "EditSiteContent": EditSiteContent,
 }
 
 export const pagesConfig = {

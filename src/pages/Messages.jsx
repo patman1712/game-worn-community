@@ -34,9 +34,18 @@ export default function Messages() {
     queryKey: ["messageable-users"],
     queryFn: async () => {
       const users = await base44.entities.User.list();
-      return users.filter(u => u.accept_messages && u.email !== currentUser?.email);
+      return users.filter(u => {
+        const acceptsMessages = u.data?.accept_messages !== false && u.accept_messages !== false;
+        return acceptsMessages && u.email !== currentUser?.email;
+      });
     },
     enabled: !!currentUser && showUserSearch,
+  });
+
+  const { data: allUsersForNames = [] } = useQuery({
+    queryKey: ["all-users-names"],
+    queryFn: () => base44.entities.User.list(),
+    enabled: !!currentUser,
   });
 
   // Group messages by conversation
@@ -48,8 +57,10 @@ export default function Messages() {
       const convId = [currentUser?.email, otherEmail].sort().join("_");
       
       if (!convMap.has(convId)) {
+        const otherUser = allUsersForNames.find(u => u.email === otherEmail);
         convMap.set(convId, {
           otherEmail,
+          otherUser,
           messages: [],
           lastMessage: msg,
           unreadCount: 0,
@@ -73,7 +84,7 @@ export default function Messages() {
     return Array.from(convMap.values()).sort((a, b) => 
       new Date(b.lastMessage.created_date) - new Date(a.lastMessage.created_date)
     );
-  }, [messages, currentUser]);
+  }, [messages, currentUser, allUsersForNames]);
 
   const filtered = showUserSearch 
     ? allUsers.filter(u => 
@@ -105,28 +116,25 @@ export default function Messages() {
         </div>
 
         {/* Search & Actions */}
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex gap-2">
-            <Button
-              onClick={() => setShowUserSearch(false)}
-              variant={!showUserSearch ? "default" : "ghost"}
-              size="sm"
-              className={!showUserSearch ? "bg-cyan-500 text-white" : "text-white/50"}
-            >
-              <MessageCircle className="w-4 h-4 mr-2" />
-              Konversationen
-            </Button>
-            <Button
-              onClick={() => setShowUserSearch(true)}
-              variant={showUserSearch ? "default" : "ghost"}
-              size="sm"
-              className={showUserSearch ? "bg-cyan-500 text-white" : "text-white/50"}
-            >
-              <Users className="w-4 h-4 mr-2" />
-              Neue Nachricht
-            </Button>
-          </div>
-          <NewMessageDialog currentUser={currentUser} />
+        <div className="flex gap-2 mb-3">
+          <Button
+            onClick={() => setShowUserSearch(false)}
+            variant={!showUserSearch ? "default" : "ghost"}
+            size="sm"
+            className={!showUserSearch ? "bg-cyan-500 text-white" : "text-white/50"}
+          >
+            <MessageCircle className="w-4 h-4 mr-2" />
+            Konversationen
+          </Button>
+          <Button
+            onClick={() => setShowUserSearch(true)}
+            variant={showUserSearch ? "default" : "ghost"}
+            size="sm"
+            className={showUserSearch ? "bg-cyan-500 text-white" : "text-white/50"}
+          >
+            <Users className="w-4 h-4 mr-2" />
+            Neue Nachricht
+          </Button>
         </div>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
@@ -171,9 +179,8 @@ export default function Messages() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <h3 className="text-white font-medium truncate">
-                          {user.display_name || user.full_name || user.email}
+                          {user.data?.display_name || user.display_name || user.full_name || user.email}
                         </h3>
-                        <p className="text-white/40 text-xs truncate">{user.email}</p>
                         {user.location && user.show_location && (
                           <p className="text-white/30 text-xs mt-1">{user.location}</p>
                         )}
@@ -201,7 +208,11 @@ export default function Messages() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1">
-                          <h3 className="text-white font-medium truncate">{conv.otherEmail}</h3>
+                          <h3 className="text-white font-medium truncate">
+                            {conversations.find(c => c.otherEmail === conv.otherEmail)?.otherUser?.display_name || 
+                             conversations.find(c => c.otherEmail === conv.otherEmail)?.otherUser?.full_name || 
+                             conv.otherEmail}
+                          </h3>
                           {conv.unreadCount > 0 && (
                             <Badge className="bg-cyan-500 text-white text-xs px-2 py-0">
                               {conv.unreadCount}

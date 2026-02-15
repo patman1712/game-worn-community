@@ -17,7 +17,13 @@ export default function NewMessageDialog({ currentUser, onMessageSent }) {
 
   const { data: users = [] } = useQuery({
     queryKey: ['allUsers'],
-    queryFn: () => base44.entities.User.list(),
+    queryFn: async () => {
+      const allUsers = await base44.entities.User.list();
+      return allUsers.filter(u => {
+        const acceptsMessages = u.data?.accept_messages !== false && u.accept_messages !== false;
+        return acceptsMessages && u.email !== currentUser?.email;
+      });
+    },
     enabled: open,
   });
 
@@ -43,8 +49,6 @@ export default function NewMessageDialog({ currentUser, onMessageSent }) {
     },
   });
 
-  const otherUsers = users.filter(u => u.email !== currentUser.email);
-
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -65,9 +69,9 @@ export default function NewMessageDialog({ currentUser, onMessageSent }) {
                 <SelectValue placeholder="User auswählen..." />
               </SelectTrigger>
               <SelectContent>
-                {otherUsers.map(u => (
+                {users.map(u => (
                   <SelectItem key={u.email} value={u.email}>
-                    {u.display_name || u.full_name} ({u.email})
+                    {u.data?.display_name || u.display_name || u.full_name || u.email}
                   </SelectItem>
                 ))}
               </SelectContent>
