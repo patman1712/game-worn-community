@@ -69,9 +69,9 @@ export default function JerseyDetail() {
   const isLiked = likes.length > 0;
   const ownerAcceptsMessages = ownerUser?.data?.accept_messages !== false && ownerUser?.accept_messages !== false;
   const userAcceptsMessages = currentUser ? (currentUser.data?.accept_messages ?? currentUser.accept_messages ?? true) : false;
-  const isOwner = currentUser && (jersey.owner_email === currentUser.email || jersey.created_by === currentUser.email);
+  const isOwner = currentUser && jersey && (jersey.owner_email === currentUser.email || jersey.created_by === currentUser.email);
   const isAdmin = currentUser && (currentUser.role === 'admin' || currentUser.data?.role === 'admin');
-  const canSeeCertificates = jersey.has_loa && jersey.loa_certificate_images?.length > 0 && (jersey.loa_certificates_public || isOwner || isAdmin);
+  const canSeeCertificates = jersey?.has_loa && jersey.loa_certificate_images?.length > 0 && (jersey.loa_certificates_public || isOwner || isAdmin);
 
   const likeMutation = useMutation({
     mutationFn: async () => {
