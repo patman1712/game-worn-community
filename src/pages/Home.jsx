@@ -57,7 +57,12 @@ export default function Home() {
     !item.is_private || item.owner_email === currentUser?.email || item.created_by === currentUser?.email || currentUser?.data?.role === 'admin' || currentUser?.role === 'admin'
   );
 
-  const allProducts = [...jerseys, ...collectionItems];
+  // Filter out hidden sports
+  const hiddenSports = currentUser?.hidden_sports || [];
+  const visibleJerseys = jerseys.filter(j => !hiddenSports.includes(j.sport_type));
+  const visibleCollectionItems = collectionItems.filter(item => !hiddenSports.includes(item.sport_type));
+
+  const allProducts = [...visibleJerseys, ...visibleCollectionItems];
 
   const { data: likes = [] } = useQuery({
     queryKey: ["likes", currentUser?.email],
@@ -167,11 +172,6 @@ export default function Home() {
   const filtered = useMemo(() => {
     let result = [...allProducts];
 
-    // Filter by user's hidden sports
-    if (currentUser?.hidden_sports && currentUser.hidden_sports.length > 0) {
-      result = result.filter(j => !currentUser.hidden_sports.includes(j.sport_type));
-    }
-
     if (search) {
       const s = search.toLowerCase();
       result = result.filter(j =>
@@ -208,11 +208,11 @@ export default function Home() {
     return result;
   }, [allProducts, search, league, sport, productType, sortBy, currentUser]);
 
-  // Stats
-  const totalLikes = jerseys.reduce((s, j) => s + (j.likes_count || 0), 0);
-  const collectors = new Set(jerseys.map(j => j.owner_email || j.created_by).filter(Boolean)).size;
+  // Stats (based on visible items only)
+  const totalLikes = visibleJerseys.reduce((s, j) => s + (j.likes_count || 0), 0);
+  const collectors = new Set([...visibleJerseys, ...visibleCollectionItems].map(j => j.owner_email || j.created_by).filter(Boolean)).size;
   const leagueCounts = {};
-  jerseys.forEach(j => { if (j.league) leagueCounts[j.league] = (leagueCounts[j.league] || 0) + 1; });
+  visibleJerseys.forEach(j => { if (j.league) leagueCounts[j.league] = (leagueCounts[j.league] || 0) + 1; });
   const topLeague = Object.entries(leagueCounts).sort(([,a],[,b]) => b - a)[0]?.[0];
 
   return (
