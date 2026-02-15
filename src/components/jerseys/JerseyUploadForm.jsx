@@ -105,7 +105,7 @@ const CONDITION_OPTIONS = CONDITIONS.map(c => ({ value: c, label: c }));
 
 export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSubmitting }) {
   const queryClient = useQueryClient();
-  const [form, setForm] = useState(initialData || {
+  const defaultFormData = {
     sport_type: "icehockey",
     team: "",
     league: "",
@@ -129,7 +129,11 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
     is_private: false,
     for_sale: false,
     purchase_price: null,
-  });
+    brand: "",
+    size: "",
+  };
+  
+  const [form, setForm] = useState(initialData ? { ...defaultFormData, ...initialData } : defaultFormData);
   const [uploading, setUploading] = useState(false);
   const [multiImageDialogOpen, setMultiImageDialogOpen] = useState(false);
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
@@ -535,6 +539,24 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
               </SelectContent>
             </Select>
           )}
+        </div>
+        <div>
+          <Label className="text-white/70 text-sm mb-1.5 block">Marke/Hersteller</Label>
+          <Input
+            value={form.brand || ""}
+            onChange={(e) => handleChange("brand", e.target.value)}
+            placeholder="z.B. Adidas"
+            className="bg-slate-800/50 border-white/10 text-white placeholder:text-white/20 focus:border-cyan-500/50"
+          />
+        </div>
+        <div>
+          <Label className="text-white/70 text-sm mb-1.5 block">Größe</Label>
+          <Input
+            value={form.size || ""}
+            onChange={(e) => handleChange("size", e.target.value)}
+            placeholder="z.B. L, 54, etc."
+            className="bg-slate-800/50 border-white/10 text-white placeholder:text-white/20 focus:border-cyan-500/50"
+          />
         </div>
       </div>
 
