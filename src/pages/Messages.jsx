@@ -43,7 +43,7 @@ export default function Messages() {
     enabled: !!currentUser,
   });
 
-  const { data: allUsers = [] } = useQuery({
+  const { data: allUsers = [], isLoading: isLoadingUsers } = useQuery({
     queryKey: ["messageable-users", currentUser?.email],
     queryFn: async () => {
       const users = await base44.entities.User.list();
@@ -54,6 +54,7 @@ export default function Messages() {
       });
     },
     enabled: !!currentUser,
+    staleTime: 30000,
   });
 
   const { data: allUsersForNames = [] } = useQuery({
@@ -183,7 +184,7 @@ export default function Messages() {
 
       {/* Conversations List */}
       <div className="max-w-3xl mx-auto px-4 pb-24">
-        {isLoading ? (
+        {(isLoading || (showUserSearch && isLoadingUsers)) ? (
           <div className="flex items-center justify-center py-20">
             <Loader2 className="w-8 h-8 text-cyan-400 animate-spin" />
           </div>
