@@ -3,8 +3,9 @@ import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { ArrowLeft, Loader2, Euro } from "lucide-react";
+import { ArrowLeft, Loader2, Euro, FileText, Download } from "lucide-react";
 import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
 
 export default function MyPurchases() {
   const [user, setUser] = useState(null);
@@ -126,8 +127,22 @@ export default function MyPurchases() {
                         )}
                       </div>
                     </div>
-                    <div className="text-right">
+                    <div className="text-right flex flex-col items-end gap-2">
                       <p className="text-cyan-400 font-bold text-lg">{jersey.purchase_price.toFixed(2)} €</p>
+                      {jersey.invoice_url && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-white/60 hover:text-white hover:bg-white/5"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            window.open(jersey.invoice_url, '_blank');
+                          }}
+                        >
+                          <FileText className="w-4 h-4 mr-1" />
+                          Rechnung
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </Link>
