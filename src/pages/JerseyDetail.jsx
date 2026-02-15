@@ -55,7 +55,19 @@ export default function JerseyDetail() {
     enabled: !!jerseyId && !!currentUser,
   });
 
+  const { data: ownerUser } = useQuery({
+    queryKey: ["owner", jersey?.owner_email || jersey?.created_by],
+    queryFn: async () => {
+      const ownerEmail = jersey?.owner_email || jersey?.created_by;
+      if (!ownerEmail) return null;
+      const users = await base44.entities.User.list();
+      return users.find(u => u.email === ownerEmail);
+    },
+    enabled: !!(jersey?.owner_email || jersey?.created_by),
+  });
+
   const isLiked = likes.length > 0;
+  const ownerAcceptsMessages = ownerUser?.data?.accept_messages !== false && ownerUser?.accept_messages !== false;
 
   const likeMutation = useMutation({
     mutationFn: async () => {
@@ -311,7 +323,7 @@ export default function JerseyDetail() {
                     <Share2 className="w-5 h-5" />
                   </Button>
                 )}
-                {currentUser && (jersey.owner_email !== currentUser.email && jersey.created_by !== currentUser.email) && (
+                {currentUser && (jersey.owner_email !== currentUser.email && jersey.created_by !== currentUser.email) && ownerAcceptsMessages && (
                   <Link
                     to={createPageUrl("Chat") + `?email=${jersey.owner_email || jersey.created_by}`}
                   >
