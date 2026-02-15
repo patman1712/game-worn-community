@@ -359,7 +359,17 @@ export default function JerseyDetail() {
                       className="rounded-lg overflow-hidden border border-white/10 bg-slate-800/30 cursor-pointer hover:border-cyan-500/50 transition-colors"
                       onClick={() => setCertificateImageOpen(url)}
                     >
-                      <img src={url} alt={`Zertifikat ${i + 1}`} className="w-full h-auto" />
+                      {url.toLowerCase().endsWith('.pdf') ? (
+                        <div className="aspect-video flex flex-col items-center justify-center gap-3 p-6">
+                          <svg className="w-16 h-16 text-red-400" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18.5,9L13,3.5V9H18.5M6,20V4H11V10H18V20H6Z" />
+                          </svg>
+                          <span className="text-white/60 text-sm">PDF Zertifikat</span>
+                          <span className="text-white/40 text-xs">Zum Öffnen klicken</span>
+                        </div>
+                      ) : (
+                        <img src={url} alt={`Zertifikat ${i + 1}`} className="w-full h-auto" />
+                      )}
                     </div>
                   ))}
                 </div>
@@ -485,7 +495,7 @@ export default function JerseyDetail() {
         </div>
       </div>
 
-      {/* Certificate Image Viewer Dialog */}
+      {/* Certificate Viewer Dialog */}
       <Dialog open={certificateImageOpen !== null} onOpenChange={() => setCertificateImageOpen(null)}>
         <DialogContent className="max-w-4xl w-[95vw] h-[90vh] bg-slate-900/95 border-white/10 p-0">
           <button
@@ -496,11 +506,19 @@ export default function JerseyDetail() {
           </button>
           {certificateImageOpen && (
             <div className="w-full h-full flex items-center justify-center p-4">
-              <img 
-                src={certificateImageOpen} 
-                alt="Zertifikat" 
-                className="max-w-full max-h-full object-contain"
-              />
+              {certificateImageOpen.toLowerCase().endsWith('.pdf') ? (
+                <iframe
+                  src={certificateImageOpen}
+                  className="w-full h-full rounded-lg"
+                  title="PDF Zertifikat"
+                />
+              ) : (
+                <img 
+                  src={certificateImageOpen} 
+                  alt="Zertifikat" 
+                  className="max-w-full max-h-full object-contain"
+                />
+              )}
             </div>
           )}
         </DialogContent>

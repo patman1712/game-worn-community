@@ -650,8 +650,17 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
             <div className="grid grid-cols-2 gap-3">
               {form.loa_certificate_images?.map((url, i) => (
                 <div key={i} className="relative group">
-                  <div className="aspect-square rounded-lg overflow-hidden border-2 border-white/10">
-                    <img src={url} alt="" className="w-full h-full object-cover" />
+                  <div className="aspect-square rounded-lg overflow-hidden border-2 border-white/10 bg-slate-800/50 flex items-center justify-center">
+                    {url.toLowerCase().endsWith('.pdf') ? (
+                      <div className="flex flex-col items-center justify-center gap-2">
+                        <svg className="w-12 h-12 text-red-400" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18.5,9L13,3.5V9H18.5M6,20V4H11V10H18V20H6Z" />
+                        </svg>
+                        <span className="text-white/60 text-xs">PDF</span>
+                      </div>
+                    ) : (
+                      <img src={url} alt="" className="w-full h-full object-cover" />
+                    )}
                   </div>
                   <button
                     type="button"
@@ -678,7 +687,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
                     e.preventDefault();
                     e.stopPropagation();
                     e.currentTarget.classList.remove('border-cyan-500/60', 'bg-cyan-500/5');
-                    const files = Array.from(e.dataTransfer?.files || []).filter(f => f.type.startsWith('image/'));
+                    const files = Array.from(e.dataTransfer?.files || []).filter(f => f.type.startsWith('image/') || f.type === 'application/pdf');
                     if (files.length === 0) return;
                     const currentCount = form.loa_certificate_images?.length || 0;
                     const maxAllowed = 2 - currentCount;
