@@ -800,6 +800,64 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
         />
       </div>
 
+      {/* Invoice Upload - Only visible if purchase price is set */}
+      {form.purchase_price && parseFloat(form.purchase_price) > 0 && (
+        <div className="p-4 bg-slate-800/30 rounded-lg border border-white/10">
+          <Label className="text-white/70 text-sm mb-2 block">Rechnung hochladen (optional, nur für dich sichtbar)</Label>
+          {form.invoice_url ? (
+            <div className="relative group">
+              <div className="p-4 rounded-lg border-2 border-white/10 bg-slate-800/50 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <ImageIcon className="w-6 h-6 text-cyan-400" />
+                  <div>
+                    <p className="text-white text-sm">Rechnung hochgeladen</p>
+                    <p className="text-white/40 text-xs">Klicken zum Anzeigen</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleChange("invoice_url", "")}
+                  className="p-2 bg-red-600/80 rounded-full hover:bg-red-700 transition-colors"
+                >
+                  <X className="w-4 h-4 text-white" />
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div
+              onClick={() => document.getElementById('invoice-upload').click()}
+              className="w-full p-6 flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-white/10 hover:border-cyan-500/40 bg-slate-800/50 cursor-pointer transition-colors"
+            >
+              <input
+                id="invoice-upload"
+                type="file"
+                accept="image/*,application/pdf"
+                className="hidden"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  setUploading(true);
+                  try {
+                    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+                    handleChange("invoice_url", file_url);
+                  } catch (error) {
+                    alert("Fehler beim Hochladen der Rechnung");
+                  } finally {
+                    setUploading(false);
+                  }
+                }}
+              />
+              {uploading ? (
+                <Loader2 className="w-6 h-6 text-cyan-400 animate-spin mb-2" />
+              ) : (
+                <Upload className="w-6 h-6 text-white/30 mb-2" />
+              )}
+              <span className="text-white/40 text-sm">Rechnung hochladen (Bild oder PDF)</span>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Description */}
       <div>
         <Label className="text-white/70 text-sm mb-1.5 block">Beschreibung</Label>
