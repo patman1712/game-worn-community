@@ -177,9 +177,25 @@ export default function Layout({ children, currentPageName }) {
       </header>
 
       {/* Content */}
-      <main className="relative">
+      <main className="relative pb-20">
         {children}
       </main>
+
+      {/* Footer */}
+      {!isChildPage && (
+        <footer className="border-t border-white/5 bg-slate-950/95 backdrop-blur-xl mt-auto">
+          <div className="max-w-7xl mx-auto px-4 py-6">
+            <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-white/40">
+              <Link to={createPageUrl("Impressum")} className="hover:text-white/70 transition-colors">
+                Impressum
+              </Link>
+              <Link to={createPageUrl("AGB")} className="hover:text-white/70 transition-colors">
+                AGB
+              </Link>
+            </div>
+          </div>
+        </footer>
+      )}
     </div>
   );
 }

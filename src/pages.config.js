@@ -61,6 +61,9 @@ import Settings from './pages/Settings';
 import Share from './pages/Share';
 import UserProfile from './pages/UserProfile';
 import UserPurchases from './pages/UserPurchases';
+import Impressum from './pages/Impressum';
+import AGB from './pages/AGB';
+import EditSiteContent from './pages/EditSiteContent';
 import __Layout from './Layout.jsx';
 
 
@@ -79,6 +82,9 @@ export const PAGES = {
     "Share": Share,
     "UserProfile": UserProfile,
     "UserPurchases": UserPurchases,
+    "Impressum": Impressum,
+    "AGB": AGB,
+    "EditSiteContent": EditSiteContent,
 }
 
 export const pagesConfig = {
