@@ -392,7 +392,11 @@ export default function JerseyDetail() {
                 <h3 className="text-white font-medium mb-4">Zertifikate (LOA)</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {jersey.loa_certificate_images.map((url, i) => (
-                    <div key={i} className="rounded-lg overflow-hidden border border-white/10 bg-slate-800/30">
+                    <div 
+                      key={i} 
+                      className="rounded-lg overflow-hidden border border-white/10 bg-slate-800/30 cursor-pointer hover:border-cyan-500/50 transition-colors"
+                      onClick={() => setCertificateImageOpen(url)}
+                    >
                       <img src={url} alt={`Zertifikat ${i + 1}`} className="w-full h-auto" />
                     </div>
                   ))}
