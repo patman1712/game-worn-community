@@ -663,8 +663,39 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
                 </div>
               ))}
               {(!form.loa_certificate_images || form.loa_certificate_images.length < 2) && (
-                <label className="aspect-square flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-white/10 hover:border-cyan-500/40 bg-slate-800/50 cursor-pointer transition-colors">
+                <div
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.currentTarget.classList.add('border-cyan-500/60', 'bg-cyan-500/5');
+                  }}
+                  onDragLeave={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.currentTarget.classList.remove('border-cyan-500/60', 'bg-cyan-500/5');
+                  }}
+                  onDrop={async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.currentTarget.classList.remove('border-cyan-500/60', 'bg-cyan-500/5');
+                    const file = e.dataTransfer?.files?.[0];
+                    if (!file || !file.type.startsWith('image/')) return;
+                    setUploading(true);
+                    try {
+                      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+                      handleChange("loa_certificate_images", [...(form.loa_certificate_images || []), file_url]);
+                      setCopyrightDialogOpen(true);
+                    } catch (error) {
+                      alert("Fehler beim Hochladen");
+                    } finally {
+                      setUploading(false);
+                    }
+                  }}
+                  onClick={() => document.getElementById('cert-upload').click()}
+                  className="aspect-square flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-white/10 hover:border-cyan-500/40 bg-slate-800/50 cursor-pointer transition-colors"
+                >
                   <input
+                    id="cert-upload"
                     type="file"
                     accept="image/*"
                     className="hidden"
@@ -675,6 +706,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
                       try {
                         const { file_url } = await base44.integrations.Core.UploadFile({ file });
                         handleChange("loa_certificate_images", [...(form.loa_certificate_images || []), file_url]);
+                        setCopyrightDialogOpen(true);
                       } catch (error) {
                         alert("Fehler beim Hochladen");
                       } finally {
@@ -687,10 +719,10 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
                   ) : (
                     <>
                       <Upload className="w-5 h-5 text-white/30 mb-1" />
-                      <span className="text-[10px] text-white/30">Bild hochladen</span>
+                      <span className="text-[10px] text-white/30">Klicken oder ziehen</span>
                     </>
                   )}
-                </label>
+                </div>
               )}
             </div>
             <div className="flex items-center justify-between pt-2">
