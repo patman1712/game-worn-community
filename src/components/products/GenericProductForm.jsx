@@ -255,8 +255,8 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
       return;
     }
     
-    // Validate exactly one jersey type is selected for jerseys
-    if (showGameWornFields) {
+    // Validate exactly one jersey type is selected for jerseys only
+    if (productType === "jersey") {
       const selectedTypes = [form.is_game_worn, form.is_game_issued, form.is_fan_jersey].filter(Boolean).length;
       if (selectedTypes !== 1) {
         alert('Bitte wähle genau einen Trikot-Typ aus');
@@ -397,8 +397,8 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
       </div>
 
       {/* Toggles */}
-      {showGameWornFields && (
-        <div className="space-y-3">
+      <div className="space-y-3">
+        {productType === "jersey" ? (
           <div>
             <Label className="text-white/70 text-sm mb-2 block">Trikot-Typ * (Genau einer erforderlich)</Label>
             <div className="flex flex-wrap gap-3">
@@ -437,19 +437,39 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
               </Button>
             </div>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <Button type="button" onClick={() => handleChange("is_signed", !form.is_signed)} className={`${form.is_signed ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'} transition-colors`}>
-              Signiert
-            </Button>
-            <Button type="button" onClick={() => handleChange("has_loa", !form.has_loa)} className={`${form.has_loa ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'} transition-colors`}>
-              Zertifikat (LOA)
-            </Button>
-            <Button type="button" onClick={() => handleChange("is_photomatch", !form.is_photomatch)} className={`${form.is_photomatch ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'} transition-colors`}>
-              Photomatch
-            </Button>
+        ) : (
+          <div>
+            <Label className="text-white/70 text-sm mb-2 block">Game-Worn</Label>
+            <div className="flex flex-wrap gap-3">
+              <Button
+                type="button"
+                onClick={() => handleChange("is_game_worn", true)}
+                className={`${form.is_game_worn ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'} transition-colors`}
+              >
+                Ja
+              </Button>
+              <Button
+                type="button"
+                onClick={() => handleChange("is_game_worn", false)}
+                className={`${!form.is_game_worn ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'} transition-colors`}
+              >
+                Nein
+              </Button>
+            </div>
           </div>
+        )}
+        <div className="flex flex-wrap gap-3">
+          <Button type="button" onClick={() => handleChange("is_signed", !form.is_signed)} className={`${form.is_signed ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'} transition-colors`}>
+            Signiert
+          </Button>
+          <Button type="button" onClick={() => handleChange("has_loa", !form.has_loa)} className={`${form.has_loa ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'} transition-colors`}>
+            Zertifikat (LOA)
+          </Button>
+          <Button type="button" onClick={() => handleChange("is_photomatch", !form.is_photomatch)} className={`${form.is_photomatch ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'} transition-colors`}>
+            Photomatch
+          </Button>
         </div>
-      )}
+      </div>
 
       <div className="flex gap-3">
         <Button type="button" onClick={() => handleChange("is_private", true)} className={`${form.is_private ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'} transition-colors`}>
