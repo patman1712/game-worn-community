@@ -68,6 +68,7 @@ export default function JerseyDetail() {
 
   const isLiked = likes.length > 0;
   const ownerAcceptsMessages = ownerUser?.data?.accept_messages !== false && ownerUser?.accept_messages !== false;
+  const userAcceptsMessages = currentUser ? (currentUser.data?.accept_messages ?? currentUser.accept_messages ?? true) : false;
 
   const likeMutation = useMutation({
     mutationFn: async () => {
@@ -323,7 +324,7 @@ export default function JerseyDetail() {
                     <Share2 className="w-5 h-5" />
                   </Button>
                 )}
-                {currentUser && (jersey.owner_email !== currentUser.email && jersey.created_by !== currentUser.email) && ownerAcceptsMessages && (
+                {currentUser && (jersey.owner_email !== currentUser.email && jersey.created_by !== currentUser.email) && ownerAcceptsMessages && userAcceptsMessages && (
                   <Link
                     to={createPageUrl("Chat") + `?email=${jersey.owner_email || jersey.created_by}`}
                   >
