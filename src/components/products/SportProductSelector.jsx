@@ -7,10 +7,11 @@ import { motion } from "framer-motion";
 const SPORTS = [
   { id: "icehockey", name: "Eishockey" },
   { id: "soccer", name: "Fussball" },
-  { id: "football", name: "Football" },
-  { id: "basketball", name: "Basketball" },
-  { id: "baseball", name: "Baseball" },
-  { id: "other", name: "Sonstiges" },
+  // Temporarily disabled sports (can be re-enabled later):
+  // { id: "football", name: "Football" },
+  // { id: "basketball", name: "Basketball" },
+  // { id: "baseball", name: "Baseball" },
+  // { id: "other", name: "Sonstiges" },
 ];
 
 const PRODUCTS = {

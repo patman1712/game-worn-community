@@ -389,12 +389,7 @@ export default function JerseyDetail() {
             {/* Certificate Section */}
             {canSeeCertificates && (
               <div className="pt-6 border-t border-white/5">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-white font-medium">Zertifikate (LOA)</h3>
-                  {!jersey.loa_certificates_public && (isOwner || isAdmin) && (
-                    <span className="text-xs text-amber-400 bg-amber-500/10 px-2 py-1 rounded">Nur für dich/Admin sichtbar</span>
-                  )}
-                </div>
+                <h3 className="text-white font-medium mb-4">Zertifikate (LOA)</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {jersey.loa_certificate_images.map((url, i) => (
                     <div key={i} className="rounded-lg overflow-hidden border border-white/10 bg-slate-800/30">
