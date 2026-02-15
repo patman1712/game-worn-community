@@ -16,12 +16,16 @@ const SPORTS = [
 
 const PRODUCTS = {
   icehockey: [
-    { id: "jersey", name: "Trikots" },
+    { id: "jersey", name: "Trikot" },
     { id: "stick", name: "Schläger" },
-    { id: "helmet", name: "Helm" },
+    { id: "helmet", name: "Spielerhelm" },
     { id: "skates", name: "Schlittschuhe" },
     { id: "pants", name: "Hose" },
     { id: "bag", name: "Tasche" },
+    { id: "goalie_mask", name: "Torwart-Maske" },
+    { id: "catcher", name: "Fanghand" },
+    { id: "blocker", name: "Blockhand" },
+    { id: "leg_pads", name: "Beinschienen" },
     { id: "pucks", name: "Pucks" },
     { id: "other", name: "Sonstiges" },
   ],

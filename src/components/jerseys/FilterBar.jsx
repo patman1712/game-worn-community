@@ -39,18 +39,63 @@ const SPORT_OPTIONS = [
   // { value: "other", label: "Andere" }
 ];
 
-const PRODUCT_OPTIONS = [
-  { value: "all", label: "Alle Produkte" },
-  { value: "jersey", label: "Trikots" },
-  { value: "stick", label: "Schläger" },
-  { value: "shoes", label: "Schuhe" },
-  { value: "other", label: "Andere" }
-];
+const PRODUCT_OPTIONS_BY_SPORT = {
+  icehockey: [
+    { value: "all", label: "Alle Objekte" },
+    { value: "jersey", label: "Trikot" },
+    { value: "stick", label: "Schläger" },
+    { value: "helmet", label: "Spielerhelm" },
+    { value: "skates", label: "Schlittschuhe" },
+    { value: "pants", label: "Hose" },
+    { value: "bag", label: "Tasche" },
+    { value: "goalie_mask", label: "Torwart-Maske" },
+    { value: "catcher", label: "Fanghand" },
+    { value: "blocker", label: "Blockhand" },
+    { value: "leg_pads", label: "Beinschienen" },
+    { value: "pucks", label: "Pucks" },
+    { value: "other", label: "Sonstiges" },
+  ],
+  soccer: [
+    { value: "all", label: "Alle Objekte" },
+    { value: "jersey", label: "Trikot" },
+    { value: "shorts", label: "Hose" },
+    { value: "shoes", label: "Fussballschuhe" },
+    { value: "training", label: "Trainingsklamotten" },
+    { value: "other", label: "Sonstiges" },
+  ],
+  football: [
+    { value: "all", label: "Alle Objekte" },
+    { value: "jersey", label: "Trikot" },
+    { value: "gloves", label: "Handschuhe" },
+    { value: "helmet", label: "Helm" },
+    { value: "football", label: "Football" },
+    { value: "other", label: "Sonstiges" },
+  ],
+  basketball: [
+    { value: "all", label: "Alle Objekte" },
+    { value: "jersey", label: "Trikots" },
+    { value: "shoes", label: "Schuhe" },
+    { value: "other", label: "Sonstiges" },
+  ],
+  baseball: [
+    { value: "all", label: "Alle Objekte" },
+    { value: "jersey", label: "Trikot" },
+    { value: "glove", label: "Fanghandschuh" },
+    { value: "ball", label: "Ball" },
+    { value: "bat", label: "Schläger" },
+    { value: "other", label: "Sonstiges" },
+  ],
+  other: [
+    { value: "all", label: "Alle Objekte" },
+    { value: "other", label: "Sonstiges" },
+  ],
+};
 
 export default function FilterBar({ search, onSearchChange, league, onLeagueChange, sortBy, onSortChange, sport, onSportChange, productType, onProductTypeChange, hiddenSports = [] }) {
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   const showExtendedFilters = sport && sport !== "all";
   const leagueOptions = getLeagueOptions(sport);
+  const productOptions = sport && sport !== "all" ? (PRODUCT_OPTIONS_BY_SPORT[sport] || [{ value: "all", label: "Alle Objekte" }]) : [{ value: "all", label: "Alle Objekte" }];
   
   // Filter out hidden sports from the options
   const visibleSportOptions = SPORT_OPTIONS.filter(s => s.value === "all" || !hiddenSports.includes(s.value));
@@ -87,9 +132,9 @@ export default function FilterBar({ search, onSearchChange, league, onLeagueChan
                 <MobileDrawerSelect
                   value={productType}
                   onValueChange={onProductTypeChange}
-                  options={PRODUCT_OPTIONS}
+                  options={productOptions}
                   label="Produkttyp wählen"
-                  placeholder="Alle Produkte"
+                  placeholder="Alle Objekte"
                 />
                 <MobileDrawerSelect
                   value={league}
@@ -128,10 +173,10 @@ export default function FilterBar({ search, onSearchChange, league, onLeagueChan
               <>
                 <Select value={productType} onValueChange={onProductTypeChange}>
                   <SelectTrigger className="bg-slate-800/50 border-white/10 text-white">
-                    <SelectValue placeholder="Alle Produkte" />
+                    <SelectValue placeholder="Alle Objekte" />
                   </SelectTrigger>
                   <SelectContent>
-                    {PRODUCT_OPTIONS.map(p => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}
+                    {productOptions.map(p => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}
                   </SelectContent>
                 </Select>
                 <Select value={league} onValueChange={onLeagueChange}>
