@@ -147,8 +147,8 @@ export default function JerseyDetail() {
         </Link>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-          {/* Images */}
-          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
+          {/* Images + Owner Section */}
+          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
             <div className="relative aspect-square rounded-2xl overflow-hidden bg-slate-800 border border-white/5">
               <img
                 src={allImages[activeImage]}
@@ -173,7 +173,7 @@ export default function JerseyDetail() {
               )}
             </div>
             {allImages.length > 1 && (
-              <div className="flex gap-2 mt-3">
+              <div className="flex gap-2">
                 {allImages.map((url, i) => (
                   <button
                     key={i}
@@ -185,6 +185,54 @@ export default function JerseyDetail() {
                 ))}
               </div>
             )}
+
+            {/* Owner + Actions */}
+            <div className="p-4 rounded-xl bg-slate-800/30 border border-white/5">
+              <div className="flex items-center justify-between">
+                <Link
+                  to={createPageUrl("UserProfile") + `?email=${jersey.owner_email || jersey.created_by}`}
+                  className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+                >
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center">
+                    <User className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-white text-sm font-medium">{jersey.owner_name || "Unbekannt"}</p>
+                    <p className="text-white/30 text-xs">Sammlung ansehen</p>
+                  </div>
+                </Link>
+                <div className="flex items-center gap-2">
+                  {currentUser && ((currentUser.role === 'admin' || currentUser.data?.role === 'admin') || (jersey.owner_email === currentUser.email || jersey.created_by === currentUser.email)) && (
+                    <Button
+                      onClick={() => {
+                        const shareUrl = `${window.location.protocol}//${window.location.host}${createPageUrl("Share")}?id=${jersey.id}`;
+                        navigator.clipboard.writeText(shareUrl);
+                        alert('Link kopiert! Du kannst ihn jetzt teilen.');
+                      }}
+                      variant="ghost"
+                      className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
+                    >
+                      <Share2 className="w-5 h-5" />
+                    </Button>
+                  )}
+                  {currentUser && (jersey.owner_email !== currentUser.email && jersey.created_by !== currentUser.email) && ownerAcceptsMessages && userAcceptsMessages && (
+                    <Link to={createPageUrl("Chat") + `?email=${jersey.owner_email || jersey.created_by}`}>
+                      <Button variant="ghost" className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10">
+                        <MessageCircle className="w-5 h-5" />
+                      </Button>
+                    </Link>
+                  )}
+                  <Button
+                    onClick={() => currentUser ? likeMutation.mutate() : base44.auth.redirectToLogin()}
+                    variant="ghost"
+                    className={`flex items-center gap-2 ${isLiked ? 'text-red-400 hover:text-red-300' : 'text-white/40 hover:text-white/70'} hover:bg-white/5`}
+                  >
+                    <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
+                    <span className="text-sm">{jersey.likes_count || 0}</span>
+                  </Button>
+                </div>
+              </div>
+            </div>
           </motion.div>
 
           {/* Info */}
@@ -300,56 +348,25 @@ export default function JerseyDetail() {
               </div>
             )}
 
-            {/* Owner */}
-            <div className="flex items-center justify-between pt-4 border-t border-white/5">
-              <Link
-                to={createPageUrl("UserProfile") + `?email=${jersey.owner_email || jersey.created_by}`}
-                className="flex items-center gap-3 hover:opacity-80 transition-opacity"
-              >
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center">
-                  <User className="w-5 h-5 text-white" />
+            {/* Certificate Section */}
+            {canSeeCertificates && (
+              <div className="pt-6 border-t border-white/5">
+                <h3 className="text-white font-medium mb-4">Zertifikate (LOA)</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {jersey.loa_certificate_images.map((url, i) => (
+                    <div 
+                      key={i} 
+                      className="rounded-lg overflow-hidden border border-white/10 bg-slate-800/30 cursor-pointer hover:border-cyan-500/50 transition-colors"
+                      onClick={() => setCertificateImageOpen(url)}
+                    >
+                      <img src={url} alt={`Zertifikat ${i + 1}`} className="w-full h-auto" />
+                    </div>
+                  ))}
                 </div>
-                <div>
-                  <p className="text-white text-sm font-medium">{jersey.owner_name || "Unbekannt"}</p>
-                  <p className="text-white/30 text-xs">Sammlung ansehen</p>
-                </div>
-              </Link>
-              <div className="flex items-center gap-2">
-                {currentUser && ((currentUser.role === 'admin' || currentUser.data?.role === 'admin') || (jersey.owner_email === currentUser.email || jersey.created_by === currentUser.email)) && (
-                  <Button
-                    onClick={() => {
-                      // Use the current hostname, which will be the user's domain when deployed
-                      const shareUrl = `${window.location.protocol}//${window.location.host}${createPageUrl("Share")}?id=${jersey.id}`;
-                      navigator.clipboard.writeText(shareUrl);
-                      alert('Link kopiert! Du kannst ihn jetzt teilen.');
-                    }}
-                    variant="ghost"
-                    className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
-                  >
-                    <Share2 className="w-5 h-5" />
-                  </Button>
-                )}
-                {currentUser && (jersey.owner_email !== currentUser.email && jersey.created_by !== currentUser.email) && ownerAcceptsMessages && userAcceptsMessages && (
-                  <Link
-                    to={createPageUrl("Chat") + `?email=${jersey.owner_email || jersey.created_by}`}
-                  >
-                    <Button variant="ghost" className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10">
-                      <MessageCircle className="w-5 h-5" />
-                    </Button>
-                  </Link>
-                )}
-                <Button
-                  onClick={() => currentUser ? likeMutation.mutate() : base44.auth.redirectToLogin()}
-                  variant="ghost"
-                  className={`flex items-center gap-2 ${isLiked ? 'text-red-400 hover:text-red-300' : 'text-white/40 hover:text-white/70'} hover:bg-white/5`}
-                >
-                  <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
-                  <span className="text-sm">{jersey.likes_count || 0}</span>
-                </Button>
               </div>
-            </div>
+            )}
 
-            {/* Moderator Actions - Separate Section */}
+            {/* Moderator Actions - Below Certificate */}
             {currentUser && (currentUser.data?.role === 'moderator' || currentUser.role === 'admin' || currentUser.data?.role === 'admin') && (
               <div className="pt-6 border-t border-white/5 flex gap-2">
                 <Link to={createPageUrl("EditJersey") + `?id=${jersey.id}`} className="flex-1">
@@ -385,24 +402,6 @@ export default function JerseyDetail() {
                 >
                   Löschen
                 </Button>
-              </div>
-            )}
-
-            {/* Certificate Section */}
-            {canSeeCertificates && (
-              <div className="pt-6 border-t border-white/5">
-                <h3 className="text-white font-medium mb-4">Zertifikate (LOA)</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {jersey.loa_certificate_images.map((url, i) => (
-                    <div 
-                      key={i} 
-                      className="rounded-lg overflow-hidden border border-white/10 bg-slate-800/30 cursor-pointer hover:border-cyan-500/50 transition-colors"
-                      onClick={() => setCertificateImageOpen(url)}
-                    >
-                      <img src={url} alt={`Zertifikat ${i + 1}`} className="w-full h-auto" />
-                    </div>
-                  ))}
-                </div>
               </div>
             )}
 
