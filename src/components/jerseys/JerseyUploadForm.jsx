@@ -702,7 +702,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
                   <input
                     id="cert-upload"
                     type="file"
-                    accept="image/*"
+                    accept="image/*,application/pdf"
                     className="hidden"
                     onChange={async (e) => {
                       const file = e.target.files?.[0];

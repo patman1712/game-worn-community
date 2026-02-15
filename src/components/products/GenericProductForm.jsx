@@ -531,7 +531,7 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
                   <input
                     id="cert-upload-generic"
                     type="file"
-                    accept="image/*"
+                    accept="image/*,application/pdf"
                     className="hidden"
                     onChange={async (e) => {
                       const file = e.target.files?.[0];
