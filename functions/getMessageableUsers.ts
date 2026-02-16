@@ -9,13 +9,20 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        // Use service role to get all users
+        // Use service role to get all users and pending users
         const allUsers = await base44.asServiceRole.entities.User.list();
+        const allPendingUsers = await base44.asServiceRole.entities.PendingUser.list();
         
         // Filter users who accept messages and exclude current user
         const messageableUsers = allUsers.filter(u => {
             if (!u || u.email === user.email) return false;
-            const acceptsMessages = (u.data?.accept_messages ?? u.accept_messages ?? true);
+            
+            // Check PendingUser first, then User.data
+            const pendingUser = allPendingUsers.find(pu => pu.email === u.email);
+            const acceptsMessages = pendingUser 
+                ? (pendingUser.accept_messages !== false)
+                : (u.data?.accept_messages !== false && u.accept_messages !== false);
+            
             return acceptsMessages;
         });
 
