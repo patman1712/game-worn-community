@@ -219,7 +219,14 @@ export default function Home() {
     : [...visibleJerseys, ...visibleCollectionItems];
   
   const totalLikes = filteredBySport.filter(j => !j.product_type).reduce((s, j) => s + (j.likes_count || 0), 0);
-  const collectors = allUsers.length;
+  
+  // Always show total number of registered users, regardless of login status or role
+  const { data: totalUsers = [] } = useQuery({
+    queryKey: ["totalRegisteredUsers"],
+    queryFn: () => base44.entities.User.list(),
+  });
+  const collectors = totalUsers.length;
+  
   const leagueCounts = {};
   filteredBySport.filter(j => !j.product_type).forEach(j => { if (j.league) leagueCounts[j.league] = (leagueCounts[j.league] || 0) + 1; });
   const topLeague = Object.entries(leagueCounts).sort(([,a],[,b]) => b - a)[0]?.[0];
