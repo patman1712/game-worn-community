@@ -31,7 +31,27 @@ export default function ManageUsers() {
   const { data: users = [], isLoading } = useQuery({
     queryKey: ['allUsers'],
     queryFn: async () => {
-      return await base44.entities.User.list();
+      const allUsers = await base44.entities.User.list();
+      const pendingUsers = await base44.entities.PendingUser.list();
+      
+      // Merge PendingUser data with User data
+      return allUsers.map(user => {
+        const pendingUser = pendingUsers.find(p => p.email === user.email);
+        if (pendingUser) {
+          return {
+            ...user,
+            data: {
+              ...user.data,
+              display_name: pendingUser.display_name || user.data?.display_name,
+              real_name: pendingUser.real_name || user.data?.real_name,
+              location: pendingUser.location || user.data?.location,
+              show_location: pendingUser.show_location !== undefined ? pendingUser.show_location : user.data?.show_location,
+              accept_messages: pendingUser.accept_messages !== undefined ? pendingUser.accept_messages : user.data?.accept_messages
+            }
+          };
+        }
+        return user;
+      });
     },
     enabled: !!user,
   });
@@ -133,7 +153,26 @@ export default function ManageUsers() {
                     <Dialog open={editingUser?.id === u.id} onOpenChange={(open) => !open && setEditingUser(null)}>
                       <DialogTrigger asChild>
                         <Button
-                          onClick={() => setEditingUser(u)}
+                          onClick={async () => {
+                            // Fetch fresh PendingUser data when opening edit dialog
+                            const pendingUsers = await base44.entities.PendingUser.filter({ email: u.email });
+                            const pendingUser = pendingUsers[0];
+                            if (pendingUser) {
+                              setEditingUser({
+                                ...u,
+                                data: {
+                                  ...u.data,
+                                  display_name: pendingUser.display_name || u.data?.display_name,
+                                  real_name: pendingUser.real_name || u.data?.real_name,
+                                  location: pendingUser.location || u.data?.location,
+                                  show_location: pendingUser.show_location !== undefined ? pendingUser.show_location : u.data?.show_location,
+                                  accept_messages: pendingUser.accept_messages !== undefined ? pendingUser.accept_messages : u.data?.accept_messages
+                                }
+                              });
+                            } else {
+                              setEditingUser(u);
+                            }
+                          }}
                           size="sm"
                           variant="ghost"
                           className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
