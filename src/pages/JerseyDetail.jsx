@@ -150,10 +150,11 @@ export default function JerseyDetail() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           {/* Images + Owner Section */}
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
-            <div 
-              className="relative aspect-square rounded-2xl overflow-hidden bg-slate-800 border border-white/5 cursor-pointer"
-              onClick={() => setLightboxOpen(true)}
-            >
+            <div className="relative aspect-square rounded-2xl overflow-hidden bg-slate-800 border border-white/5">
+              <div 
+                className="absolute inset-0 cursor-pointer z-10"
+                onClick={() => setLightboxOpen(true)}
+              />
               <img
                 src={allImages[activeImage]}
                 alt={jersey.title}
@@ -162,14 +163,20 @@ export default function JerseyDetail() {
               {allImages.length > 1 && (
                 <>
                   <button
-                    onClick={() => setActiveImage(i => (i - 1 + allImages.length) % allImages.length)}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/60 transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveImage(i => (i - 1 + allImages.length) % allImages.length);
+                    }}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/60 transition-colors z-20"
                   >
                     <ChevronLeft className="w-5 h-5 text-white" />
                   </button>
                   <button
-                    onClick={() => setActiveImage(i => (i + 1) % allImages.length)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/60 transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveImage(i => (i + 1) % allImages.length);
+                    }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/60 transition-colors z-20"
                   >
                     <ChevronRight className="w-5 h-5 text-white" />
                   </button>
@@ -182,6 +189,9 @@ export default function JerseyDetail() {
                   <button
                     key={i}
                     onClick={() => {
+                      setActiveImage(i);
+                    }}
+                    onDoubleClick={() => {
                       setActiveImage(i);
                       setLightboxOpen(true);
                     }}
