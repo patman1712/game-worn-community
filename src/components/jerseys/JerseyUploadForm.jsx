@@ -97,11 +97,24 @@ const LEAGUES_BY_SPORT = {
 };
 
 const JERSEY_TYPES = ["Home", "Away", "Third", "Special", "All-Star", "Retro", "Practice", "Warm-Up", "Fan-Jersey"];
-const CONDITIONS = ["Neu mit Etikett", "Neu ohne Etikett", "Sehr gut", "Gut", "Getragen", "Game-Worn"];
+const DETAILS_OPTIONS = [
+  "Neu mit Etikett",
+  "Neu ohne Etikett",
+  "Getragen",
+  "pre Season",
+  "Home",
+  "Away",
+  "Third",
+  "Specialtrikot",
+  "Warmup Third",
+  "Play Offs",
+  "Set 1",
+  "Set 2",
+  "Set 3"
+];
 const CAPTAIN_PATCH_OPTIONS = ["Keine", "C", "A"];
 
 const TYPE_OPTIONS = JERSEY_TYPES.map(t => ({ value: t, label: t }));
-const CONDITION_OPTIONS = CONDITIONS.map(c => ({ value: c, label: c }));
 
 export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSubmitting }) {
   const queryClient = useQueryClient();
@@ -113,7 +126,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
     player_name: "",
     player_number: "",
     jersey_type: "",
-    condition: "",
+    details: [],
     description: "",
     image_url: "",
     additional_images: [],
@@ -500,26 +513,27 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
           />
         </div>
 
-        <div>
-          <Label className="text-white/70 text-sm mb-1.5 block">Zustand</Label>
-          {isMobile ? (
-            <MobileDrawerSelect
-              value={form.condition}
-              onValueChange={(v) => handleChange("condition", v)}
-              options={CONDITION_OPTIONS}
-              label="Zustand wählen"
-              placeholder="Zustand wählen"
-            />
-          ) : (
-            <Select value={form.condition} onValueChange={(v) => handleChange("condition", v)}>
-              <SelectTrigger className="bg-slate-800/50 border-white/10 text-white">
-                <SelectValue placeholder="Zustand wählen" />
-              </SelectTrigger>
-              <SelectContent>
-                {CONDITIONS.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          )}
+        <div className="sm:col-span-2">
+          <Label className="text-white/70 text-sm mb-2 block">Details (Mehrfachauswahl möglich)</Label>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {DETAILS_OPTIONS.map(detail => (
+              <Button
+                key={detail}
+                type="button"
+                onClick={() => {
+                  const current = form.details || [];
+                  if (current.includes(detail)) {
+                    handleChange("details", current.filter(d => d !== detail));
+                  } else {
+                    handleChange("details", [...current, detail]);
+                  }
+                }}
+                className={`${(form.details || []).includes(detail) ? 'bg-cyan-600 hover:bg-cyan-700 text-white' : 'bg-slate-700 hover:bg-slate-600 text-white/70'} transition-colors text-xs h-9`}
+              >
+                {detail}
+              </Button>
+            ))}
+          </div>
         </div>
         <div>
           <Label className="text-white/70 text-sm mb-1.5 block">Captain/Alternate Patch</Label>

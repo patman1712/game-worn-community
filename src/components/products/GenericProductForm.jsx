@@ -21,6 +21,22 @@ const LEAGUES_BY_SPORT = {
   other: ["Sonstige"]
 };
 
+const DETAILS_OPTIONS = [
+  "Neu mit Etikett",
+  "Neu ohne Etikett",
+  "Getragen",
+  "pre Season",
+  "Home",
+  "Away",
+  "Third",
+  "Specialtrikot",
+  "Warmup Third",
+  "Play Offs",
+  "Set 1",
+  "Set 2",
+  "Set 3"
+];
+
 const compressImage = async (file, targetSizeKB = 1000) => {
   return new Promise((resolve, reject) => {
     try {
@@ -103,7 +119,7 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
     season: "",
     player_name: "",
     player_number: "",
-    condition: "",
+    details: [],
     description: "",
     image_url: "",
     additional_images: [],
@@ -392,10 +408,33 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
           <Label className="text-white/70 text-sm mb-1.5 block">Größe</Label>
           <Input value={form.size} onChange={(e) => handleChange("size", e.target.value)} placeholder="z.B. L, 42, etc." className="bg-slate-800/50 border-white/10 text-white placeholder:text-white/20 focus:border-cyan-500/50" />
         </div>
-        <div>
-          <Label className="text-white/70 text-sm mb-1.5 block">Zustand</Label>
-          <Input value={form.condition} onChange={(e) => handleChange("condition", e.target.value)} placeholder="z.B. Neu, Gut, etc." className="bg-slate-800/50 border-white/10 text-white placeholder:text-white/20 focus:border-cyan-500/50" />
+      </div>
+
+      {/* Details Section */}
+      <div>
+        <Label className="text-white/70 text-sm mb-2 block">Details (Mehrfachauswahl möglich)</Label>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          {DETAILS_OPTIONS.map(detail => (
+            <Button
+              key={detail}
+              type="button"
+              onClick={() => {
+                const current = form.details || [];
+                if (current.includes(detail)) {
+                  handleChange("details", current.filter(d => d !== detail));
+                } else {
+                  handleChange("details", [...current, detail]);
+                }
+              }}
+              className={`${(form.details || []).includes(detail) ? 'bg-cyan-600 hover:bg-cyan-700 text-white' : 'bg-slate-700 hover:bg-slate-600 text-white/70'} transition-colors text-xs h-9`}
+            >
+              {detail}
+            </Button>
+          ))}
         </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       </div>
 
       {/* Toggles */}
