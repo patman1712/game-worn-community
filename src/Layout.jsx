@@ -50,9 +50,9 @@ export default function Layout({ children, currentPageName }) {
   
   // Determine if messages should be shown - check both PendingUser and User.data
   const showMessages = user && (
-    pendingUser === undefined 
-      ? (user.data?.accept_messages !== false && user.accept_messages !== false)
-      : (pendingUser === null ? true : pendingUser.accept_messages !== false)
+    pendingUser !== undefined
+      ? (pendingUser?.accept_messages !== false)  // Use pendingUser if loaded
+      : (user.data?.accept_messages !== false && user.accept_messages !== false)  // Fallback to user.data
   );
   
   const visibleTabs = TABS.filter(tab => {
