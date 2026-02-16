@@ -20,7 +20,25 @@ export default function Layout({ children, currentPageName }) {
   const location = useLocation();
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => setUser(null));
+    base44.auth.me().then(async (authUser) => {
+      // Get full user details including accept_messages from PendingUser
+      try {
+        const pendingUsers = await base44.entities.PendingUser.filter({ email: authUser.email });
+        if (pendingUsers.length > 0) {
+          setUser({
+            ...authUser,
+            data: {
+              ...authUser.data,
+              accept_messages: pendingUsers[0].accept_messages
+            }
+          });
+        } else {
+          setUser(authUser);
+        }
+      } catch (e) {
+        setUser(authUser);
+      }
+    }).catch(() => setUser(null));
   }, []);
 
   const { data: unreadMessages = [] } = useQuery({
