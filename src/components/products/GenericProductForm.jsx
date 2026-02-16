@@ -398,43 +398,47 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
         </div>
       </div>
 
-      {/* Details Section */}
-      <div>
-        <Label className="text-white/70 text-sm mb-1.5 block">Details</Label>
-        <Button
-          type="button"
-          onClick={() => setDetailsDialogOpen(true)}
-          variant="outline"
-          className="w-full bg-slate-800/50 border-white/10 text-white hover:bg-slate-700 hover:text-white justify-start"
-        >
-          {form.details && form.details.length > 0 
-            ? `${form.details.length} Detail${form.details.length > 1 ? 's' : ''} ausgewählt`
-            : "Details hinzufügen"}
-        </Button>
-        {form.details && form.details.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-2">
-            {form.details.map(detail => (
-              <span key={detail} className="text-xs bg-cyan-600/20 text-cyan-300 px-2 py-1 rounded">
-                {detail}
-              </span>
-            ))}
+      {/* Details Section - Only for jerseys */}
+      {productType === "jersey" && (
+        <>
+          <div>
+            <Label className="text-white/70 text-sm mb-1.5 block">Details</Label>
+            <Button
+              type="button"
+              onClick={() => setDetailsDialogOpen(true)}
+              variant="outline"
+              className="w-full bg-slate-800/50 border-white/10 text-white hover:bg-slate-700 hover:text-white justify-start"
+            >
+              {form.details && form.details.length > 0 
+                ? `${form.details.length} Detail${form.details.length > 1 ? 's' : ''} ausgewählt`
+                : "Details hinzufügen"}
+            </Button>
+            {form.details && form.details.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-2">
+                {form.details.map(detail => (
+                  <span key={detail} className="text-xs bg-cyan-600/20 text-cyan-300 px-2 py-1 rounded">
+                    {detail}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
-        )}
-      </div>
 
-      {/* Condition Field - Only for Fan-Jersey */}
-      {form.is_fan_jersey && (
-        <div>
-          <Label className="text-white/70 text-sm mb-1.5 block">Zustand</Label>
-          <Button
-            type="button"
-            onClick={() => setConditionDialogOpen(true)}
-            variant="outline"
-            className="w-full bg-slate-800/50 border-white/10 text-white hover:bg-slate-700 hover:text-white justify-start"
-          >
-            {form.condition || "Zustand hinzufügen"}
-          </Button>
-        </div>
+          {/* Condition Field - Only for Authentic or Fan-Jersey */}
+          {(form.is_authentic || form.is_fan_jersey) && (
+            <div>
+              <Label className="text-white/70 text-sm mb-1.5 block">Zustand</Label>
+              <Button
+                type="button"
+                onClick={() => setConditionDialogOpen(true)}
+                variant="outline"
+                className="w-full bg-slate-800/50 border-white/10 text-white hover:bg-slate-700 hover:text-white justify-start"
+              >
+                {form.condition || "Zustand hinzufügen"}
+              </Button>
+            </div>
+          )}
+        </>
       )}
 
       {/* Toggles */}
