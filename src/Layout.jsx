@@ -23,13 +23,15 @@ export default function Layout({ children, currentPageName }) {
     base44.auth.me().then(setUser).catch(() => setUser(null));
   }, []);
 
-  const { data: pendingUser } = useQuery({
+  const { data: pendingUser, refetch: refetchPendingUser } = useQuery({
     queryKey: ["pendingUser", user?.email],
     queryFn: async () => {
       const pendingUsers = await base44.entities.PendingUser.filter({ email: user.email });
       return pendingUsers[0] || null;
     },
     enabled: !!user,
+    staleTime: 0, // Always fetch fresh data
+    refetchOnMount: true,
   });
 
   const { data: unreadMessages = [] } = useQuery({

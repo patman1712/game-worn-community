@@ -61,6 +61,19 @@ export default function Settings() {
     const updatedUser = await base44.auth.me();
     setUser(updatedUser);
     
+    // Update PendingUser with accept_messages
+    try {
+      const pendingUsers = await base44.entities.PendingUser.filter({ email: user.email });
+      if (pendingUsers.length > 0) {
+        await base44.entities.PendingUser.update(pendingUsers[0].id, {
+          accept_messages: profile.accept_messages,
+          display_name: profile.display_name,
+        });
+      }
+    } catch (error) {
+      console.error('Error updating PendingUser:', error);
+    }
+    
     // Update all user's jerseys with new display name
     if (profile.display_name !== user.display_name) {
       try {
