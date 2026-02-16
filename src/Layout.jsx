@@ -34,12 +34,6 @@ export default function Layout({ children, currentPageName }) {
     refetchOnMount: true,
   });
 
-  const { data: unreadMessages = [] } = useQuery({
-    queryKey: ["unreadMessages", user?.email],
-    queryFn: () => user ? base44.entities.Message.filter({ receiver_email: user.email, read: false }) : [],
-    enabled: !!user && !isLoadingPendingUser && showMessages,
-  });
-
   // Share page should have no layout at all
   if (currentPageName === "Share") {
     return children;
@@ -55,6 +49,12 @@ export default function Layout({ children, currentPageName }) {
       ? (pendingUser.accept_messages !== false)  // Use pendingUser if exists
       : (user.data?.accept_messages !== false && user.accept_messages !== false)  // Fallback to user.data
   );
+
+  const { data: unreadMessages = [] } = useQuery({
+    queryKey: ["unreadMessages", user?.email],
+    queryFn: () => user ? base44.entities.Message.filter({ receiver_email: user.email, read: false }) : [],
+    enabled: !!user && !isLoadingPendingUser && showMessages,
+  });
   
   const visibleTabs = TABS.filter(tab => {
     if (!tab.authRequired) return true;
