@@ -628,7 +628,6 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
                   <Upload className="w-6 h-6 text-cyan-400" />
                   <div>
                     <p className="text-white text-sm">Rechnung hochgeladen</p>
-                    <p className="text-white/40 text-xs">Klicken zum Anzeigen</p>
                   </div>
                 </div>
                 <button
@@ -642,6 +641,33 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
             </div>
           ) : (
             <div
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                e.currentTarget.classList.add('border-cyan-500/60', 'bg-cyan-500/5');
+              }}
+              onDragLeave={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                e.currentTarget.classList.remove('border-cyan-500/60', 'bg-cyan-500/5');
+              }}
+              onDrop={async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                e.currentTarget.classList.remove('border-cyan-500/60', 'bg-cyan-500/5');
+                const files = Array.from(e.dataTransfer?.files || []).filter(f => f.type.startsWith('image/') || f.type === 'application/pdf');
+                if (files.length === 0) return;
+                const file = files[0];
+                setUploading(true);
+                try {
+                  const { file_url } = await base44.integrations.Core.UploadFile({ file });
+                  handleChange("invoice_url", file_url);
+                } catch (error) {
+                  alert("Fehler beim Hochladen der Rechnung");
+                } finally {
+                  setUploading(false);
+                }
+              }}
               onClick={() => document.getElementById('invoice-upload-generic').click()}
               className="w-full p-6 flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-white/10 hover:border-cyan-500/40 bg-slate-800/50 cursor-pointer transition-colors"
             >
