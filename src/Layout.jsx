@@ -39,6 +39,8 @@ export default function Layout({ children, currentPageName }) {
   const visibleTabs = TABS.filter(tab => {
     if (!tab.authRequired) return true;
     if (!user) return false;
+    // Hide Messages tab if user has disabled accept_messages
+    if (tab.name === "Messages" && user.data?.accept_messages === false) return false;
     return true;
   });
 

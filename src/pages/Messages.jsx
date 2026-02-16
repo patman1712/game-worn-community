@@ -73,9 +73,14 @@ export default function Messages() {
       
       if (!convMap.has(convId)) {
         const otherUser = allUsersForNames.find(u => u.email === otherEmail);
+        const displayName = otherUser?.data?.display_name || otherUser?.display_name || otherUser?.full_name;
+        
         convMap.set(convId, {
           otherEmail,
-          otherUser,
+          otherUser: otherUser ? {
+            ...otherUser,
+            displayName: displayName
+          } : null,
           messages: [],
           lastMessage: msg,
           unreadCount: 0,
@@ -243,10 +248,7 @@ export default function Messages() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1">
                           <h3 className="text-white font-medium truncate">
-                            {(conv.otherUser?.data?.display_name || 
-                              conv.otherUser?.display_name || 
-                              conv.otherUser?.full_name) || 
-                             "Benutzer"}
+                            {conv.otherUser?.displayName || "Benutzer"}
                           </h3>
                           <div className="flex items-center gap-2">
                             {conv.unreadCount > 0 && (
