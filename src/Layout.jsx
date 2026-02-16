@@ -52,7 +52,7 @@ export default function Layout({ children, currentPageName }) {
   const showMessages = user && (
     pendingUser === undefined 
       ? (user.data?.accept_messages !== false && user.accept_messages !== false)
-      : pendingUser.accept_messages !== false
+      : (pendingUser === null ? true : pendingUser.accept_messages !== false)
   );
   
   const visibleTabs = TABS.filter(tab => {
