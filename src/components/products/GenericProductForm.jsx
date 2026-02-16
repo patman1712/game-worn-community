@@ -394,10 +394,10 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
           <Label className="text-white/70 text-sm mb-1.5 block">Größe</Label>
           <Input value={form.size} onChange={(e) => handleChange("size", e.target.value)} placeholder="z.B. L, 42, etc." className="bg-slate-800/50 border-white/10 text-white placeholder:text-white/20 focus:border-cyan-500/50" />
         </div>
-      </div>
+        </div>
 
-      {/* Details Section */}
-      <div>
+        {/* Details Section */}
+        <div>
         <Label className="text-white/70 text-sm mb-1.5 block">Details</Label>
         <Button
           type="button"
@@ -418,7 +418,7 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
             ))}
           </div>
         )}
-      </div>
+        </div>
       </div>
 
       {/* Toggles */}
