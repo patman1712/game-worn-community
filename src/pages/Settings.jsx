@@ -39,15 +39,27 @@ export default function Settings() {
   const [changingPassword, setChangingPassword] = useState(false);
 
   useEffect(() => {
-    base44.auth.me().then(u => {
+    base44.auth.me().then(async (u) => {
       setUser(u);
+      
+      // Load from PendingUser if exists
+      let accept_messages = u.accept_messages !== false;
+      try {
+        const pendingUsers = await base44.entities.PendingUser.filter({ email: u.email });
+        if (pendingUsers.length > 0) {
+          accept_messages = pendingUsers[0].accept_messages !== false;
+        }
+      } catch (e) {
+        console.error('Error loading PendingUser:', e);
+      }
+      
       setProfile({
         display_name: u.display_name || u.full_name || "",
         real_name: u.real_name || u.full_name || "",
         location: u.location || "",
         show_email: u.show_email || false,
         show_location: u.show_location || false,
-        accept_messages: u.accept_messages !== false,
+        accept_messages: accept_messages,
         hidden_sports: u.hidden_sports || [],
       });
     }).catch(() => {

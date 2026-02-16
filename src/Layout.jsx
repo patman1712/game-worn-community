@@ -48,11 +48,18 @@ export default function Layout({ children, currentPageName }) {
   const isChildPage = CHILD_PAGES.includes(currentPageName);
   const showBottomNav = !isChildPage;
   
+  // Determine if messages should be shown - check both PendingUser and User.data
+  const showMessages = user && (
+    pendingUser === undefined 
+      ? (user.data?.accept_messages !== false && user.accept_messages !== false)
+      : pendingUser.accept_messages !== false
+  );
+  
   const visibleTabs = TABS.filter(tab => {
     if (!tab.authRequired) return true;
     if (!user) return false;
     // Hide Messages tab if user has explicitly disabled accept_messages
-    if (tab.name === "Messages" && pendingUser?.accept_messages === false) return false;
+    if (tab.name === "Messages" && !showMessages) return false;
     return true;
   });
 
