@@ -48,6 +48,11 @@ export default function Home() {
     queryFn: () => base44.entities.CollectionItem.list("-created_date", 200),
   });
 
+  const { data: allUsers = [] } = useQuery({
+    queryKey: ["allUsers"],
+    queryFn: () => base44.entities.User.list(),
+  });
+
   // Filter out private jerseys (unless they belong to the current user or user is admin)
   const jerseys = allJerseys.filter(j => 
     !j.is_private || j.owner_email === currentUser?.email || j.created_by === currentUser?.email || currentUser?.data?.role === 'admin' || currentUser?.role === 'admin'
@@ -208,11 +213,15 @@ export default function Home() {
     return result;
   }, [allProducts, search, league, sport, productType, sortBy, currentUser]);
 
-  // Stats (based on visible items only)
-  const totalLikes = visibleJerseys.reduce((s, j) => s + (j.likes_count || 0), 0);
-  const collectors = new Set([...visibleJerseys, ...visibleCollectionItems].map(j => j.owner_email || j.created_by).filter(Boolean)).size;
+  // Stats (based on filtered items)
+  const filteredBySport = sport !== "all" 
+    ? [...visibleJerseys, ...visibleCollectionItems].filter(j => j.sport_type === sport)
+    : [...visibleJerseys, ...visibleCollectionItems];
+  
+  const totalLikes = filteredBySport.filter(j => !j.product_type).reduce((s, j) => s + (j.likes_count || 0), 0);
+  const collectors = allUsers.length;
   const leagueCounts = {};
-  visibleJerseys.forEach(j => { if (j.league) leagueCounts[j.league] = (leagueCounts[j.league] || 0) + 1; });
+  filteredBySport.filter(j => !j.product_type).forEach(j => { if (j.league) leagueCounts[j.league] = (leagueCounts[j.league] || 0) + 1; });
   const topLeague = Object.entries(leagueCounts).sort(([,a],[,b]) => b - a)[0]?.[0];
 
   return (
@@ -249,7 +258,7 @@ export default function Home() {
           </motion.div>
 
           <StatsBar
-            totalJerseys={allProducts.length}
+            totalJerseys={filteredBySport.length}
             totalCollectors={collectors}
             totalLikes={totalLikes}
             topLeague={topLeague}
