@@ -23,7 +23,7 @@ export default function Layout({ children, currentPageName }) {
     base44.auth.me().then(setUser).catch(() => setUser(null));
   }, []);
 
-  const { data: pendingUser, refetch: refetchPendingUser } = useQuery({
+  const { data: pendingUser, isLoading: isLoadingPendingUser } = useQuery({
     queryKey: ["pendingUser", user?.email],
     queryFn: async () => {
       const pendingUsers = await base44.entities.PendingUser.filter({ email: user.email });
@@ -37,7 +37,7 @@ export default function Layout({ children, currentPageName }) {
   const { data: unreadMessages = [] } = useQuery({
     queryKey: ["unreadMessages", user?.email],
     queryFn: () => user ? base44.entities.Message.filter({ receiver_email: user.email, read: false }) : [],
-    enabled: !!user && pendingUser !== undefined && pendingUser?.accept_messages !== false,
+    enabled: !!user && !isLoadingPendingUser && showMessages,
   });
 
   // Share page should have no layout at all
@@ -49,9 +49,10 @@ export default function Layout({ children, currentPageName }) {
   const showBottomNav = !isChildPage;
   
   // Determine if messages should be shown - check both PendingUser and User.data
-  const showMessages = user && (
-    pendingUser !== undefined
-      ? (pendingUser?.accept_messages !== false)  // Use pendingUser if loaded
+  // Don't show messages while loading to prevent flickering
+  const showMessages = user && !isLoadingPendingUser && (
+    pendingUser
+      ? (pendingUser.accept_messages !== false)  // Use pendingUser if exists
       : (user.data?.accept_messages !== false && user.accept_messages !== false)  // Fallback to user.data
   );
   
