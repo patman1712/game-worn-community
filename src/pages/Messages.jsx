@@ -55,7 +55,15 @@ export default function Messages() {
 
   const { data: allUsersForNames = [] } = useQuery({
     queryKey: ["all-users-names"],
-    queryFn: () => base44.entities.User.list(),
+    queryFn: async () => {
+      try {
+        const users = await base44.entities.User.list();
+        const pendingUsers = await base44.entities.PendingUser.list();
+        return [...users, ...pendingUsers];
+      } catch (e) {
+        return [];
+      }
+    },
     enabled: !!currentUser,
   });
 
@@ -239,10 +247,10 @@ export default function Messages() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1">
                           <h3 className="text-white font-medium truncate">
-                            {conv.otherUser?.data?.display_name || 
-                             conv.otherUser?.display_name || 
-                             conv.otherUser?.full_name || 
-                             conv.otherEmail}
+                            {(conv.otherUser?.data?.display_name || 
+                              conv.otherUser?.display_name || 
+                              conv.otherUser?.full_name) || 
+                             "Benutzer"}
                           </h3>
                           <div className="flex items-center gap-2">
                             {conv.unreadCount > 0 && (

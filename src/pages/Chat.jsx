@@ -111,7 +111,7 @@ export default function Chat() {
           </div>
           <div>
             <h2 className="text-white font-medium">
-              {otherUser?.data?.display_name || otherUser?.display_name || otherUser?.full_name || "Chat"}
+              {(otherUser?.data?.display_name || otherUser?.display_name || otherUser?.full_name) || "Benutzer"}
             </h2>
             <p className="text-white/40 text-xs">Chat</p>
           </div>
