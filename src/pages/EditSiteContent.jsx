@@ -74,7 +74,7 @@ export default function EditSiteContent() {
           Zurück zum Admin-Panel
         </Link>
 
-        <h1 className="text-3xl font-bold text-white mb-8">Impressum & AGB bearbeiten</h1>
+        <h1 className="text-3xl font-bold text-white mb-8">Impressum & Datenschutz bearbeiten</h1>
 
         <div className="space-y-8">
           {/* Impressum */}
@@ -97,15 +97,15 @@ export default function EditSiteContent() {
             </Button>
           </div>
 
-          {/* AGB */}
+          {/* Datenschutz */}
           <div className="bg-slate-800/50 rounded-xl p-6 border border-white/10">
-            <Label className="text-white text-lg font-semibold mb-4 block">AGB</Label>
+            <Label className="text-white text-lg font-semibold mb-4 block">Datenschutz</Label>
             <Textarea
               value={agbText}
               onChange={(e) => setAgbText(e.target.value)}
               rows={12}
               className="bg-slate-900/50 border-white/10 text-white placeholder:text-white/20 focus:border-cyan-500/50 resize-none mb-4"
-              placeholder="AGB-Text eingeben..."
+              placeholder="Datenschutz-Text eingeben..."
             />
             <Button
               onClick={() => saveMutation.mutate({ type: "agb", text: agbText })}
@@ -113,7 +113,7 @@ export default function EditSiteContent() {
               className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500"
             >
               {saveMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
-              AGB speichern
+              Datenschutz speichern
             </Button>
           </div>
         </div>
