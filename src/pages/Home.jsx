@@ -53,6 +53,14 @@ export default function Home() {
     queryFn: () => base44.entities.User.list(),
   });
 
+  const { data: userCountData } = useQuery({
+    queryKey: ["userCount"],
+    queryFn: async () => {
+      const response = await base44.functions.invoke('getUserCount');
+      return response.data;
+    },
+  });
+
   // Filter out private jerseys (unless they belong to the current user or user is admin)
   const jerseys = allJerseys.filter(j => 
     !j.is_private || j.owner_email === currentUser?.email || j.created_by === currentUser?.email || currentUser?.data?.role === 'admin' || currentUser?.role === 'admin'
@@ -219,7 +227,7 @@ export default function Home() {
     : [...visibleJerseys, ...visibleCollectionItems];
   
   const totalLikes = filteredBySport.filter(j => !j.product_type).reduce((s, j) => s + (j.likes_count || 0), 0);
-  const collectors = allUsers.length;
+  const collectors = userCountData?.count || 0;
   const leagueCounts = {};
   filteredBySport.filter(j => !j.product_type).forEach(j => { if (j.league) leagueCounts[j.league] = (leagueCounts[j.league] || 0) + 1; });
   const topLeague = Object.entries(leagueCounts).sort(([,a],[,b]) => b - a)[0]?.[0];
