@@ -11,6 +11,7 @@ import MobileDrawerSelect from "../jerseys/MobileDrawerSelect";
 import ImageEditor from "../jerseys/ImageEditor";
 import MultiImageUploadDialog from "../jerseys/MultiImageUploadDialog";
 import CopyrightDialog from "../jerseys/CopyrightDialog";
+import DetailsDialog from "../jerseys/DetailsDialog";
 
 const LEAGUES_BY_SPORT = {
   icehockey: ["NHL", "DEL", "SHL", "KHL", "NLA", "EIHL", "Liiga", "CHL", "IIHF", "AHL", "OHL", "Sonstige"],
@@ -20,22 +21,6 @@ const LEAGUES_BY_SPORT = {
   baseball: ["MLB", "NPB", "KBO", "Sonstige"],
   other: ["Sonstige"]
 };
-
-const DETAILS_OPTIONS = [
-  "Neu mit Etikett",
-  "Neu ohne Etikett",
-  "Getragen",
-  "pre Season",
-  "Home",
-  "Away",
-  "Third",
-  "Specialtrikot",
-  "Warmup Third",
-  "Play Offs",
-  "Set 1",
-  "Set 2",
-  "Set 3"
-];
 
 const compressImage = async (file, targetSizeKB = 1000) => {
   return new Promise((resolve, reject) => {
@@ -147,6 +132,7 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
   const [copyrightDialogOpen, setCopyrightDialogOpen] = useState(false);
   const [copyrightAgreed, setCopyrightAgreed] = useState(false);
   const [initialImageCount] = useState(initialData?.additional_images?.length || 0);
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   
   const leagueOptions = LEAGUES_BY_SPORT[sportType] || [];
@@ -412,29 +398,27 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
 
       {/* Details Section */}
       <div>
-        <Label className="text-white/70 text-sm mb-2 block">Details (Mehrfachauswahl möglich)</Label>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          {DETAILS_OPTIONS.map(detail => (
-            <Button
-              key={detail}
-              type="button"
-              onClick={() => {
-                const current = form.details || [];
-                if (current.includes(detail)) {
-                  handleChange("details", current.filter(d => d !== detail));
-                } else {
-                  handleChange("details", [...current, detail]);
-                }
-              }}
-              className={`${(form.details || []).includes(detail) ? 'bg-cyan-600 hover:bg-cyan-700 text-white' : 'bg-slate-700 hover:bg-slate-600 text-white/70'} transition-colors text-xs h-9`}
-            >
-              {detail}
-            </Button>
-          ))}
-        </div>
+        <Label className="text-white/70 text-sm mb-1.5 block">Details</Label>
+        <Button
+          type="button"
+          onClick={() => setDetailsDialogOpen(true)}
+          variant="outline"
+          className="w-full bg-slate-800/50 border-white/10 text-white hover:bg-slate-700 hover:text-white justify-start"
+        >
+          {form.details && form.details.length > 0 
+            ? `${form.details.length} Detail${form.details.length > 1 ? 's' : ''} ausgewählt`
+            : "Details hinzufügen"}
+        </Button>
+        {form.details && form.details.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-2">
+            {form.details.map(detail => (
+              <span key={detail} className="text-xs bg-cyan-600/20 text-cyan-300 px-2 py-1 rounded">
+                {detail}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       </div>
 
       {/* Toggles */}
@@ -773,6 +757,14 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
       <MultiImageUploadDialog open={multiImageDialogOpen} onOpenChange={setMultiImageDialogOpen} onImagesUploaded={handleMultiImageUpload} />
 
       <CopyrightDialog open={copyrightDialogOpen} onConfirm={() => { setCopyrightAgreed(true); setCopyrightDialogOpen(false); }} onCancel={() => { if (initialData) { handleChange("additional_images", initialData.additional_images || []); if (initialData.image_url) handleChange("image_url", initialData.image_url); } else { handleChange("additional_images", []); handleChange("image_url", ""); } setCopyrightDialogOpen(false); }} />
+
+      {/* Details Dialog */}
+      <DetailsDialog
+        open={detailsDialogOpen}
+        onOpenChange={setDetailsDialogOpen}
+        selectedDetails={form.details || []}
+        onConfirm={(selected) => handleChange("details", selected)}
+      />
     </form>
   );
 }
