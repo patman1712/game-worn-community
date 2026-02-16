@@ -5,9 +5,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 
 const DETAILS_OPTIONS = [
-  "Neu mit Etikett",
-  "Neu ohne Etikett",
-  "Getragen",
   "pre Season",
   "Home",
   "Away",

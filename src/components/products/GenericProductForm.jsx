@@ -12,6 +12,7 @@ import ImageEditor from "../jerseys/ImageEditor";
 import MultiImageUploadDialog from "../jerseys/MultiImageUploadDialog";
 import CopyrightDialog from "../jerseys/CopyrightDialog";
 import DetailsDialog from "../jerseys/DetailsDialog";
+import ConditionDialog from "../jerseys/ConditionDialog";
 
 const LEAGUES_BY_SPORT = {
   icehockey: ["NHL", "DEL", "SHL", "KHL", "NLA", "EIHL", "Liiga", "CHL", "IIHF", "AHL", "OHL", "Sonstige"],
@@ -133,6 +134,7 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
   const [copyrightAgreed, setCopyrightAgreed] = useState(false);
   const [initialImageCount] = useState(initialData?.additional_images?.length || 0);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [conditionDialogOpen, setConditionDialogOpen] = useState(false);
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   
   const leagueOptions = LEAGUES_BY_SPORT[sportType] || [];
@@ -419,6 +421,21 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
           </div>
         )}
       </div>
+
+      {/* Condition Field - Only for Fan-Jersey */}
+      {form.is_fan_jersey && (
+        <div>
+          <Label className="text-white/70 text-sm mb-1.5 block">Zustand</Label>
+          <Button
+            type="button"
+            onClick={() => setConditionDialogOpen(true)}
+            variant="outline"
+            className="w-full bg-slate-800/50 border-white/10 text-white hover:bg-slate-700 hover:text-white justify-start"
+          >
+            {form.condition || "Zustand hinzufügen"}
+          </Button>
+        </div>
+      )}
 
       {/* Toggles */}
       <div className="space-y-3">
@@ -763,6 +780,14 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
         onOpenChange={setDetailsDialogOpen}
         selectedDetails={form.details || []}
         onConfirm={(selected) => handleChange("details", selected)}
+      />
+
+      {/* Condition Dialog */}
+      <ConditionDialog
+        open={conditionDialogOpen}
+        onOpenChange={setConditionDialogOpen}
+        selectedCondition={form.condition}
+        onConfirm={(condition) => handleChange("condition", condition)}
       />
     </form>
   );

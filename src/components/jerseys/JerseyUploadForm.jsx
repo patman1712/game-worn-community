@@ -14,6 +14,7 @@ import ImageEditor from "./ImageEditor";
 import MultiImageUploadDialog from "./MultiImageUploadDialog";
 import CopyrightDialog from "./CopyrightDialog";
 import DetailsDialog from "./DetailsDialog";
+import ConditionDialog from "./ConditionDialog";
 
 const compressImage = async (file, targetSizeKB = 1000) => {
   return new Promise((resolve, reject) => {
@@ -144,6 +145,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
   const [copyrightAgreed, setCopyrightAgreed] = useState(false);
   const [initialImageCount] = useState(initialData?.additional_images?.length || 0);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [conditionDialogOpen, setConditionDialogOpen] = useState(false);
   
   const leagueOptions = LEAGUES_BY_SPORT[form.sport_type] || [];
   const LEAGUE_OPTIONS = leagueOptions.map(l => ({ value: l, label: l }));
@@ -522,6 +524,21 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
             </div>
           )}
         </div>
+
+        {/* Condition Field - Only for Authentic or Fan-Jersey */}
+        {(form.is_authentic || form.is_fan_jersey) && (
+          <div>
+            <Label className="text-white/70 text-sm mb-1.5 block">Zustand</Label>
+            <Button
+              type="button"
+              onClick={() => setConditionDialogOpen(true)}
+              variant="outline"
+              className="w-full bg-slate-800/50 border-white/10 text-white hover:bg-slate-700 hover:text-white justify-start"
+            >
+              {form.condition || "Zustand hinzufügen"}
+            </Button>
+          </div>
+        )}
         <div>
           <Label className="text-white/70 text-sm mb-1.5 block">Captain/Alternate Patch</Label>
           {isMobile ? (
@@ -982,6 +999,14 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
         onOpenChange={setDetailsDialogOpen}
         selectedDetails={form.details || []}
         onConfirm={(selected) => handleChange("details", selected)}
+      />
+
+      {/* Condition Dialog */}
+      <ConditionDialog
+        open={conditionDialogOpen}
+        onOpenChange={setConditionDialogOpen}
+        selectedCondition={form.condition}
+        onConfirm={(condition) => handleChange("condition", condition)}
       />
     </form>
   );
