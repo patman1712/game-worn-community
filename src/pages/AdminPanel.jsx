@@ -57,7 +57,7 @@ export default function AdminPanel() {
             </Link>
             <Link to={createPageUrl("EditSiteContent")}>
               <Button variant="outline" className="text-purple-400 border-purple-500/30 hover:bg-purple-500/10">
-                Impressum & AGB
+                Impressum & Datenschutz
               </Button>
             </Link>
           </div>

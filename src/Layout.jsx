@@ -216,7 +216,7 @@ export default function Layout({ children, currentPageName }) {
                 Impressum
               </Link>
               <Link to={createPageUrl("AGB")} className="hover:text-white/70 transition-colors">
-                AGB
+                Datenschutz
               </Link>
             </div>
           </div>
