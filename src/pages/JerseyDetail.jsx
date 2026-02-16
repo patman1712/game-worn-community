@@ -20,6 +20,7 @@ export default function JerseyDetail() {
   const [activeImage, setActiveImage] = useState(0);
   const [commentText, setCommentText] = useState("");
   const [certificateImageOpen, setCertificateImageOpen] = useState(null);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -149,7 +150,10 @@ export default function JerseyDetail() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           {/* Images + Owner Section */}
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
-            <div className="relative aspect-square rounded-2xl overflow-hidden bg-slate-800 border border-white/5">
+            <div 
+              className="relative aspect-square rounded-2xl overflow-hidden bg-slate-800 border border-white/5 cursor-pointer"
+              onClick={() => setLightboxOpen(true)}
+            >
               <img
                 src={allImages[activeImage]}
                 alt={jersey.title}
@@ -173,11 +177,14 @@ export default function JerseyDetail() {
               )}
             </div>
             {allImages.length > 1 && (
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 {allImages.map((url, i) => (
                   <button
                     key={i}
-                    onClick={() => setActiveImage(i)}
+                    onClick={() => {
+                      setActiveImage(i);
+                      setLightboxOpen(true);
+                    }}
                     className={`w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${activeImage === i ? 'border-cyan-500' : 'border-white/10 opacity-50 hover:opacity-80'}`}
                   >
                     <img src={url} alt="" className="w-full h-full object-cover" />
@@ -521,6 +528,47 @@ export default function JerseyDetail() {
               )}
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Image Lightbox */}
+      <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
+        <DialogContent className="max-w-[95vw] w-[95vw] h-[95vh] bg-slate-900/95 border-white/10 p-0">
+          <button
+            onClick={() => setLightboxOpen(false)}
+            className="absolute top-4 right-4 z-50 p-2 rounded-full bg-slate-800/80 hover:bg-slate-700 text-white transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+          <div className="w-full h-full flex items-center justify-center relative p-4">
+            <img 
+              src={allImages[activeImage]} 
+              alt={jersey.title}
+              className="max-w-full max-h-full object-contain"
+            />
+            {allImages.length > 1 && (
+              <>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveImage(i => (i - 1 + allImages.length) % allImages.length);
+                  }}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/60 backdrop-blur-sm hover:bg-black/80 transition-colors"
+                >
+                  <ChevronLeft className="w-6 h-6 text-white" />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveImage(i => (i + 1) % allImages.length);
+                  }}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/60 backdrop-blur-sm hover:bg-black/80 transition-colors"
+                >
+                  <ChevronRight className="w-6 h-6 text-white" />
+                </button>
+              </>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>
