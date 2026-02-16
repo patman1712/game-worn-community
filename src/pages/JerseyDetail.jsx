@@ -347,6 +347,22 @@ export default function JerseyDetail() {
                   <p className="text-white text-sm font-medium">{jersey.season}</p>
                 </div>
               )}
+              {jersey.brand && (
+                <div className="p-3 rounded-xl bg-slate-800/30 border border-white/5">
+                  <div className="flex items-center gap-2 text-white/30 text-xs mb-1">
+                    <Tag className="w-3 h-3" /> Marke
+                  </div>
+                  <p className="text-white text-sm font-medium">{jersey.brand}</p>
+                </div>
+              )}
+              {jersey.size && (
+                <div className="p-3 rounded-xl bg-slate-800/30 border border-white/5">
+                  <div className="flex items-center gap-2 text-white/30 text-xs mb-1">
+                    <Shirt className="w-3 h-3" /> Größe
+                  </div>
+                  <p className="text-white text-sm font-medium">{jersey.size}</p>
+                </div>
+              )}
               {jersey.condition && (
                 <div className="p-3 rounded-xl bg-slate-800/30 border border-white/5">
                   <div className="flex items-center gap-2 text-white/30 text-xs mb-1">
@@ -356,6 +372,20 @@ export default function JerseyDetail() {
                 </div>
               )}
             </div>
+
+            {/* Details Section */}
+            {jersey.details && jersey.details.length > 0 && (
+              <div>
+                <h3 className="text-white/60 text-sm font-medium mb-2">Details</h3>
+                <div className="flex flex-wrap gap-2">
+                  {jersey.details.map(detail => (
+                    <Badge key={detail} className="bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-xs">
+                      {detail}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Description */}
             {jersey.description && (
