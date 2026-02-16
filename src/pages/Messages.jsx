@@ -56,13 +56,9 @@ export default function Messages() {
   const { data: allUsersForNames = [] } = useQuery({
     queryKey: ["all-users-names"],
     queryFn: async () => {
-      try {
-        const users = await base44.entities.User.list();
-        const pendingUsers = await base44.entities.PendingUser.list();
-        return [...users, ...pendingUsers];
-      } catch (e) {
-        return [];
-      }
+      // Use backend function to get all users with service role
+      const response = await base44.functions.invoke('getMessageableUsers');
+      return response.data.users || [];
     },
     enabled: !!currentUser,
   });

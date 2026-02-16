@@ -22,18 +22,8 @@ export default function Chat() {
   const { data: otherUser } = useQuery({
     queryKey: ["user", otherEmail],
     queryFn: async () => {
-      try {
-        const users = await base44.entities.User.list();
-        const user = users.find(u => u.email === otherEmail);
-        if (user) return user;
-      } catch (e) {}
-
-      try {
-        const pendingUsers = await base44.entities.PendingUser.list();
-        return pendingUsers.find(u => u.email === otherEmail);
-      } catch (e) {}
-
-      return null;
+      const response = await base44.functions.invoke('getUserDetails', { email: otherEmail });
+      return response.data;
     },
     enabled: !!otherEmail,
   });
