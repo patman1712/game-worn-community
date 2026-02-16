@@ -23,9 +23,10 @@ Deno.serve(async (req) => {
         const publicUsers = messageableUsers.map(u => ({
             email: u.email,
             full_name: u.full_name,
-            display_name: u.data?.display_name || u.display_name,
-            location: u.data?.location || u.location,
-            show_location: u.data?.show_location ?? u.show_location ?? false
+            display_name: u.data?.display_name || u.display_name || u.full_name,
+            data: {
+                display_name: u.data?.display_name || u.display_name || u.full_name
+            }
         }));
 
         return Response.json({ users: publicUsers });
