@@ -249,8 +249,8 @@ export default function Settings() {
                 <div className="flex items-center gap-3">
                   <MessageCircle className="w-4 h-4 text-white/40" />
                   <div>
-                    <Label className="text-white/70 text-sm">Nachrichten erlauben</Label>
-                    <p className="text-white/30 text-xs mt-0.5">Andere User können dir Nachrichten senden</p>
+                    <Label className="text-white/70 text-sm">Nachrichten-System erlauben</Label>
+                    <p className="text-white/30 text-xs mt-0.5">Aktiviere das Nachrichten-System um Nachrichten zu senden und zu empfangen</p>
                   </div>
                 </div>
                 <Switch
