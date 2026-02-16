@@ -20,26 +20,17 @@ export default function Layout({ children, currentPageName }) {
   const location = useLocation();
 
   useEffect(() => {
-    base44.auth.me().then(async (authUser) => {
-      // Get full user details including accept_messages from PendingUser
-      try {
-        const pendingUsers = await base44.entities.PendingUser.filter({ email: authUser.email });
-        if (pendingUsers.length > 0) {
-          setUser({
-            ...authUser,
-            data: {
-              ...authUser.data,
-              accept_messages: pendingUsers[0].accept_messages
-            }
-          });
-        } else {
-          setUser(authUser);
-        }
-      } catch (e) {
-        setUser(authUser);
-      }
-    }).catch(() => setUser(null));
+    base44.auth.me().then(setUser).catch(() => setUser(null));
   }, []);
+
+  const { data: pendingUser } = useQuery({
+    queryKey: ["pendingUser", user?.email],
+    queryFn: async () => {
+      const pendingUsers = await base44.entities.PendingUser.filter({ email: user.email });
+      return pendingUsers[0] || null;
+    },
+    enabled: !!user,
+  });
 
   const { data: unreadMessages = [] } = useQuery({
     queryKey: ["unreadMessages", user?.email],
@@ -58,7 +49,7 @@ export default function Layout({ children, currentPageName }) {
     if (!tab.authRequired) return true;
     if (!user) return false;
     // Hide Messages tab if user has disabled accept_messages
-    if (tab.name === "Messages" && user.data?.accept_messages === false) return false;
+    if (tab.name === "Messages" && pendingUser?.accept_messages === false) return false;
     return true;
   });
 
