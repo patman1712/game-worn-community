@@ -86,10 +86,6 @@ export default function JerseyCard({ jersey, isLiked, onLike, index = 0 }) {
               className={`w-full h-full object-contain transition-all duration-700 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
               onLoad={() => setImgLoaded(true)}
             />
-            {/* Gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-80" />
-
-
 
             {/* Like and Edit buttons */}
             <div className="absolute top-3 right-3 flex gap-2">
@@ -152,35 +148,35 @@ export default function JerseyCard({ jersey, isLiked, onLike, index = 0 }) {
                 />
               </button>
             </div>
+          </div>
 
-            {/* Bottom info overlay */}
-            <div className="absolute bottom-0 left-0 right-0 p-4">
-              <div className="flex items-center gap-1.5 mb-2">
-                <Badge className="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] px-2 py-0">
-                  {jersey.sport_type === 'icehockey' ? 'Eishockey' :
-                   jersey.sport_type === 'soccer' ? 'Fussball' :
-                   jersey.sport_type === 'football' ? 'Football' :
-                   jersey.sport_type === 'basketball' ? 'Basketball' :
-                   jersey.sport_type === 'baseball' ? 'Baseball' : 'Eishockey'}
+          {/* Info Section - Below Image */}
+          <div className="px-4 py-3 bg-slate-900/80">
+            <div className="flex items-center gap-1.5 mb-2 flex-wrap">
+              <Badge className="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] px-2 py-0">
+                {jersey.sport_type === 'icehockey' ? 'Eishockey' :
+                 jersey.sport_type === 'soccer' ? 'Fussball' :
+                 jersey.sport_type === 'football' ? 'Football' :
+                 jersey.sport_type === 'basketball' ? 'Basketball' :
+                 jersey.sport_type === 'baseball' ? 'Baseball' : 'Eishockey'}
+              </Badge>
+              {jersey.league && (
+                <Badge className="bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-[10px] px-2 py-0">
+                  {jersey.league}
                 </Badge>
-                {jersey.league && (
-                  <Badge className="bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-[10px] px-2 py-0">
-                    {jersey.league}
-                  </Badge>
-                )}
-                {jersey.jersey_type && (
-                  <Badge className="bg-white/10 text-white/70 border border-white/10 text-[10px] px-2 py-0">
-                    {jersey.jersey_type}
-                  </Badge>
-                )}
-              </div>
-              <p className="text-white/50 text-xs">{jersey.team}</p>
-              {jersey.player_name && (
-                <p className="text-cyan-400/80 text-xs mt-1 font-medium">
-                  #{jersey.player_number} {jersey.player_name}
-                </p>
+              )}
+              {jersey.jersey_type && (
+                <Badge className="bg-white/10 text-white/70 border border-white/10 text-[10px] px-2 py-0">
+                  {jersey.jersey_type}
+                </Badge>
               )}
             </div>
+            <p className="text-white/70 text-sm font-medium truncate">{jersey.team}</p>
+            {jersey.player_name && (
+              <p className="text-cyan-400 text-sm mt-1 font-medium truncate">
+                #{jersey.player_number} {jersey.player_name}
+              </p>
+            )}
           </div>
 
           {/* Info Section - Game Worn, For Sale, etc */}
