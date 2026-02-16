@@ -35,7 +35,7 @@ export default function Layout({ children, currentPageName }) {
   const { data: unreadMessages = [] } = useQuery({
     queryKey: ["unreadMessages", user?.email],
     queryFn: () => user ? base44.entities.Message.filter({ receiver_email: user.email, read: false }) : [],
-    enabled: !!user,
+    enabled: !!user && pendingUser !== undefined && pendingUser?.accept_messages !== false,
   });
 
   // Share page should have no layout at all
@@ -45,11 +45,17 @@ export default function Layout({ children, currentPageName }) {
 
   const isChildPage = CHILD_PAGES.includes(currentPageName);
   const showBottomNav = !isChildPage;
+  
+  // Check both User.data.accept_messages and PendingUser.accept_messages
+  const acceptMessages = pendingUser !== undefined 
+    ? pendingUser?.accept_messages !== false 
+    : user?.data?.accept_messages !== false;
+  
   const visibleTabs = TABS.filter(tab => {
     if (!tab.authRequired) return true;
     if (!user) return false;
     // Hide Messages tab if user has disabled accept_messages
-    if (tab.name === "Messages" && pendingUser?.accept_messages === false) return false;
+    if (tab.name === "Messages" && !acceptMessages) return false;
     return true;
   });
 
