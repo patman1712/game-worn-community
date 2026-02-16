@@ -241,7 +241,8 @@ export default function Messages() {
                           <h3 className="text-white font-medium truncate">
                             {conv.otherUser?.data?.display_name || 
                              conv.otherUser?.display_name || 
-                             conv.otherUser?.full_name}
+                             conv.otherUser?.full_name || 
+                             conv.otherEmail}
                           </h3>
                           <div className="flex items-center gap-2">
                             {conv.unreadCount > 0 && (
