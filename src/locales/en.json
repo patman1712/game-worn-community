@@ -1,0 +1,37 @@
+{
+  "nav": {
+    "home": "Collection",
+    "messages": "Messages",
+    "myCollection": "My Items",
+    "addJersey": "Add Item",
+    "admin": "Admin",
+    "profile": "Profile",
+    "logout": "Logout",
+    "login": "Login",
+    "imprint": "Imprint",
+    "privacy": "Privacy",
+    "back": "Back"
+  },
+  "auth": {
+    "welcomeBack": "Welcome Back",
+    "loginSubtitle": "Sign in to manage your collection",
+    "email": "Email Address",
+    "password": "Password",
+    "forgotPassword": "Forgot Password?",
+    "loginButton": "Sign In",
+    "noAccount": "No account yet?",
+    "registerNow": "Register now",
+    "pendingMessage": "Your account is still pending approval by an administrator."
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "chooseLanguage": "Choose your preferred language",
+    "save": "Save"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  }
+}

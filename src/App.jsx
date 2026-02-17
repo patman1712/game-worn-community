@@ -12,6 +12,7 @@ import RegisterPage from '@/pages/RegisterPage';
 import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
 import CookieConsent from '@/components/CookieConsent';
+import './i18n';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];

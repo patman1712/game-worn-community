@@ -6,8 +6,10 @@ import { Label } from "@/components/ui/label";
 import { Loader2, LogIn, ChevronLeft } from "lucide-react";
 import { Link } from 'react-router-dom';
 import { motion } from "framer-motion";
+import { useTranslation } from 'react-i18next';
 
 export default function LoginPage() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -57,15 +59,15 @@ export default function LoginPage() {
             className="h-52 w-auto object-contain mx-auto mb-8 drop-shadow-[0_4px_20px_rgba(6,182,212,0.4)]"
           />
           
-          <h2 className="text-2xl font-bold text-white mb-2">Willkommen zurück</h2>
-          <p className="text-white/40">Melde dich an, um deine Sammlung zu verwalten</p>
+          <h2 className="text-2xl font-bold text-white mb-2">{t('auth.welcomeBack')}</h2>
+          <p className="text-white/40">{t('auth.loginSubtitle')}</p>
         </div>
 
         <div className="bg-slate-900/50 p-8 rounded-2xl border border-white/10 backdrop-blur-md shadow-xl">
           <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-4">
               <div>
-                <Label htmlFor="email" className="text-white/70">Email Adresse</Label>
+                <Label htmlFor="email" className="text-white/70">{t('auth.email')}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -78,12 +80,12 @@ export default function LoginPage() {
               </div>
               <div>
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password" classname="text-white/70">Passwort</Label>
+                  <Label htmlFor="password" classname="text-white/70">{t('auth.password')}</Label>
                   <Link 
                     to="/forgot-password" 
                     className="text-xs text-cyan-400 hover:text-cyan-300 hover:underline"
                   >
-                    Passwort vergessen?
+                    {t('auth.forgotPassword')}
                   </Link>
                 </div>
                 <Input
@@ -112,7 +114,7 @@ export default function LoginPage() {
               {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
                 <>
                   <LogIn className="w-4 h-4 mr-2" />
-                  Anmelden
+                  {t('auth.loginButton')}
                 </>
               )}
             </Button>
@@ -120,9 +122,9 @@ export default function LoginPage() {
         </div>
 
         <div className="mt-8 text-center text-sm text-white/40">
-          Noch kein Konto?{' '}
+          {t('auth.noAccount')}{' '}
           <Link to="/register" className="text-cyan-400 hover:text-cyan-300 font-medium transition-colors hover:underline underline-offset-4">
-            Jetzt registrieren
+            {t('auth.registerNow')}
           </Link>
         </div>
       </motion.div>

@@ -16,10 +16,17 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { User, Trash2, LogOut, Loader2, AlertTriangle, MapPin, Mail, Eye, EyeOff, Save, Lock, MessageCircle, FilterX } from "lucide-react";
+import { User, Trash2, LogOut, Loader2, AlertTriangle, MapPin, Mail, Eye, EyeOff, Save, Lock, MessageCircle, FilterX, Globe } from "lucide-react";
+import { useTranslation } from 'react-i18next';
 
 export default function Settings() {
+  const { t, i18n } = useTranslation();
   const [user, setUser] = useState(null);
+
+  const changeLanguage = (lng) => {
+    i18n.changeLanguage(lng);
+    localStorage.setItem('i18nextLng', lng);
+  };
   const [isDeleting, setIsDeleting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [profile, setProfile] = useState({
@@ -163,8 +170,37 @@ export default function Settings() {
   return (
     <div className="min-h-screen">
       <div className="max-w-2xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold text-white mb-1">Einstellungen</h1>
+        <h1 className="text-2xl font-bold text-white mb-1">{t('settings.title')}</h1>
         <p className="text-white/40 text-sm mb-8">Verwalte dein Profil und Account</p>
+
+        {/* Language Settings */}
+        <Card className="bg-slate-900/60 border-white/5 mb-4">
+          <CardHeader>
+            <CardTitle className="text-white text-base flex items-center gap-2">
+              <Globe className="w-4 h-4" />
+              {t('settings.language')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-white/70 text-sm mb-3">{t('settings.chooseLanguage')}</p>
+            <div className="flex gap-2">
+              <Button 
+                onClick={() => changeLanguage('de')} 
+                variant={i18n.language === 'de' ? 'default' : 'outline'}
+                className={i18n.language === 'de' ? 'bg-cyan-600 hover:bg-cyan-500' : 'bg-transparent border-white/10 text-white hover:bg-white/5'}
+              >
+                Deutsch
+              </Button>
+              <Button 
+                onClick={() => changeLanguage('en')} 
+                variant={i18n.language === 'en' ? 'default' : 'outline'}
+                className={i18n.language === 'en' ? 'bg-cyan-600 hover:bg-cyan-500' : 'bg-transparent border-white/10 text-white hover:bg-white/5'}
+              >
+                English
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Profile Edit */}
         <Card className="bg-slate-900/60 border-white/5 mb-4">

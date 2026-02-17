@@ -1,0 +1,37 @@
+{
+  "nav": {
+    "home": "Sammlung",
+    "messages": "Nachrichten",
+    "myCollection": "Meine Objekte",
+    "addJersey": "Objekt hinzufügen",
+    "admin": "Admin",
+    "profile": "Profil",
+    "logout": "Abmelden",
+    "login": "Anmelden",
+    "imprint": "Impressum",
+    "privacy": "Datenschutz",
+    "back": "Zurück"
+  },
+  "auth": {
+    "welcomeBack": "Willkommen zurück",
+    "loginSubtitle": "Melde dich an, um deine Sammlung zu verwalten",
+    "email": "Email Adresse",
+    "password": "Passwort",
+    "forgotPassword": "Passwort vergessen?",
+    "loginButton": "Anmelden",
+    "noAccount": "Noch kein Konto?",
+    "registerNow": "Jetzt registrieren",
+    "pendingMessage": "Dein Account wartet noch auf Freischaltung durch einen Administrator."
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "language": "Sprache",
+    "chooseLanguage": "Wähle deine bevorzugte Sprache",
+    "save": "Speichern"
+  },
+  "common": {
+    "loading": "Lädt...",
+    "error": "Fehler",
+    "success": "Erfolg"
+  }
+}

@@ -1,6 +1,16 @@
-export const APP_VERSION = "1.1.0";
+export const APP_VERSION = "1.2.0";
 
 export const CHANGELOG = [
+  {
+    version: "1.2.0",
+    date: "2026-02-18",
+    title: "Internationalization (i18n) Update",
+    changes: [
+      { type: "feature", text: "Plattform ist jetzt mehrsprachig (Deutsch & Englisch)." },
+      { type: "feature", text: "Sprache kann im Header oder in den Einstellungen geändert werden." },
+      { type: "improvement", text: "Login-Seite und Hauptnavigation vollständig übersetzt." }
+    ]
+  },
   {
     version: "1.1.0",
     date: "2026-02-17",
