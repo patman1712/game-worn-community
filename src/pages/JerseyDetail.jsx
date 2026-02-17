@@ -151,36 +151,31 @@ export default function JerseyDetail() {
       // Don't execute if already pending to prevent double clicks
       const entity = isCollectionItem ? base44.entities.CollectionItem : base44.entities.Jersey;
       
-      // Fetch fresh item data to ensure we have the latest count
-      const items = await entity.filter({ id: jerseyId });
-      const currentItem = items[0];
-      const currentCount = currentItem ? (parseInt(currentItem.likes_count) || 0) : 0;
+      // Use current local state instead of refetching, similar to Home.jsx
+      // This prevents race conditions where the fetch returns stale data
+      const currentCount = parseInt(jersey.likes_count) || 0;
 
       if (isLiked) {
-        // Need to find the like ID
         const likeToDelete = likes[0];
         if (likeToDelete) {
             await base44.entities.JerseyLike.delete(likeToDelete.id);
-            if (currentItem) {
-                await entity.update(jerseyId, { likes_count: Math.max(0, currentCount - 1) });
-            }
+            // Update and return the result for cache update
+            return await entity.update(jerseyId, { likes_count: Math.max(0, currentCount - 1) });
         }
       } else {
         await base44.entities.JerseyLike.create({ jersey_id: jerseyId, user_email: currentUser.email });
-        if (currentItem) {
-            await entity.update(jerseyId, { likes_count: currentCount + 1 });
-        }
+        // Update and return the result for cache update
+        return await entity.update(jerseyId, { likes_count: currentCount + 1 });
       }
     },
     onMutate: async () => {
-        // Optimistic update for Jersey Detail page
+        // Optimistic update
         await queryClient.cancelQueries({ queryKey: ["jersey", jerseyId] });
         await queryClient.cancelQueries({ queryKey: ["myLike", jerseyId, currentUser?.email] });
 
         const previousJersey = queryClient.getQueryData(["jersey", jerseyId]);
         const previousLikes = queryClient.getQueryData(["myLike", jerseyId, currentUser?.email]);
         
-        // Toggle like state immediately
         const newIsLiked = !(previousLikes && previousLikes.length > 0);
         
         queryClient.setQueryData(["jersey", jerseyId], (old) => {
@@ -191,7 +186,6 @@ export default function JerseyDetail() {
             return {
                 ...old,
                 likes_count: newCount,
-                // Also update merged data if present to be safe
                 data: { ...(old.data || {}), likes_count: newCount }
             };
         });
@@ -203,6 +197,18 @@ export default function JerseyDetail() {
         }
         
         return { previousJersey, previousLikes };
+    },
+    onSuccess: (updatedJersey) => {
+        // Update with the actual server response if available
+        if (updatedJersey) {
+            queryClient.setQueryData(["jersey", jerseyId], (old) => {
+                 if (!old) return updatedJersey;
+                 // Merge to keep client-side props if any
+                 return { ...old, ...updatedJersey, likes_count: updatedJersey.likes_count };
+            });
+        }
+        // Invalidate to be sure, but the data should already be correct
+        queryClient.invalidateQueries({ queryKey: ["myLike"] });
     },
     onError: (err, newTodo, context) => {
         console.error("Like mutation failed:", err);
