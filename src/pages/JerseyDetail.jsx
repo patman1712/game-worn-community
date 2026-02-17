@@ -161,20 +161,16 @@ export default function JerseyDetail() {
         if (likeToDelete) {
             await base44.entities.JerseyLike.delete(likeToDelete.id);
             const newCount = Math.max(0, currentCount - 1);
-            // Update both column and data JSON to ensure consistency
-            return await entity.update(jerseyId, { 
-                likes_count: newCount,
-                data: { ...currentData, likes_count: newCount }
-            });
+            // Just update likes_count directly without touching data JSON for now
+            // This is safer as backend handles merging
+            return await entity.update(jerseyId, { likes_count: newCount });
         }
       } else {
         await base44.entities.JerseyLike.create({ jersey_id: jerseyId, user_email: currentUser.email });
         const newCount = currentCount + 1;
-        // Update both column and data JSON to ensure consistency
-        return await entity.update(jerseyId, { 
-            likes_count: newCount,
-            data: { ...currentData, likes_count: newCount }
-        });
+        // Just update likes_count directly without touching data JSON for now
+        // This is safer as backend handles merging
+        return await entity.update(jerseyId, { likes_count: newCount });
       }
     },
     onMutate: async () => {
@@ -195,7 +191,8 @@ export default function JerseyDetail() {
             return {
                 ...old,
                 likes_count: newCount,
-                data: { ...(old.data || {}), likes_count: newCount }
+                // Only update top-level property for optimistic update
+                // data: { ...(old.data || {}), likes_count: newCount } // Don't touch data here to avoid confusion
             };
         });
         
