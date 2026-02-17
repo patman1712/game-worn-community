@@ -61,6 +61,21 @@ export default function Layout({ children, currentPageName }) {
     enabled: !!user && !isLoadingPendingUser && showMessages,
   });
   
+  // Fetch pending users count for admin badge
+  const { data: pendingUsersCount = 0 } = useQuery({
+    queryKey: ["pendingUsersCount", user?.email],
+    queryFn: async () => {
+      if (!user || (user.role !== 'admin' && user.data?.role !== 'admin')) return 0;
+      try {
+        const list = await base44.entities.PendingUser.list();
+        return list.length;
+      } catch (e) {
+        return 0;
+      }
+    },
+    enabled: !!user && (user.role === 'admin' || user.data?.role === 'admin'),
+  });
+  
   const visibleTabs = TABS.filter(tab => {
     if (!tab.authRequired) return true;
     if (!user) return false;
@@ -158,7 +173,7 @@ export default function Layout({ children, currentPageName }) {
               {user ? (
                 <div className="flex items-center gap-2">
                   {(user.role === 'admin' || user.data?.role === 'admin') && (
-                    <Link to={createPageUrl("AdminPanel")}>
+                    <Link to={createPageUrl("AdminPanel")} className="relative group">
                       <Button
                         size="sm"
                         variant="ghost"
@@ -167,6 +182,11 @@ export default function Layout({ children, currentPageName }) {
                         <Settings className="w-3.5 h-3.5 mr-1.5" />
                         <span className="hidden sm:inline">Admin</span>
                       </Button>
+                      {pendingUsersCount > 0 && (
+                        <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-slate-950">
+                          {pendingUsersCount > 9 ? '9+' : pendingUsersCount}
+                        </span>
+                      )}
                     </Link>
                   )}
                   <Link to={createPageUrl("Settings")}>
