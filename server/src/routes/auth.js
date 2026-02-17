@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
+const { Resend } = require('resend');
 const User = require('../models/User');
 const PendingUser = require('../models/PendingUser');
 const SystemSetting = require('../models/SystemSetting'); // Import SystemSetting
@@ -20,16 +21,47 @@ const JWT_SECRET = 'your-secret-key-change-this-in-production';
 const sendEmail = async (to, subject, text) => {
     // 1. Load Settings from DB
     let smtpConfig = null;
+    let resendConfig = null;
     try {
         const setting = await SystemSetting.findByPk('smtp_config');
         if (setting && setting.value) {
             smtpConfig = setting.value;
         }
+        const resendSetting = await SystemSetting.findByPk('resend_config');
+        if (resendSetting && resendSetting.value) {
+            resendConfig = resendSetting.value;
+        }
     } catch (e) {
-        console.error('Failed to load SMTP settings from DB:', e);
+        console.error('Failed to load settings from DB:', e);
     }
     
-    // 2. Determine Config (DB > Env)
+    // 2. Try Resend API first (HTTP based, bypasses SMTP blocking)
+    if (resendConfig && resendConfig.apiKey) {
+        try {
+            const resend = new Resend(resendConfig.apiKey);
+            const fromEmail = resendConfig.from || 'onboarding@resend.dev';
+            
+            const data = await resend.emails.send({
+                from: fromEmail,
+                to,
+                subject,
+                text
+            });
+            
+            if (data.error) {
+                console.error('Resend API Error:', data.error);
+                throw new Error(data.error.message);
+            }
+            
+            console.log(`Email sent via Resend to ${to}`, data);
+            return;
+        } catch (error) {
+            console.error('Resend failed:', error);
+            // If Resend fails, we could fall back to SMTP, but usually one is enough
+        }
+    }
+    
+    // 3. Fallback to SMTP
     const host = smtpConfig?.host || process.env.SMTP_HOST;
     const port = smtpConfig?.port || process.env.SMTP_PORT || 587;
     const user = smtpConfig?.user || process.env.SMTP_USER;
@@ -52,6 +84,11 @@ const sendEmail = async (to, subject, text) => {
         port,
         secure,
         auth: { user, pass },
+        tls: {
+            // Do not fail on invalid certs
+            rejectUnauthorized: false
+        },
+        connectionTimeout: 10000 // 10 seconds timeout
     });
     
     try {
@@ -61,10 +98,9 @@ const sendEmail = async (to, subject, text) => {
             subject,
             text,
         });
-        console.log(`Email sent to ${to}`);
+        console.log(`Email sent via SMTP to ${to}`);
     } catch (error) {
-        console.error('Error sending email:', error);
-        // Don't throw here to avoid crashing the request if email fails, just log it
+        console.error('Error sending email via SMTP:', error);
     }
 };
 

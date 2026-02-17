@@ -107,6 +107,60 @@ router.post('/settings/smtp/test', requireAdmin, async (req, res) => {
     }
 });
 
+// --- Resend Settings ---
+
+// Get Resend Settings
+router.get('/settings/resend', requireAdmin, async (req, res) => {
+    try {
+        const setting = await SystemSetting.findByPk('resend_config');
+        res.json(setting ? setting.value : {});
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Update Resend Settings
+router.post('/settings/resend', requireAdmin, async (req, res) => {
+    try {
+        const config = req.body;
+        if (!config.apiKey) return res.status(400).json({ error: 'API Key required' });
+        
+        let setting = await SystemSetting.findByPk('resend_config');
+        if (setting) {
+            setting.value = config;
+            setting.changed('value', true);
+            await setting.save();
+        } else {
+            await SystemSetting.create({ key: 'resend_config', value: config });
+        }
+        res.json({ message: 'Resend Settings saved' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Test Resend
+router.post('/settings/resend/test', requireAdmin, async (req, res) => {
+    try {
+        const { config, to } = req.body;
+        const { Resend } = require('resend'); // Import here to ensure it's available
+        const resend = new Resend(config.apiKey);
+        
+        const data = await resend.emails.send({
+            from: config.from || 'onboarding@resend.dev',
+            to: to || req.adminUser.email,
+            subject: 'Test Email (Resend)',
+            text: 'Resend API works!'
+        });
+        
+        if (data.error) throw new Error(data.error.message);
+        
+        res.json({ message: 'Test Email sent successfully', details: JSON.stringify(data) });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
+
 // Full System Backup
 router.get('/backup/full', requireAdmin, async (req, res) => {
   try {

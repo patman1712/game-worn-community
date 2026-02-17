@@ -112,6 +112,21 @@ export const base44 = {
             body: JSON.stringify({ config, to })
         });
     },
+    getResendSettings: async () => {
+        return request('/admin/settings/resend');
+    },
+    saveResendSettings: async (config) => {
+        return request('/admin/settings/resend', {
+            method: 'POST',
+            body: JSON.stringify(config)
+        });
+    },
+    testResendSettings: async (config, to) => {
+        return request('/admin/settings/resend/test', {
+            method: 'POST',
+            body: JSON.stringify({ config, to })
+        });
+    },
     redirectToLogin: () => {
       // Basic redirect
       window.location.href = '/login';

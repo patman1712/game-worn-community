@@ -21,6 +21,9 @@ export default function EditSiteContent() {
   const [smtpConfig, setSmtpConfig] = useState({
     host: '', port: 587, user: '', pass: '', secure: false, from: ''
   });
+  const [resendConfig, setResendConfig] = useState({
+      apiKey: '', from: ''
+  });
   const [testEmail, setTestEmail] = useState('');
   const [isTestingSmtp, setIsTestingSmtp] = useState(false);
   
@@ -39,6 +42,12 @@ export default function EditSiteContent() {
           base44.auth.getSmtpSettings().then(config => {
               if (config && Object.keys(config).length > 0) {
                   setSmtpConfig(prev => ({...prev, ...config}));
+              }
+          });
+          // Load Resend settings
+          base44.auth.getResendSettings().then(config => {
+              if (config && Object.keys(config).length > 0) {
+                  setResendConfig(prev => ({...prev, ...config}));
               }
           });
       }
@@ -78,32 +87,50 @@ export default function EditSiteContent() {
   });
   
   const saveSmtpMutation = useMutation({
-      mutationFn: async (config) => {
-          return base44.auth.saveSmtpSettings(config);
-      },
-      onSuccess: () => {
-          toast({ title: "Gespeichert", description: "Email-Einstellungen wurden aktualisiert." });
-      },
-      onError: (err) => {
-          toast({ variant: "destructive", title: "Fehler", description: err.message });
-      }
+    mutationFn: async (config) => {
+      return base44.auth.saveSmtpSettings(config);
+    },
+    onSuccess: () => {
+      toast({ title: "Gespeichert", description: "Email-Einstellungen wurden aktualisiert." });
+    },
+    onError: (err) => {
+      toast({ variant: "destructive", title: "Fehler", description: err.message });
+    }
+  });
+
+  const saveResendMutation = useMutation({
+    mutationFn: async (config) => base44.auth.saveResendSettings(config),
+    onSuccess: () => toast({ title: "Gespeichert", description: "Resend Einstellungen aktualisiert." }),
+    onError: (err) => toast({ variant: "destructive", title: "Fehler", description: err.message })
   });
 
   const handleTestEmail = async () => {
-      setIsTestingSmtp(true);
-      try {
-          const res = await base44.auth.testSmtpSettings(smtpConfig, testEmail);
-          // Assuming response structure: { data: { message, details } } because of how base44.functions.invoke or request works?
-          // No, request returns JSON directly. So res is { message, details }
-          toast({ 
-              title: "Erfolg", 
-              description: `${res.message}. ${res.details || ''}` 
-          });
-      } catch (err) {
-          toast({ variant: "destructive", title: "Fehler", description: err.message });
-      } finally {
-          setIsTestingSmtp(false);
-      }
+    setIsTestingSmtp(true);
+    try {
+      const res = await base44.auth.testSmtpSettings(smtpConfig, testEmail);
+      // Assuming response structure: { data: { message, details } } because of how base44.functions.invoke or request works?
+      // No, request returns JSON directly. So res is { message, details }
+      toast({ 
+        title: "Erfolg", 
+        description: `${res.message}. ${res.details || ''}` 
+      });
+    } catch (err) {
+      toast({ variant: "destructive", title: "Fehler", description: err.message });
+    } finally {
+      setIsTestingSmtp(false);
+    }
+  };
+
+  const handleTestResend = async () => {
+    setIsTestingSmtp(true);
+    try {
+      const res = await base44.auth.testResendSettings(resendConfig, testEmail);
+      toast({ title: "Erfolg", description: res.message });
+    } catch (err) {
+      toast({ variant: "destructive", title: "Fehler", description: err.message });
+    } finally {
+      setIsTestingSmtp(false);
+    }
   };
 
   if (isLoading || !user) {
@@ -128,16 +155,20 @@ export default function EditSiteContent() {
         <h1 className="text-3xl font-bold text-white mb-8">System Einstellungen</h1>
 
         <Tabs defaultValue="legal" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 bg-slate-800/50 border border-white/10 mb-8">
-                <TabsTrigger value="legal" className="data-[state=active]:bg-cyan-600 data-[state=active]:text-white">
-                    <Shield className="w-4 h-4 mr-2" />
-                    Rechtliches & Inhalt
-                </TabsTrigger>
-                <TabsTrigger value="email" className="data-[state=active]:bg-cyan-600 data-[state=active]:text-white">
-                    <Mail className="w-4 h-4 mr-2" />
-                    Email Server (SMTP)
-                </TabsTrigger>
-            </TabsList>
+            <TabsList className="grid w-full grid-cols-3 bg-slate-800/50 border border-white/10 mb-8">
+        <TabsTrigger value="legal" className="data-[state=active]:bg-cyan-600 data-[state=active]:text-white">
+          <Shield className="w-4 h-4 mr-2" />
+          Rechtliches & Inhalt
+        </TabsTrigger>
+        <TabsTrigger value="email" className="data-[state=active]:bg-cyan-600 data-[state=active]:text-white">
+          <Mail className="w-4 h-4 mr-2" />
+          Email Server (SMTP)
+        </TabsTrigger>
+        <TabsTrigger value="resend" className="data-[state=active]:bg-cyan-600 data-[state=active]:text-white">
+          <Mail className="w-4 h-4 mr-2" />
+          Resend API (Empfohlen)
+        </TabsTrigger>
+      </TabsList>
 
             <TabsContent value="legal" className="space-y-8">
                 {/* Impressum */}
@@ -283,7 +314,64 @@ export default function EditSiteContent() {
                     </div>
                 </div>
             </TabsContent>
-        </Tabs>
+
+      <TabsContent value="resend">
+        <div className="bg-slate-800/50 rounded-xl p-6 border border-white/10">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center">
+              <Server className="w-5 h-5 text-cyan-400" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-white">Resend API Konfiguration</h2>
+              <p className="text-white/40 text-sm">Empfohlen, wenn SMTP blockiert wird. Erstelle einen Key auf resend.com.</p>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 gap-6 mb-6">
+            <div>
+              <Label className="text-white mb-2 block">API Key (re_...)</Label>
+              <Input 
+                value={resendConfig.apiKey} 
+                onChange={e => setResendConfig({...resendConfig, apiKey: e.target.value})}
+                placeholder="re_12345678..."
+                className="bg-slate-900/50 border-white/10 text-white font-mono"
+                type="password"
+              />
+            </div>
+            <div>
+              <Label className="text-white mb-2 block">Absender (From)</Label>
+              <Input 
+                value={resendConfig.from} 
+                onChange={e => setResendConfig({...resendConfig, from: e.target.value})}
+                placeholder="onboarding@resend.dev"
+                className="bg-slate-900/50 border-white/10 text-white"
+              />
+              <p className="text-xs text-white/30 mt-1">Muss bei Resend verifiziert sein. Zum Testen: onboarding@resend.dev</p>
+            </div>
+          </div>
+
+          <div className="flex gap-4 border-t border-white/10 pt-6">
+            <Button
+              onClick={() => saveResendMutation.mutate(resendConfig)}
+              disabled={saveResendMutation.isPending}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+            >
+              {saveResendMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
+              Einstellungen speichern
+            </Button>
+            
+            <Button
+              onClick={handleTestResend}
+              disabled={isTestingSmtp}
+              variant="secondary"
+            >
+              {isTestingSmtp ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Mail className="w-4 h-4 mr-2" />}
+              Test-Email senden
+            </Button>
+          </div>
+        </div>
+      </TabsContent>
+    </Tabs>
       </div>
     </div>
   );
