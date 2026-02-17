@@ -201,11 +201,35 @@ export default function JerseyDetail() {
             };
         });
         
+        // Update local like state immediately so UI updates
         if (newIsLiked) {
              queryClient.setQueryData(["myLike", jerseyId, currentUser?.email], [{ id: 'temp-optimistic', jersey_id: jerseyId, user_email: currentUser?.email }]);
         } else {
              queryClient.setQueryData(["myLike", jerseyId, currentUser?.email], []);
         }
+        
+        // Also update global cache for this item
+        queryClient.setQueryData(["jerseys"], (old = []) => {
+            return old.map(j => {
+                if (j.id === jerseyId) {
+                    let c = parseInt(j.likes_count);
+                    if (isNaN(c)) c = 0;
+                    return { ...j, likes_count: newIsLiked ? c + 1 : Math.max(0, c - 1) };
+                }
+                return j;
+            });
+        });
+
+        queryClient.setQueryData(["collectionItems"], (old = []) => {
+            return old.map(j => {
+                if (j.id === jerseyId) {
+                    let c = parseInt(j.likes_count);
+                    if (isNaN(c)) c = 0;
+                    return { ...j, likes_count: newIsLiked ? c + 1 : Math.max(0, c - 1) };
+                }
+                return j;
+            });
+        });
         
         return { previousJersey, previousLikes };
     },
