@@ -66,7 +66,45 @@ app.set('io', io);
 // Sync database and start server
 const PORT = process.env.PORT || 3001;
 
-sequelize.sync({ alter: true }).then(() => {
+async function checkAndPromoteAdmin() {
+  try {
+    // Check Pending Users
+    const pendingUsers = await PendingUser.findAll();
+    for (const pUser of pendingUsers) {
+      const data = pUser.data || {};
+      // Check for display_name 'Admin' (case insensitive if needed, but strict is safer for now)
+      if (data.display_name === 'Admin') {
+        console.log('Found Pending Admin user. Promoting...');
+        await User.create({
+          email: pUser.email,
+          password: pUser.password,
+          role: 'admin',
+          data: { ...data, role: 'admin' }
+        });
+        await pUser.destroy();
+        console.log('Admin user promoted and approved.');
+      }
+    }
+
+    // Check Existing Users
+    const users = await User.findAll();
+    for (const user of users) {
+      const data = user.data || {};
+      if (data.display_name === 'Admin' && user.role !== 'admin') {
+        console.log('Found existing User "Admin". Updating role...');
+        user.role = 'admin';
+        user.data = { ...data, role: 'admin' };
+        await user.save();
+        console.log('User "Admin" is now an admin.');
+      }
+    }
+  } catch (err) {
+    console.error('Error promoting admin:', err);
+  }
+}
+
+sequelize.sync({ alter: true }).then(async () => {
+  await checkAndPromoteAdmin();
   server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
   });
