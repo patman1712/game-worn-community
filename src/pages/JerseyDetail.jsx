@@ -187,14 +187,18 @@ export default function JerseyDetail() {
         queryClient.setQueryData(["jersey", jerseyId], (old) => {
             if (!old) return old;
             const currentCount = typeof old.likes_count === 'number' ? old.likes_count : 0;
+            const newCount = newIsLiked ? currentCount + 1 : Math.max(0, currentCount - 1);
+            
             return {
                 ...old,
-                likes_count: newIsLiked ? currentCount + 1 : Math.max(0, currentCount - 1)
+                likes_count: newCount,
+                // Also update merged data if present to be safe
+                data: { ...(old.data || {}), likes_count: newCount }
             };
         });
         
         if (newIsLiked) {
-             queryClient.setQueryData(["myLike", jerseyId, currentUser?.email], [{ id: 'temp-optimistic' }]);
+             queryClient.setQueryData(["myLike", jerseyId, currentUser?.email], [{ id: 'temp-optimistic', jersey_id: jerseyId, user_email: currentUser?.email }]);
         } else {
              queryClient.setQueryData(["myLike", jerseyId, currentUser?.email], []);
         }
@@ -202,8 +206,13 @@ export default function JerseyDetail() {
         return { previousJersey, previousLikes };
     },
     onError: (err, newTodo, context) => {
-        queryClient.setQueryData(["jersey", jerseyId], context.previousJersey);
-        queryClient.setQueryData(["myLike", jerseyId, currentUser?.email], context.previousLikes);
+        console.error("Like mutation failed:", err);
+        if (context?.previousJersey) {
+            queryClient.setQueryData(["jersey", jerseyId], context.previousJersey);
+        }
+        if (context?.previousLikes) {
+            queryClient.setQueryData(["myLike", jerseyId, currentUser?.email], context.previousLikes);
+        }
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["jersey", jerseyId] });
