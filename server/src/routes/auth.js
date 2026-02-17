@@ -99,6 +99,15 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     
+    // Check if user is pending
+    const pendingUser = await PendingUser.findOne({ where: { email } });
+    if (pendingUser) {
+        const validPendingPassword = await bcrypt.compare(password, pendingUser.password);
+        if (validPendingPassword) {
+             return res.status(403).json({ error: 'Dein Account wartet noch auf Freischaltung durch einen Administrator.' });
+        }
+    }
+    
     const user = await User.findOne({ where: { email } });
     if (!user) {
       return res.status(401).json({ error: 'Email Adresse oder Passwort falsch' });
