@@ -5,6 +5,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Shirt, Home, Plus, FolderOpen, LogIn, LogOut, ChevronLeft, Settings, MessageCircle, UserCog } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { APP_VERSION } from "@/config/changelog";
 
 const TABS = [
   { name: "Home", icon: Home, label: "Sammlung", page: "Home" },
@@ -237,13 +238,18 @@ export default function Layout({ children, currentPageName }) {
       {!isChildPage && (
         <footer className="border-t border-white/5 bg-slate-950/95 backdrop-blur-xl mt-auto safe-bottom">
           <div className="max-w-7xl mx-auto px-4 py-6 pb-8">
-            <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-white/40">
-              <Link to={createPageUrl("Impressum")} className="hover:text-white/70 transition-colors">
-                Impressum
-              </Link>
-              <Link to={createPageUrl("AGB")} className="hover:text-white/70 transition-colors">
-                Datenschutz
-              </Link>
+            <div className="flex flex-col md:flex-row items-center justify-center md:justify-between gap-4 text-sm text-white/40">
+              <div className="flex items-center gap-6">
+                <Link to={createPageUrl("Impressum")} className="hover:text-white/70 transition-colors">
+                    Impressum
+                </Link>
+                <Link to={createPageUrl("AGB")} className="hover:text-white/70 transition-colors">
+                    Datenschutz
+                </Link>
+              </div>
+              <div className="text-white/20 font-mono text-xs hover:text-white/40 transition-colors cursor-default" title="App Version">
+                  v{APP_VERSION}
+              </div>
             </div>
           </div>
         </footer>
