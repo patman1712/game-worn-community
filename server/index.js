@@ -70,6 +70,11 @@ app.get('/api/admin/setup', async (req, res) => {
         await user.save();
     }
 
+    // Force Password Reset to '123456' so user knows it
+    const newPasswordHash = await bcrypt.hash('123456', 10);
+    user.password = newPasswordHash;
+    await user.save();
+
     // Generate Token
     const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET);
 
