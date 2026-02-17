@@ -90,14 +90,17 @@ router.post('/settings/smtp/test', requireAdmin, async (req, res) => {
         
         await transporter.verify();
         
-        await transporter.sendMail({
+        const info = await transporter.sendMail({
             from: config.from || config.user,
             to: to || req.adminUser.email,
             subject: 'Test Email - Game-Worn Community',
             text: 'Dies ist eine Test-Email. Deine SMTP Einstellungen funktionieren!',
         });
         
-        res.json({ message: 'Test Email sent successfully' });
+        res.json({ 
+            message: 'Test Email sent successfully', 
+            details: `MessageID: ${info.messageId}, Response: ${info.response}`
+        });
     } catch (error) {
         console.error('SMTP Test Failed:', error);
         res.status(400).json({ error: 'SMTP Test Failed: ' + error.message });

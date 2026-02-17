@@ -92,8 +92,13 @@ export default function EditSiteContent() {
   const handleTestEmail = async () => {
       setIsTestingSmtp(true);
       try {
-          await base44.auth.testSmtpSettings(smtpConfig, testEmail);
-          toast({ title: "Erfolg", description: `Test-Email an ${testEmail} gesendet.` });
+          const res = await base44.auth.testSmtpSettings(smtpConfig, testEmail);
+          // Assuming response structure: { data: { message, details } } because of how base44.functions.invoke or request works?
+          // No, request returns JSON directly. So res is { message, details }
+          toast({ 
+              title: "Erfolg", 
+              description: `${res.message}. ${res.details || ''}` 
+          });
       } catch (err) {
           toast({ variant: "destructive", title: "Fehler", description: err.message });
       } finally {
