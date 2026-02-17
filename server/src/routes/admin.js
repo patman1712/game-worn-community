@@ -76,18 +76,28 @@ router.get('/backup/full', requireAdmin, async (req, res) => {
     archive.pipe(res);
 
     // 1. Add Database - Try multiple locations
+    const storagePath = process.env.DATABASE_STORAGE || path.join(__dirname, '../../database.sqlite');
+    
     const possibleDbPaths = [
+        storagePath, // The actual configured path
         path.join(__dirname, '../../database.sqlite'), // server root
         path.join(__dirname, '../../../database.sqlite'), // project root (local dev)
         path.join(process.cwd(), 'database.sqlite'), // current working directory
-        path.join(process.cwd(), 'server/database.sqlite') // inside server dir
+        path.join(process.cwd(), 'server/database.sqlite'), // inside server dir
+        '/app/database.sqlite', // common docker path
+        '/data/database.sqlite' // common volume path
     ];
 
     let dbAdded = false;
-    for (const dbPath of possibleDbPaths) {
-        if (fs.existsSync(dbPath)) {
-            console.log('Adding DB from:', dbPath);
-            archive.file(dbPath, { name: 'database.sqlite' });
+    // Use Set to avoid duplicates
+    const uniquePaths = [...new Set(possibleDbPaths)];
+    
+    for (const dbPath of uniquePaths) {
+        // Resolve to absolute path
+        const absolutePath = path.resolve(dbPath);
+        if (fs.existsSync(absolutePath)) {
+            console.log('Adding DB from:', absolutePath);
+            archive.file(absolutePath, { name: 'database.sqlite' });
             dbAdded = true;
             break;
         }
@@ -95,8 +105,9 @@ router.get('/backup/full', requireAdmin, async (req, res) => {
     
     if (!dbAdded) {
         console.warn('WARNING: database.sqlite not found in any standard location!');
-        // Create a dummy file to warn user inside the zip
-        archive.append('WARNING: database.sqlite could not be found during backup.', { name: 'DB_MISSING_WARNING.txt' });
+        // Debug info: List where we looked
+        const debugInfo = `Could not find database.sqlite.\nLooked in:\n${uniquePaths.map(p => path.resolve(p)).join('\n')}\n\nCurrent CWD: ${process.cwd()}\nDATABASE_STORAGE env: ${process.env.DATABASE_STORAGE}`;
+        archive.append(debugInfo, { name: 'DB_MISSING_DEBUG.txt' });
     }
 
     // 2. Add Uploads
