@@ -154,18 +154,27 @@ export default function JerseyDetail() {
       // Use current local state instead of refetching, similar to Home.jsx
       // This prevents race conditions where the fetch returns stale data
       const currentCount = parseInt(jersey.likes_count) || 0;
+      const currentData = jersey?.data || {};
 
       if (isLiked) {
         const likeToDelete = likes[0];
         if (likeToDelete) {
             await base44.entities.JerseyLike.delete(likeToDelete.id);
-            // Update and return the result for cache update
-            return await entity.update(jerseyId, { likes_count: Math.max(0, currentCount - 1) });
+            const newCount = Math.max(0, currentCount - 1);
+            // Update both column and data JSON to ensure consistency
+            return await entity.update(jerseyId, { 
+                likes_count: newCount,
+                data: { ...currentData, likes_count: newCount }
+            });
         }
       } else {
         await base44.entities.JerseyLike.create({ jersey_id: jerseyId, user_email: currentUser.email });
-        // Update and return the result for cache update
-        return await entity.update(jerseyId, { likes_count: currentCount + 1 });
+        const newCount = currentCount + 1;
+        // Update both column and data JSON to ensure consistency
+        return await entity.update(jerseyId, { 
+            likes_count: newCount,
+            data: { ...currentData, likes_count: newCount }
+        });
       }
     },
     onMutate: async () => {
