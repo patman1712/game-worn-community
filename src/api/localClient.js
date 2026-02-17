@@ -81,6 +81,18 @@ export const base44 = {
         body: JSON.stringify({ currentPassword, newPassword })
       });
     },
+    forgotPassword: async (email) => {
+      return request('/auth/forgot-password', {
+        method: 'POST',
+        body: JSON.stringify({ email })
+      });
+    },
+    resetPassword: async (token, newPassword) => {
+      return request('/auth/reset-password', {
+        method: 'POST',
+        body: JSON.stringify({ token, newPassword })
+      });
+    },
     logout: () => {
       localStorage.removeItem('token');
       window.location.reload();

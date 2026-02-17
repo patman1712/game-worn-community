@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const nodemailer = require('nodemailer');
+const crypto = require('crypto');
 const User = require('../models/User');
 const PendingUser = require('../models/PendingUser');
 
@@ -9,8 +11,46 @@ const Jersey = require('../models/Jersey');
 const CollectionItem = require('../models/CollectionItem');
 const Message = require('../models/Message');
 const Comment = require('../models/Comment');
+const JerseyLike = require('../models/JerseyLike'); // Added missing import
 
 const JWT_SECRET = 'your-secret-key-change-this-in-production';
+
+// Nodemailer Transporter Setup
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: process.env.SMTP_PORT || 587,
+  secure: process.env.SMTP_SECURE === 'true',
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
+
+// Helper to send email
+const sendEmail = async (to, subject, text) => {
+    // If no SMTP host configured, log to console for development
+    if (!process.env.SMTP_HOST) {
+        console.log('---------------------------------------------------');
+        console.log(`[Mock Email] To: ${to}`);
+        console.log(`Subject: ${subject}`);
+        console.log(`Body: ${text}`);
+        console.log('---------------------------------------------------');
+        return;
+    }
+    
+    try {
+        await transporter.sendMail({
+            from: process.env.SMTP_FROM || '"Game-Worn Community" <noreply@game-worn-community.de>',
+            to,
+            subject,
+            text,
+        });
+        console.log(`Email sent to ${to}`);
+    } catch (error) {
+        console.error('Error sending email:', error);
+        // Don't throw here to avoid crashing the request if email fails, just log it
+    }
+};
 
 // Register
 router.post('/register', async (req, res) => {
@@ -51,7 +91,7 @@ router.post('/login', async (req, res) => {
     
     const user = await User.findOne({ where: { email } });
     if (!user) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ error: 'Email Adresse oder Passwort falsch' });
     }
 
     // Check if user is blocked - Robust JSON handling
@@ -71,7 +111,7 @@ router.post('/login', async (req, res) => {
 
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ error: 'Email Adresse oder Passwort falsch' });
     }
 
     const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET);
@@ -80,6 +120,92 @@ router.post('/login', async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
+});
+
+// Forgot Password
+router.post('/forgot-password', async (req, res) => {
+    try {
+        const { email } = req.body;
+        const user = await User.findOne({ where: { email } });
+        
+        if (!user) {
+            return res.json({ message: 'Falls ein Konto mit dieser E-Mail existiert, wurde ein Link zum Zurücksetzen gesendet.' });
+        }
+        
+        // Generate Token
+        const token = crypto.randomBytes(32).toString('hex');
+        const expires = Date.now() + 3600000; // 1 hour
+        
+        // Save to User data
+        let currentData = user.data || {};
+        if (typeof currentData === 'string') {
+            try { currentData = JSON.parse(currentData); } catch(e) { currentData = {}; }
+        }
+        
+        user.data = {
+            ...currentData,
+            reset_token: token,
+            reset_token_expires: expires
+        };
+        user.changed('data', true);
+        await user.save();
+        
+        // Send Email
+        const resetLink = `${req.headers.origin || 'https://www.game-worn-community.de'}/reset-password?token=${token}`;
+        
+        await sendEmail(
+            email,
+            'Passwort zurücksetzen - Game-Worn Community',
+            `Hallo,\n\nDu hast angefordert, dein Passwort zurückzusetzen.\nBitte klicke auf den folgenden Link:\n\n${resetLink}\n\nDieser Link ist 1 Stunde gültig.\n\nFalls du dies nicht angefordert hast, ignoriere diese Email.`
+        );
+        
+        res.json({ message: 'Falls ein Konto mit dieser E-Mail existiert, wurde ein Link zum Zurücksetzen gesendet.' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Reset Password
+router.post('/reset-password', async (req, res) => {
+    try {
+        const { token, newPassword } = req.body;
+        
+        // Find user with token
+        // Since we store it in JSON, we iterate (low user count assumed)
+        const users = await User.findAll();
+        const user = users.find(u => {
+            let d = u.data || {};
+            if (typeof d === 'string') { try { d = JSON.parse(d); } catch(e) { d = {}; } }
+            return d.reset_token === token && d.reset_token_expires > Date.now();
+        });
+        
+        if (!user) {
+            return res.status(400).json({ error: 'Ungültiger oder abgelaufener Link.' });
+        }
+        
+        // Hash new password
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        
+        // Update user
+        let currentData = user.data || {};
+        if (typeof currentData === 'string') { try { currentData = JSON.parse(currentData); } catch(e) { currentData = {}; } }
+        
+        // Remove token
+        delete currentData.reset_token;
+        delete currentData.reset_token_expires;
+        
+        user.password = hashedPassword;
+        user.data = currentData;
+        user.changed('data', true);
+        await user.save();
+        
+        res.json({ message: 'Passwort erfolgreich geändert. Du kannst dich jetzt einloggen.' });
+        
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Server error' });
+    }
 });
 
 // Get Current User
