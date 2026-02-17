@@ -130,16 +130,43 @@ router.patch('/me', async (req, res) => {
             { user_name: display_name },
             { where: { user_email: email } }
         );
-        
-        // Note: Jerseys store owner_email, and created_by is also usually email.
-        // The display name is mostly fetched dynamically via user.data.display_name in frontend.
-        // However, if we store owner_name anywhere in Jersey.data, we should update it.
-        // Since we don't have easy JSON path updates in all SQL dialects via Sequelize easily without raw queries,
-        // and our frontend fetches the latest User profile anyway to display the name, 
-        // updating Comments is the most critical part where the name is static.
     }
     
     res.json(user);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Change Password
+router.post('/change-password', async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) return res.status(401).json({ error: 'No token provided' });
+
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const user = await User.findByPk(decoded.id);
+    
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    
+    const { currentPassword, newPassword } = req.body;
+    
+    if (!currentPassword || !newPassword) {
+        return res.status(400).json({ error: 'Missing fields' });
+    }
+
+    // Verify current password
+    const validPassword = await bcrypt.compare(currentPassword, user.password);
+    if (!validPassword) {
+      return res.status(401).json({ error: 'Invalid current password' });
+    }
+
+    // Set new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await user.save();
+
+    res.json({ message: 'Password updated successfully' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

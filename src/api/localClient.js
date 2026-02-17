@@ -75,6 +75,12 @@ export const base44 = {
         role: user.role
       };
     },
+    updatePassword: async (currentPassword, newPassword) => {
+      return request('/auth/change-password', {
+        method: 'POST',
+        body: JSON.stringify({ currentPassword, newPassword })
+      });
+    },
     logout: () => {
       localStorage.removeItem('token');
       window.location.reload();
