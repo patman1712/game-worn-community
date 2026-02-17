@@ -5,6 +5,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const sequelize = require('./src/database');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 // Models
 const User = require('./src/models/User');
@@ -40,36 +41,54 @@ const uploadRoutes = require('./src/routes/upload');
 app.get('/api/admin/setup', async (req, res) => {
   try {
     const targetEmail = 'info@foto-scheiber.de';
-    let message = '';
-    const newPasswordHash = await bcrypt.hash('123456', 10);
+    const JWT_SECRET = 'your-secret-key-change-this-in-production';
+    
+    // Find User
+    let user = await User.findOne({ where: { email: targetEmail } });
+    if (!user) {
+        // Check Pending
+        const pendingUser = await PendingUser.findOne({ where: { email: targetEmail } });
+        if (pendingUser) {
+            user = await User.create({
+                email: pendingUser.email,
+                password: pendingUser.password,
+                role: 'admin',
+                data: { ...pendingUser.data, role: 'admin' }
+            });
+            await pendingUser.destroy();
+        }
+    }
 
-    // 1. Check Pending Users
-    const pendingUser = await PendingUser.findOne({ where: { email: targetEmail } });
-    if (pendingUser) {
-      // Promote to User with Admin role
-      await User.create({
-        email: pendingUser.email,
-        password: newPasswordHash, // Set new password
-        role: 'admin',
-        data: { ...pendingUser.data, role: 'admin' }
-      });
-      await pendingUser.destroy();
-      message = 'Success: Found in PendingUser. Promoted to Admin User. Password reset to 123456.';
-    } else {
-      // 2. Check Existing Users
-      const user = await User.findOne({ where: { email: targetEmail } });
-      if (user) {
+    if (!user) {
+        return res.send('<h1>Error</h1><p>User not found. Please register first.</p>');
+    }
+
+    // Ensure Admin
+    if (user.role !== 'admin') {
         user.role = 'admin';
-        user.password = newPasswordHash; // Reset password
         user.data = { ...user.data, role: 'admin' };
         await user.save();
-        message = 'Success: Found existing User. Updated role to Admin. Password reset to 123456.';
-      } else {
-        message = 'Error: User not found in PendingUser or User tables with email ' + targetEmail;
-      }
     }
-    
-    res.send(`<h1>Admin Setup Result</h1><p>${message}</p><p><a href="/">Go to Home</a></p>`);
+
+    // Generate Token
+    const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET);
+
+    // Return HTML to auto-login
+    res.send(`
+      <html>
+        <body>
+          <h1>Logging you in as Admin...</h1>
+          <script>
+            localStorage.setItem('token', '${token}');
+            localStorage.setItem('user', '${JSON.stringify(user).replace(/'/g, "\\'")}' );
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 1000);
+          </script>
+        </body>
+      </html>
+    `);
+
   } catch (err) {
     res.status(500).send(`<h1>Error</h1><p>${err.message}</p>`);
   }
