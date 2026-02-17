@@ -27,21 +27,78 @@ export default function JerseyDetail() {
     base44.auth.me().then(setCurrentUser).catch(() => {});
   }, []);
 
+  // Real-time subscription for jersey updates
+  useEffect(() => {
+    if (!jerseyId) return;
+    
+    // Subscribe to updates for this specific item
+    const unsubscribeJersey = base44.entities.Jersey.subscribe((event) => {
+      if (event.type === 'update' && event.id === jerseyId) {
+        queryClient.invalidateQueries({ queryKey: ["jersey", jerseyId] });
+      }
+    });
+    
+    const unsubscribeItem = base44.entities.CollectionItem.subscribe((event) => {
+      if (event.type === 'update' && event.id === jerseyId) {
+        queryClient.invalidateQueries({ queryKey: ["jersey", jerseyId] });
+      }
+    });
+
+    return () => {
+      unsubscribeJersey();
+      unsubscribeItem();
+    };
+  }, [jerseyId, queryClient]);
+
   const { data: jersey, isLoading } = useQuery({
     queryKey: ["jersey", jerseyId],
     queryFn: async () => {
       try {
         const jerseyList = await base44.entities.Jersey.filter({ id: jerseyId });
-        if (jerseyList.length > 0) return jerseyList[0];
+        if (jerseyList.length > 0) {
+            const item = jerseyList[0];
+            // ... merging logic ...
+            let itemData = item.data || {};
+            if (typeof itemData === 'string') {
+                try { itemData = JSON.parse(itemData); } catch (e) { }
+            }
+            const merged = { ...itemData, ...item };
+            
+            // Explicit mappings
+            merged.player_number = merged.player_number || merged.number || itemData.player_number || itemData.number;
+            
+            // IMPORTANT: Ensure likes_count is treated as a number
+            merged.likes_count = typeof merged.likes_count === 'number' ? merged.likes_count : 0;
+            
+            // Handle owner name if unknown
+            if (!merged.owner_name || merged.owner_name === 'Unbekannt') {
+                if (merged.data?.owner_name) merged.owner_name = merged.data.owner_name;
+            }
+            
+            return merged;
+        }
         
         const itemList = await base44.entities.CollectionItem.filter({ id: jerseyId });
-        if (itemList.length > 0) return itemList[0];
-        
+        if (itemList.length > 0) {
+            const item = itemList[0];
+            // ... merging logic ...
+            let itemData = item.data || {};
+            if (typeof itemData === 'string') {
+                try { itemData = JSON.parse(itemData); } catch (e) { }
+            }
+            const merged = { ...itemData, ...item };
+            
+            // Explicit mappings
+            merged.player_number = merged.player_number || merged.number || itemData.player_number || itemData.number;
+
+            // IMPORTANT: Ensure likes_count is treated as a number
+            merged.likes_count = typeof merged.likes_count === 'number' ? merged.likes_count : 0;
+            
+            // ...
+            return merged;
+        }
         return null;
-      } catch (error) {
-        console.error("Error loading item:", error);
-        return null;
-      }
+      } catch (error) { return null; }
     },
     enabled: !!jerseyId,
   });
@@ -64,30 +121,91 @@ export default function JerseyDetail() {
       const ownerEmail = jersey?.owner_email || jersey?.created_by;
       if (!ownerEmail) return null;
       const users = await base44.entities.User.list();
-      return users.find(u => u.email === ownerEmail);
+      const user = users.find(u => u.email === ownerEmail);
+      // Ensure we return an object with display_name, potentially from data
+      if (user) {
+          return {
+              ...user,
+              display_name: user.data?.display_name || user.display_name || user.data?.name || "Unbekannt"
+          };
+      }
+      return null;
     },
     enabled: !!(jersey?.owner_email || jersey?.created_by),
   });
 
   const isLiked = likes.length > 0;
   const ownerAcceptsMessages = ownerUser?.data?.accept_messages !== false && ownerUser?.accept_messages !== false;
+  const ownerName = ownerUser?.display_name || jersey?.owner_name || jersey?.data?.owner_name || "Unbekannt";
+  
   const userAcceptsMessages = currentUser ? (currentUser.data?.accept_messages ?? currentUser.accept_messages ?? true) : false;
   const isOwner = currentUser && jersey && (jersey.owner_email === currentUser.email || jersey.created_by === currentUser.email);
   const isAdmin = currentUser && (currentUser.role === 'admin' || currentUser.data?.role === 'admin');
-  const canSeeCertificates = jersey?.has_loa && jersey.loa_certificate_images?.length > 0 && (jersey.loa_certificates_public || isOwner || isAdmin);
+  const isCollectionItem = !!jersey?.product_type;
 
+  // Logic updated: Allow seeing certificates if they are public OR if user is owner/admin
+  const canSeeCertificates = jersey?.has_loa && jersey.loa_certificate_images?.length > 0 && (jersey.loa_certificates_public === true || isOwner || isAdmin);
+  
   const likeMutation = useMutation({
     mutationFn: async () => {
+      // Don't execute if already pending to prevent double clicks
       const entity = isCollectionItem ? base44.entities.CollectionItem : base44.entities.Jersey;
       if (isLiked) {
-        await base44.entities.JerseyLike.delete(likes[0].id);
-        await entity.update(jerseyId, { likes_count: Math.max(0, (jersey.likes_count || 0) - 1) });
+        // Need to find the like ID. Optimistically we might not have it if we just created it.
+        // But in `likes` array from useQuery we should have it.
+        const likeToDelete = likes[0];
+        if (likeToDelete) {
+            await base44.entities.JerseyLike.delete(likeToDelete.id);
+            // Fetch current item to get accurate count before decrementing
+            // Or just trust the decrement if we assume consistency
+            const items = await entity.filter({ id: jerseyId });
+            const currentItem = items[0];
+            if (currentItem) {
+                await entity.update(jerseyId, { likes_count: Math.max(0, (currentItem.likes_count || 0) - 1) });
+            }
+        }
       } else {
         await base44.entities.JerseyLike.create({ jersey_id: jerseyId, user_email: currentUser.email });
-        await entity.update(jerseyId, { likes_count: (jersey.likes_count || 0) + 1 });
+        const items = await entity.filter({ id: jerseyId });
+        const currentItem = items[0];
+        if (currentItem) {
+            await entity.update(jerseyId, { likes_count: (currentItem.likes_count || 0) + 1 });
+        }
       }
     },
-    onSuccess: () => {
+    onMutate: async () => {
+        // Optimistic update for Jersey Detail page
+        await queryClient.cancelQueries({ queryKey: ["jersey", jerseyId] });
+        await queryClient.cancelQueries({ queryKey: ["myLike", jerseyId, currentUser?.email] });
+
+        const previousJersey = queryClient.getQueryData(["jersey", jerseyId]);
+        const previousLikes = queryClient.getQueryData(["myLike", jerseyId, currentUser?.email]);
+        
+        // Toggle like state immediately
+        const newIsLiked = !(previousLikes && previousLikes.length > 0);
+        
+        queryClient.setQueryData(["jersey", jerseyId], (old) => {
+            if (!old) return old;
+            const currentCount = typeof old.likes_count === 'number' ? old.likes_count : 0;
+            return {
+                ...old,
+                likes_count: newIsLiked ? currentCount + 1 : Math.max(0, currentCount - 1)
+            };
+        });
+        
+        if (newIsLiked) {
+             queryClient.setQueryData(["myLike", jerseyId, currentUser?.email], [{ id: 'temp-optimistic' }]);
+        } else {
+             queryClient.setQueryData(["myLike", jerseyId, currentUser?.email], []);
+        }
+        
+        return { previousJersey, previousLikes };
+    },
+    onError: (err, newTodo, context) => {
+        queryClient.setQueryData(["jersey", jerseyId], context.previousJersey);
+        queryClient.setQueryData(["myLike", jerseyId, currentUser?.email], context.previousLikes);
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["jersey", jerseyId] });
       queryClient.invalidateQueries({ queryKey: ["myLike"] });
     },
@@ -95,17 +213,21 @@ export default function JerseyDetail() {
 
   const commentMutation = useMutation({
     mutationFn: async (text) => {
-      return base44.entities.Comment.create({
+      const result = await base44.entities.Comment.create({
         jersey_id: jerseyId,
         user_email: currentUser.email,
         user_name: currentUser.display_name || currentUser.full_name || currentUser.email,
         comment: text,
       });
+      return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["comments", jerseyId] });
       setCommentText("");
     },
+    onError: (error) => {
+        alert("Fehler beim Senden des Kommentars: " + error.message);
+    }
   });
 
   const deleteCommentMutation = useMutation({
@@ -131,8 +253,6 @@ export default function JerseyDetail() {
       </div>
     );
   }
-
-  const isCollectionItem = !!jersey.product_type;
 
   const allImages = [jersey.image_url, ...(jersey.additional_images || [])].filter((url, index, array) => array.indexOf(url) === index);
 
@@ -204,7 +324,7 @@ export default function JerseyDetail() {
             )}
 
             {/* Owner + Actions */}
-            <div className="p-4 rounded-xl bg-slate-800/30 border border-white/5">
+            <div className="p-4 rounded-xl bg-slate-800/30 border border-white/5 space-y-4">
               <div className="flex items-center justify-between">
                 <Link
                   to={createPageUrl("UserProfile") + `?email=${jersey.owner_email || jersey.created_by}`}
@@ -214,7 +334,7 @@ export default function JerseyDetail() {
                     <User className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <p className="text-white text-sm font-medium">{jersey.owner_name || "Unbekannt"}</p>
+                    <p className="text-white text-sm font-medium">{ownerName}</p>
                     <p className="text-white/30 text-xs">Sammlung ansehen</p>
                   </div>
                 </Link>
@@ -249,12 +369,43 @@ export default function JerseyDetail() {
                   </Button>
                 </div>
               </div>
+
+              {/* Private Owner Info - Moved here */}
+              {(isOwner || isAdmin) && (jersey.purchase_price || jersey.invoice_url) && (
+                <div className="pt-4 border-t border-white/5">
+                  <h3 className="text-white/60 text-xs font-medium flex items-center gap-2 mb-3">
+                    <Shield className="w-3 h-3" /> Private Informationen
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    {jersey.purchase_price && (
+                      <div>
+                        <span className="text-white/40 text-[10px] uppercase tracking-wider block mb-1">Kaufpreis</span>
+                        <span className="text-white font-mono text-sm">
+                          {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(jersey.purchase_price)}
+                        </span>
+                      </div>
+                    )}
+                    {jersey.invoice_url && (
+                      <div>
+                        <span className="text-white/40 text-[10px] uppercase tracking-wider block mb-1">Dokumente</span>
+                        <button 
+                          onClick={() => setCertificateImageOpen(jersey.invoice_url)}
+                          className="text-cyan-400 text-sm hover:underline flex items-center gap-1"
+                        >
+                          Rechnung ansehen
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </motion.div>
 
           {/* Info */}
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
             <div>
+              <h1 className="text-3xl font-bold text-white mb-2">{jersey.title || jersey.team || "Unbenanntes Objekt"}</h1>
               <div className="flex items-center gap-2 mb-3 flex-wrap">
                 {jersey.sport_type && (
                   <Badge className="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs">
@@ -316,22 +467,27 @@ export default function JerseyDetail() {
                    </Badge>
                  )}
                  {jersey.for_sale && (
-                   <Badge className="bg-green-500/20 text-green-300 border border-green-500/30 text-xs">
-                     For Sale
-                   </Badge>
-                 )}
+                  <Badge className="bg-green-500/20 text-green-300 border border-green-500/30 text-xs">
+                    For Sale
+                  </Badge>
+                )}
+                {jersey.is_private && (isOwner || isAdmin) && (
+                  <Badge className="bg-slate-500/20 text-slate-300 border border-slate-500/30 text-xs">
+                    Privat
+                  </Badge>
+                )}
               </div>
 
             </div>
 
             {/* Player info */}
-            {jersey.player_name && (
+            {(jersey.player_name || jersey.player_number) && (
               <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-800/50 border border-white/5">
                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center text-white font-bold text-lg">
-                  {jersey.player_number || "#"}
+                  #{jersey.player_number || ""}
                 </div>
                 <div>
-                  <p className="text-white font-semibold">{jersey.player_name}</p>
+                  <p className="text-white font-semibold">{jersey.player_name || "Unbekannter Spieler"}</p>
                   <p className="text-white/40 text-sm">{jersey.season || ""}</p>
                 </div>
               </div>
@@ -395,7 +551,10 @@ export default function JerseyDetail() {
               </div>
             )}
 
-            {/* Certificate Section */}
+            {/* Private Owner Info */}
+            {/* Removed from here as it was moved to the left column */}
+
+            {/* Certificate Section - Moved below actions as requested */}
             {canSeeCertificates && (
               <div className="pt-6 border-t border-white/5">
                 <h3 className="text-white font-medium mb-4">Zertifikate (LOA)</h3>
@@ -403,7 +562,7 @@ export default function JerseyDetail() {
                   {jersey.loa_certificate_images.map((url, i) => (
                     <div 
                       key={i} 
-                      className="rounded-lg overflow-hidden border border-white/10 bg-slate-800/30 cursor-pointer hover:border-cyan-500/50 transition-colors"
+                      className="rounded-lg overflow-hidden border border-white/10 bg-slate-800/30 cursor-pointer hover:border-cyan-500/50 transition-colors relative group"
                       onClick={() => setCertificateImageOpen(url)}
                     >
                       {url.toLowerCase().endsWith('.pdf') ? (
@@ -417,14 +576,19 @@ export default function JerseyDetail() {
                       ) : (
                         <img src={url} alt={`Zertifikat ${i + 1}`} className="w-full h-auto" />
                       )}
+                      
+                      {/* Overlay indicator */}
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                         <span className="text-white text-sm font-medium">Ansehen</span>
+                      </div>
                     </div>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Moderator Actions - Below Certificate */}
-            {currentUser && (currentUser.data?.role === 'moderator' || currentUser.role === 'admin' || currentUser.data?.role === 'admin') && (
+            {/* Moderator Actions - Above Certificate if no certificate, or below if certificate */}
+            {currentUser && (currentUser.data?.role === 'moderator' || currentUser.role === 'admin' || currentUser.data?.role === 'admin' || isOwner) && (
               <div className="pt-6 border-t border-white/5 flex gap-2">
                 <Link to={createPageUrl("EditJersey") + `?id=${jersey.id}`} className="flex-1">
                   <Button variant="outline" className="w-full text-orange-400 border-orange-500/30 hover:text-orange-300 hover:bg-orange-500/10">
@@ -436,16 +600,22 @@ export default function JerseyDetail() {
                     if (confirm('Objekt wirklich löschen?')) {
                       try {
                         const entity = isCollectionItem ? base44.entities.CollectionItem : base44.entities.Jersey;
-                        // Delete likes
-                        const likes = await base44.entities.JerseyLike.filter({ jersey_id: jersey.id });
-                        for (const like of likes) {
-                          await base44.entities.JerseyLike.delete(like.id);
-                        }
-                        // Delete comments
-                        const comments = await base44.entities.Comment.filter({ jersey_id: jersey.id });
-                        for (const comment of comments) {
-                          await base44.entities.Comment.delete(comment.id);
-                        }
+                        // Delete likes - try/catch
+                        try {
+                            const likes = await base44.entities.JerseyLike.filter({ jersey_id: jersey.id });
+                            for (const like of likes) {
+                              try { await base44.entities.JerseyLike.delete(like.id); } catch (e) {}
+                            }
+                        } catch (e) {}
+                        
+                        // Delete comments - try/catch
+                        try {
+                            const comments = await base44.entities.Comment.filter({ jersey_id: jersey.id });
+                            for (const comment of comments) {
+                              try { await base44.entities.Comment.delete(comment.id); } catch (e) {}
+                            }
+                        } catch (e) {}
+                        
                         // Delete item
                         await entity.delete(jersey.id);
                         window.location.href = createPageUrl("Home");

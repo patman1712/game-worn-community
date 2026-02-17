@@ -31,18 +31,33 @@ export default function UserPurchases() {
     enabled: !!user,
   });
 
+  const { data: users = [] } = useQuery({
+    queryKey: ["allUsers"],
+    queryFn: () => base44.entities.User.list(),
+    enabled: !!user,
+  });
+
   const isLoading = jerseysLoading || itemsLoading;
 
   // Combine all items and group by owner
   const allItems = [...jerseys, ...collectionItems];
   const userPurchases = allItems
-    .filter(j => j.purchase_price != null && j.purchase_price > 0)
+    .filter(j => {
+      const price = j.purchase_price || j.data?.purchase_price;
+      return price != null && price > 0;
+    })
     .reduce((acc, item) => {
       const ownerEmail = item.owner_email || item.created_by;
+      const price = item.purchase_price || item.data?.purchase_price || 0;
+      
       if (!acc[ownerEmail]) {
+        // Find user to get display name
+        const ownerUser = users.find(u => u.email === ownerEmail);
+        const displayName = ownerUser?.data?.display_name || ownerUser?.display_name || item.owner_name || ownerEmail;
+        
         acc[ownerEmail] = {
           email: ownerEmail,
-          name: item.owner_name || ownerEmail,
+          name: displayName,
           jerseys: [],
           otherItems: [],
           totalCost: 0,
@@ -52,17 +67,20 @@ export default function UserPurchases() {
       }
       
       // Check if it's a jersey or collection item
-      if (item.product_type) {
-        // It's a CollectionItem
-        acc[ownerEmail].otherItems.push(item);
-        acc[ownerEmail].otherCount++;
-      } else {
-        // It's a Jersey
+      // Logic update: If it's a soccer jersey (added via generic form), it might be a CollectionItem but should count as jersey
+      const isJersey = !item.product_type || item.product_type === 'jersey' || item.type === 'jersey';
+      
+      if (isJersey) {
+        // It's a Jersey (either old entity or new CollectionItem with type jersey)
         acc[ownerEmail].jerseys.push(item);
         acc[ownerEmail].jerseyCount++;
+      } else {
+        // It's a non-jersey CollectionItem
+        acc[ownerEmail].otherItems.push(item);
+        acc[ownerEmail].otherCount++;
       }
       
-      acc[ownerEmail].totalCost += item.purchase_price;
+      acc[ownerEmail].totalCost += price;
       return acc;
     }, {});
 
@@ -77,9 +95,9 @@ export default function UserPurchases() {
       // Calculate filtered total cost based on current filter
       let filteredTotalCost = userData.totalCost;
       if (filter === "jerseys") {
-        filteredTotalCost = userData.jerseys.reduce((sum, j) => sum + j.purchase_price, 0);
+        filteredTotalCost = userData.jerseys.reduce((sum, j) => sum + (j.purchase_price || j.data?.purchase_price || 0), 0);
       } else if (filter === "other") {
-        filteredTotalCost = userData.otherItems.reduce((sum, j) => sum + j.purchase_price, 0);
+        filteredTotalCost = userData.otherItems.reduce((sum, j) => sum + (j.purchase_price || j.data?.purchase_price || 0), 0);
       }
       return { ...userData, filteredTotalCost };
     })

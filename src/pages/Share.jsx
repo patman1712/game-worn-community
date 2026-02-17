@@ -2,22 +2,52 @@ import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
-import { Award, Star, Calendar, Shield, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Award, Star, Calendar, Shield, ChevronLeft, ChevronRight, Loader2, X, User } from "lucide-react";
 
 export default function Share() {
   const params = new URLSearchParams(window.location.search);
   const itemId = params.get("id");
   const [activeImage, setActiveImage] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   const { data: item, isLoading } = useQuery({
     queryKey: ["shareItem", itemId],
     queryFn: async () => {
       try {
         const jerseyList = await base44.entities.Jersey.filter({ id: itemId });
-        if (jerseyList.length > 0) return jerseyList[0];
+        if (jerseyList.length > 0) {
+            const item = jerseyList[0];
+            let itemData = item.data || {};
+            if (typeof itemData === 'string') {
+                try { itemData = JSON.parse(itemData); } catch (e) { }
+            }
+            const merged = { ...itemData, ...item };
+            
+            // Explicit mappings
+            merged.player_number = merged.player_number || merged.number || itemData.player_number || itemData.number;
+            
+            // Handle owner name if unknown
+            if (!merged.owner_name || merged.owner_name === 'Unbekannt') {
+                if (merged.data?.owner_name) merged.owner_name = merged.data.owner_name;
+            }
+            return merged;
+        }
         
         const itemList = await base44.entities.CollectionItem.filter({ id: itemId });
-        if (itemList.length > 0) return itemList[0];
+        if (itemList.length > 0) {
+            const item = itemList[0];
+            let itemData = item.data || {};
+            if (typeof itemData === 'string') {
+                try { itemData = JSON.parse(itemData); } catch (e) { }
+            }
+            const merged = { ...itemData, ...item };
+            
+            // Explicit mappings
+            merged.player_number = merged.player_number || merged.number || itemData.player_number || itemData.number;
+             
+            return merged;
+        }
         
         return null;
       } catch (error) {
@@ -27,6 +57,26 @@ export default function Share() {
     },
     enabled: !!itemId,
   });
+
+  const { data: ownerUser } = useQuery({
+    queryKey: ["owner", item?.owner_email || item?.created_by],
+    queryFn: async () => {
+      const ownerEmail = item?.owner_email || item?.created_by;
+      if (!ownerEmail) return null;
+      const users = await base44.entities.User.list();
+      const user = users.find(u => u.email === ownerEmail);
+      if (user) {
+          return {
+              ...user,
+              display_name: user.data?.display_name || user.display_name || user.data?.name || "Unbekannt"
+          };
+      }
+      return null;
+    },
+    enabled: !!(item?.owner_email || item?.created_by),
+  });
+
+  const ownerName = ownerUser?.display_name || item?.owner_name || item?.data?.owner_name || "Unbekannt";
 
   // Update meta tags for social sharing
   useEffect(() => {
@@ -102,6 +152,10 @@ export default function Share() {
           {/* Images */}
           <div>
             <div className="relative aspect-square rounded-2xl overflow-hidden bg-slate-800 border border-white/5">
+              <div 
+                className="absolute inset-0 cursor-pointer z-10"
+                onClick={() => setLightboxOpen(true)}
+              />
               <img
                 src={allImages[activeImage]}
                 alt={item.title || item.team}
@@ -110,14 +164,20 @@ export default function Share() {
               {allImages.length > 1 && (
                 <>
                   <button
-                    onClick={() => setActiveImage(i => (i - 1 + allImages.length) % allImages.length)}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/60 transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveImage(i => (i - 1 + allImages.length) % allImages.length);
+                    }}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/60 transition-colors z-20"
                   >
                     <ChevronLeft className="w-5 h-5 text-white" />
                   </button>
                   <button
-                    onClick={() => setActiveImage(i => (i + 1) % allImages.length)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/60 transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveImage(i => (i + 1) % allImages.length);
+                    }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/60 transition-colors z-20"
                   >
                     <ChevronRight className="w-5 h-5 text-white" />
                   </button>
@@ -209,13 +269,13 @@ export default function Share() {
             </div>
 
             {/* Player info */}
-            {item.player_name && (
+            {(item.player_name || item.player_number) && (
               <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-800/50 border border-white/5">
                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center text-white font-bold text-lg">
-                  {item.player_number || "#"}
+                  #{item.player_number || ""}
                 </div>
                 <div>
-                  <p className="text-white font-semibold">{item.player_name}</p>
+                  <p className="text-white font-semibold">{item.player_name || "Unbekannter Spieler"}</p>
                   <p className="text-white/40 text-sm">{item.season || ""}</p>
                 </div>
               </div>
@@ -257,6 +317,20 @@ export default function Share() {
               )}
             </div>
 
+            {/* Details Section */}
+            {item.details && item.details.length > 0 && (
+              <div>
+                <h3 className="text-white/60 text-sm font-medium mb-2">Details</h3>
+                <div className="flex flex-wrap gap-2">
+                  {item.details.map(detail => (
+                    <Badge key={detail} className="bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-xs">
+                      {detail}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Description */}
             {item.description && (
               <div>
@@ -267,13 +341,58 @@ export default function Share() {
 
             {/* Owner */}
             <div className="pt-4 border-t border-white/5">
-              <p className="text-white/40 text-sm">
-                Aus der Sammlung von <span className="text-white font-medium">{item.owner_name || "Unbekannt"}</span>
-              </p>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center">
+                  <User className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <p className="text-white/40 text-xs">Aus der Sammlung von</p>
+                  <p className="text-white text-sm font-medium">{ownerName}</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
+      <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
+        <DialogContent className="max-w-[95vw] w-[95vw] h-[95vh] bg-slate-900/95 border-white/10 p-0">
+          <button
+            onClick={() => setLightboxOpen(false)}
+            className="absolute top-4 right-4 z-50 p-2 rounded-full bg-slate-800/80 hover:bg-slate-700 text-white transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+          <div className="w-full h-full flex items-center justify-center relative p-4">
+            <img 
+              src={allImages[activeImage]} 
+              alt={item.title}
+              className="max-w-full max-h-full object-contain"
+            />
+            {allImages.length > 1 && (
+              <>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveImage(i => (i - 1 + allImages.length) % allImages.length);
+                  }}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/60 backdrop-blur-sm hover:bg-black/80 transition-colors"
+                >
+                  <ChevronLeft className="w-6 h-6 text-white" />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveImage(i => (i + 1) % allImages.length);
+                  }}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/60 backdrop-blur-sm hover:bg-black/80 transition-colors"
+                >
+                  <ChevronRight className="w-6 h-6 text-white" />
+                </button>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

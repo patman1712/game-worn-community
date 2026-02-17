@@ -19,7 +19,10 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-export default function JerseyCard({ jersey, isLiked, onLike, index = 0 }) {
+export default function JerseyCard({ jersey: initialJersey, isLiked, onLike, index = 0 }) {
+  // Flatten data if available (for CollectionItems)
+  const jersey = { ...(initialJersey.data || {}), ...initialJersey };
+  
   const [imgLoaded, setImgLoaded] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [open, setOpen] = useState(false);
@@ -34,21 +37,44 @@ export default function JerseyCard({ jersey, isLiked, onLike, index = 0 }) {
 
   const isCollectionItem = !!jersey.product_type;
 
+  const likeMutation = useMutation({
+    mutationFn: async () => {
+      const entity = isCollectionItem ? base44.entities.CollectionItem : base44.entities.Jersey;
+      if (isLiked) {
+        // Unlike
+        // We need the like ID. But JerseyCard only gets isLiked boolean from parent.
+        // The parent (Home.jsx) handles the logic usually via onLike callback.
+        // But to have instant update locally, we might need to rely on parent re-fetching.
+        // However, if we want to show updated count immediately in the card, we need local state.
+      }
+    },
+    // We actually rely on the parent's onLike handler for the mutation logic in most cases
+    // But let's check how Home.jsx passes onLike.
+  });
+
+  // Local state for optimistic UI updates (optional, but good for UX)
+  // Actually, the parent (Home.jsx) refetches data on like, so the prop `jersey` should update.
+  // If `jersey.likes_count` comes from the DB, it should update after refetch.
+  
   const deleteMutation = useMutation({
     mutationFn: async (id) => {
       const entity = isCollectionItem ? base44.entities.CollectionItem : base44.entities.Jersey;
       
-      // Delete likes
-      const likes = await base44.entities.JerseyLike.filter({ jersey_id: id });
-      for (const like of likes) {
-        await base44.entities.JerseyLike.delete(like.id);
-      }
+      // Delete likes - try/catch to ignore errors
+      try {
+        const likes = await base44.entities.JerseyLike.filter({ jersey_id: id });
+        for (const like of likes) {
+            try { await base44.entities.JerseyLike.delete(like.id); } catch (e) {}
+        }
+      } catch (e) {}
       
-      // Delete comments
-      const comments = await base44.entities.Comment.filter({ jersey_id: id });
-      for (const comment of comments) {
-        await base44.entities.Comment.delete(comment.id);
-      }
+      // Delete comments - try/catch to ignore errors
+      try {
+          const comments = await base44.entities.Comment.filter({ jersey_id: id });
+          for (const comment of comments) {
+            try { await base44.entities.Comment.delete(comment.id); } catch (e) {}
+          }
+      } catch (e) {}
       
       // Delete item
       await entity.delete(id);
@@ -60,7 +86,16 @@ export default function JerseyCard({ jersey, isLiked, onLike, index = 0 }) {
       queryClient.invalidateQueries({ queryKey: ["myItems"] });
       setOpen(false);
     },
+    onError: (error) => {
+        alert("Fehler beim Löschen: " + error.message);
+    }
   });
+
+  const handleDelete = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setOpen(true);
+  };
 
   return (
     <motion.div
@@ -103,15 +138,16 @@ export default function JerseyCard({ jersey, isLiked, onLike, index = 0 }) {
                   <AlertDialog open={open} onOpenChange={setOpen}>
                     <AlertDialogTrigger asChild>
                       <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                        }}
+                        onClick={handleDelete}
                         className="p-2 rounded-full bg-black/30 backdrop-blur-sm hover:bg-red-500/40 transition-all"
                       >
                         <Trash2 className="w-4 h-4 text-red-400/70 hover:text-red-400" />
                       </button>
                     </AlertDialogTrigger>
-                    <AlertDialogContent className="bg-slate-900 border-white/10">
+                    <AlertDialogContent 
+                        className="bg-slate-900 border-white/10"
+                        onClick={(e) => e.stopPropagation()}
+                    >
                       <AlertDialogHeader>
                         <AlertDialogTitle className="text-white">Objekt löschen?</AlertDialogTitle>
                         <AlertDialogDescription className="text-white/50">
@@ -119,7 +155,15 @@ export default function JerseyCard({ jersey, isLiked, onLike, index = 0 }) {
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel className="bg-white/5 text-white border-white/10 hover:bg-white/10">Abbrechen</AlertDialogCancel>
+                        <AlertDialogCancel 
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setOpen(false);
+                            }}
+                            className="bg-white/5 text-white border-white/10 hover:bg-white/10"
+                        >
+                            Abbrechen
+                        </AlertDialogCancel>
                         <AlertDialogAction
                           onClick={(e) => {
                             e.preventDefault();
@@ -243,7 +287,7 @@ export default function JerseyCard({ jersey, isLiked, onLike, index = 0 }) {
             </div>
             <div className="flex items-center gap-1 text-white/40 text-xs">
               <Heart className="w-3 h-3" />
-              <span>{jersey.likes_count || 0}</span>
+              <span>{isLiked ? (jersey.likes_count || 0) : (jersey.likes_count || 0)}</span>
             </div>
           </div>
         </div>

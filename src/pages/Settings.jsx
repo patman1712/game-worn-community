@@ -86,12 +86,22 @@ export default function Settings() {
       console.error('Error updating PendingUser:', error);
     }
     
-    // Update all user's jerseys with new display name
-    if (profile.display_name !== user.display_name) {
+    // Update all user's jerseys/items with new display name
+    if (profile.display_name && profile.display_name !== user.display_name) {
       try {
-        await base44.functions.invoke('updateUserJerseys', { display_name: profile.display_name });
+        // Update Jerseys
+        const jerseys = await base44.entities.Jersey.filter({ owner_email: user.email });
+        for (const jersey of jerseys) {
+          await base44.entities.Jersey.update(jersey.id, { created_by: profile.display_name });
+        }
+        
+        // Update CollectionItems
+        const items = await base44.entities.CollectionItem.filter({ owner_email: user.email });
+        for (const item of items) {
+          await base44.entities.CollectionItem.update(item.id, { created_by: profile.display_name });
+        }
       } catch (error) {
-        console.error('Error updating jerseys:', error);
+        console.error('Error updating items:', error);
       }
     }
     

@@ -23,7 +23,6 @@ import {
 export default function Messages() {
   const [currentUser, setCurrentUser] = useState(null);
   const [search, setSearch] = useState("");
-  const [showUserSearch, setShowUserSearch] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [conversationToDelete, setConversationToDelete] = useState(null);
   const queryClient = useQueryClient();
@@ -43,22 +42,11 @@ export default function Messages() {
     enabled: !!currentUser,
   });
 
-  const { data: allUsers = [], isLoading: isLoadingUsers } = useQuery({
-    queryKey: ["messageable-users", currentUser?.email],
-    queryFn: async () => {
-      const response = await base44.functions.invoke('getMessageableUsers');
-      return response.data.users || [];
-    },
-    enabled: !!currentUser,
-    staleTime: 30000,
-  });
-
   const { data: allUsersForNames = [] } = useQuery({
     queryKey: ["all-users-names"],
     queryFn: async () => {
-      // Use backend function to get all users with service role
-      const response = await base44.functions.invoke('getMessageableUsers');
-      return response.data.users || [];
+      // Use direct list instead of function
+      return await base44.entities.User.list();
     },
     enabled: !!currentUser,
   });
@@ -91,7 +79,7 @@ export default function Messages() {
       conv.messages.push(msg);
       
       // Update last message if this one is newer
-      if (new Date(msg.created_date) > new Date(conv.lastMessage.created_date)) {
+      if (new Date(msg.createdAt) > new Date(conv.lastMessage.createdAt)) {
         conv.lastMessage = msg;
       }
       
@@ -102,19 +90,14 @@ export default function Messages() {
     });
     
     return Array.from(convMap.values()).sort((a, b) => 
-      new Date(b.lastMessage.created_date) - new Date(a.lastMessage.created_date)
+      new Date(b.lastMessage.createdAt) - new Date(a.lastMessage.createdAt)
     );
   }, [messages, currentUser, allUsersForNames]);
 
-  const filtered = showUserSearch 
-    ? allUsers.filter(u => 
-        !search || 
-        u.email.toLowerCase().includes(search.toLowerCase()) ||
-        (u.display_name && u.display_name.toLowerCase().includes(search.toLowerCase()))
-      )
-    : conversations.filter(c => 
-        !search || c.otherEmail.toLowerCase().includes(search.toLowerCase())
-      );
+  const filtered = conversations.filter(c => 
+      !search || c.otherEmail.toLowerCase().includes(search.toLowerCase()) || 
+      (c.otherUser?.displayName && c.otherUser.displayName.toLowerCase().includes(search.toLowerCase()))
+    );
 
   const deleteMutation = useMutation({
     mutationFn: async (otherEmail) => {
@@ -148,40 +131,23 @@ export default function Messages() {
     <div className="min-h-screen">
       {/* Header */}
       <div className="max-w-3xl mx-auto px-4 pt-8 pb-6">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
-            <MessageCircle className="w-5 h-5 text-white" />
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
+              <MessageCircle className="w-5 h-5 text-white" />
+            </div>
+            <h1 className="text-2xl font-bold text-white">Nachrichten</h1>
           </div>
-          <h1 className="text-2xl font-bold text-white">Nachrichten</h1>
+          <NewMessageDialog currentUser={currentUser} />
         </div>
 
-        {/* Search & Actions */}
-        <div className="flex gap-2 mb-3">
-          <Button
-            onClick={() => setShowUserSearch(false)}
-            variant={!showUserSearch ? "default" : "ghost"}
-            size="sm"
-            className={!showUserSearch ? "bg-cyan-500 text-white" : "text-white/50"}
-          >
-            <MessageCircle className="w-4 h-4 mr-2" />
-            Konversationen
-          </Button>
-          <Button
-            onClick={() => setShowUserSearch(true)}
-            variant={showUserSearch ? "default" : "ghost"}
-            size="sm"
-            className={showUserSearch ? "bg-cyan-500 text-white" : "text-white/50"}
-          >
-            <Users className="w-4 h-4 mr-2" />
-            Neue Nachricht
-          </Button>
-        </div>
-        <div className="relative">
+        {/* Search */}
+        <div className="relative mb-6">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder={showUserSearch ? "Suche User..." : "Suche Konversationen..."}
+            placeholder="Suche Konversationen..."
             className="bg-slate-800/50 border-white/10 text-white pl-10 placeholder:text-white/20"
           />
         </div>
@@ -189,7 +155,7 @@ export default function Messages() {
 
       {/* Conversations List */}
       <div className="max-w-3xl mx-auto px-4 pb-24">
-        {(isLoading || (showUserSearch && isLoadingUsers)) ? (
+        {isLoading ? (
           <div className="flex items-center justify-center py-20">
             <Loader2 className="w-8 h-8 text-cyan-400 animate-spin" />
           </div>
@@ -200,36 +166,7 @@ export default function Messages() {
           </div>
         ) : (
           <div className="space-y-2">
-            {showUserSearch ? (
-              // User search results
-              filtered.map((user, i) => (
-                <motion.div
-                  key={user.email}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.05 }}
-                >
-                  <Link
-                    to={createPageUrl("Chat") + `?email=${encodeURIComponent(user.email)}`}
-                    className="block bg-slate-900/60 backdrop-blur-sm rounded-xl border border-white/5 hover:border-cyan-500/30 p-4 transition-all"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center flex-shrink-0">
-                        <User className="w-5 h-5 text-white" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-white font-medium truncate">
-                          {user.data?.display_name || user.display_name || user.full_name}
-                        </h3>
-                        <p className="text-white/40 text-xs mt-1">Neue Konversation starten</p>
-                      </div>
-                    </div>
-                  </Link>
-                </motion.div>
-              ))
-            ) : (
-              // Conversations
-              filtered.map((conv, i) => (
+            {filtered.map((conv, i) => (
                 <motion.div
                   key={conv.otherEmail}
                   initial={{ opacity: 0, y: 20 }}
@@ -263,7 +200,7 @@ export default function Messages() {
                           {conv.lastMessage.message}
                         </p>
                         <p className="text-white/30 text-xs mt-1">
-                          {new Date(conv.lastMessage.created_date).toLocaleDateString('de-DE', {
+                          {new Date(conv.lastMessage.createdAt).toLocaleDateString('de-DE', {
                             day: '2-digit',
                             month: '2-digit',
                             year: '2-digit',
@@ -284,7 +221,7 @@ export default function Messages() {
                   </Link>
                 </motion.div>
               ))
-            )}
+            }
           </div>
         )}
       </div>

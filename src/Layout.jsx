@@ -26,8 +26,13 @@ export default function Layout({ children, currentPageName }) {
   const { data: pendingUser, isLoading: isLoadingPendingUser } = useQuery({
     queryKey: ["pendingUser", user?.email],
     queryFn: async () => {
-      const pendingUsers = await base44.entities.PendingUser.filter({ email: user.email });
-      return pendingUsers[0] || null;
+      if (!user?.email) return null;
+      try {
+        const pendingUsers = await base44.entities.PendingUser.filter({ email: user.email });
+        return pendingUsers[0] || null;
+      } catch (e) {
+        return null;
+      }
     },
     enabled: !!user,
     staleTime: 0, // Always fetch fresh data
@@ -186,15 +191,16 @@ export default function Layout({ children, currentPageName }) {
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
-                  <Button
-                    onClick={() => base44.auth.redirectToLogin()}
-                    size="sm"
-                    variant="ghost"
-                    className="text-white/70 hover:text-white hover:bg-white/5 text-xs h-8 px-3"
-                  >
-                    <LogIn className="w-3.5 h-3.5 mr-1.5" />
-                    Anmelden
-                  </Button>
+                  <Link to="/login">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-white/70 hover:text-white hover:bg-white/5 text-xs h-8 px-3"
+                    >
+                      <LogIn className="w-3.5 h-3.5 mr-1.5" />
+                      Anmelden
+                    </Button>
+                  </Link>
                 </div>
               )}
             </>

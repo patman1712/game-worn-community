@@ -40,6 +40,10 @@ export default function UserProfile() {
   const ownerName = profileUser?.display_name || jerseys[0]?.owner_name || email;
   const totalLikes = jerseys.reduce((s, j) => s + (j.likes_count || 0), 0);
 
+  const ownerAcceptsMessages = profileUser?.data?.accept_messages !== false && profileUser?.accept_messages !== false;
+  const userAcceptsMessages = currentUser ? (currentUser.data?.accept_messages ?? currentUser.accept_messages ?? true) : false;
+  const showMessageButton = currentUser && (email !== currentUser.email) && ownerAcceptsMessages && userAcceptsMessages;
+
   return (
     <div className="min-h-screen">
       <div className="max-w-6xl mx-auto px-4 py-10">
@@ -52,20 +56,38 @@ export default function UserProfile() {
         </Link>
 
         {/* Profile Header */}
-        <div className="flex items-center gap-5 mb-10">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center">
-            <User className="w-8 h-8 text-white" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-white">{ownerName}</h1>
-            <div className="flex items-center gap-4 mt-1">
-              <span className="text-white/40 text-sm flex items-center gap-1.5">
-                <Shirt className="w-3.5 h-3.5" /> {jerseys.length} Trikots
-              </span>
-              <span className="text-white/40 text-sm flex items-center gap-1.5">
-                <Heart className="w-3.5 h-3.5" /> {totalLikes} Likes
-              </span>
+        <div className="flex items-center justify-between mb-10">
+          <div className="flex items-center gap-5">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center">
+              <User className="w-8 h-8 text-white" />
             </div>
+            <div>
+              <h1 className="text-2xl font-bold text-white">{ownerName}</h1>
+              <div className="flex items-center gap-4 mt-1">
+                <span className="text-white/40 text-sm flex items-center gap-1.5">
+                  <Shirt className="w-3.5 h-3.5" /> {jerseys.length} Trikots
+                </span>
+                <span className="text-white/40 text-sm flex items-center gap-1.5">
+                  <Heart className="w-3.5 h-3.5" /> {totalLikes} Likes
+                </span>
+              </div>
+            </div>
+          </div>
+          
+          {/* Actions */}
+          <div className="flex gap-3">
+            {showMessageButton && (
+              <Link to={createPageUrl("Chat") + `?email=${email}`}>
+                <Button className="bg-cyan-500 hover:bg-cyan-600 text-white gap-2">
+                  <div className="w-4 h-4">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                  </div>
+                  Nachricht senden
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
 

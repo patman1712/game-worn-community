@@ -9,7 +9,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { User, Shield, Ban, Trash2, Edit, Loader2, Search } from "lucide-react";
+import { User, Shield, Ban, Trash2, Edit, Loader2, Search, Check, UserPlus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 export default function ManageUsers() {
@@ -34,7 +34,7 @@ export default function ManageUsers() {
       const allUsers = await base44.entities.User.list();
       const pendingUsers = await base44.entities.PendingUser.list();
       
-      // Merge PendingUser data with User data
+      // Merge PendingUser data with User data for display names if needed
       return allUsers.map(user => {
         const pendingUser = pendingUsers.find(p => p.email === user.email);
         if (pendingUser) {
@@ -56,8 +56,37 @@ export default function ManageUsers() {
     enabled: !!user,
   });
 
+  const { data: pendingApprovals = [], isLoading: isLoadingPending } = useQuery({
+    queryKey: ['pendingApprovals'],
+    queryFn: async () => {
+      return await base44.entities.PendingUser.list();
+    },
+    enabled: !!user,
+  });
+
+  // Filter out pending users that are already approved (exist in users list)
+  const usersToApprove = pendingApprovals.filter(
+    p => !users.some(u => u.email === p.email)
+  );
+
+  const approveMutation = useMutation({
+    mutationFn: async (pendingUserId) => {
+      await base44.auth.approveUser(pendingUserId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['allUsers'] });
+      queryClient.invalidateQueries({ queryKey: ['pendingApprovals'] });
+    },
+    onError: (error) => {
+      console.error('Approve user error:', error);
+      alert('Fehler beim Freischalten: ' + error.message);
+    }
+  });
+
   const manageMutation = useMutation({
     mutationFn: async ({ action, userId, updates }) => {
+      // Direct call to local client logic which now routes to /auth/manage-user
+      // The client now returns { data: ... }
       const response = await base44.functions.invoke('manageUser', { action, userId, updates });
       return response.data;
     },
@@ -67,7 +96,7 @@ export default function ManageUsers() {
     },
     onError: (error) => {
       console.error('Manage user error:', error);
-      alert('Fehler beim Speichern: ' + (error.response?.data?.error || error.message));
+      alert('Fehler: ' + (error.response?.data?.error || error.message));
     }
   });
 
@@ -89,10 +118,56 @@ export default function ManageUsers() {
     <div className="min-h-screen p-6">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Registrierte User</h1>
-          <p className="text-white/50">Verwalte alle registrierten Benutzer</p>
+          <h1 className="text-3xl font-bold text-white mb-2">User Verwaltung</h1>
+          <p className="text-white/50">Verwalte Registrierungen und Benutzer</p>
         </div>
 
+        {/* Pending Approvals Section */}
+        {usersToApprove.length > 0 && (
+          <div className="mb-10">
+            <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+              <UserPlus className="w-5 h-5 text-cyan-400" />
+              Warten auf Freischaltung
+              <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-500/30 ml-2">
+                {usersToApprove.length}
+              </Badge>
+            </h2>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {usersToApprove.map((pendingUser) => (
+                <Card key={pendingUser.id} className="bg-slate-900/60 backdrop-blur-sm border-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.1)]">
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="w-12 h-12 rounded-full bg-cyan-500/20 flex items-center justify-center">
+                        <User className="w-6 h-6 text-cyan-400" />
+                      </div>
+                      <Badge variant="outline" className="border-cyan-500/30 text-cyan-400">
+                        Neu
+                      </Badge>
+                    </div>
+                    
+                    <h3 className="text-lg font-bold text-white mb-1">
+                      {pendingUser.data?.display_name || 'Unbekannt'}
+                    </h3>
+                    <p className="text-white/50 text-sm mb-4">{pendingUser.email}</p>
+                    
+                    <div className="flex gap-2">
+                      <Button 
+                        onClick={() => approveMutation.mutate(pendingUser.id)}
+                        disabled={approveMutation.isPending}
+                        className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500"
+                      >
+                        {approveMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4 mr-2" />}
+                        Freischalten
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <h2 className="text-xl font-bold text-white mb-4">Registrierte User</h2>
         <Card className="bg-slate-900/60 backdrop-blur-sm border-white/5 mb-6">
           <CardHeader>
             <div className="flex items-center gap-2">

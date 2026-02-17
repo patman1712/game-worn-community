@@ -20,8 +20,16 @@ export default function NewMessageDialog({ currentUser, onMessageSent }) {
     queryFn: async () => {
       const allUsers = await base44.entities.User.list();
       return allUsers.filter(u => {
-        const acceptsMessages = u.data?.accept_messages !== false && u.accept_messages !== false;
-        return acceptsMessages && u.email !== currentUser?.email;
+        // User accepts messages if flag is explicitly true or undefined (default true)
+        // AND checks if 'data' field has it (sometimes stored there)
+        const userSettings = u.data || {};
+        const acceptsMessages = 
+          (u.accept_messages !== false) && 
+          (userSettings.accept_messages !== false);
+          
+        const isSelf = u.email === currentUser?.email;
+        
+        return acceptsMessages && !isSelf;
       });
     },
     enabled: open,

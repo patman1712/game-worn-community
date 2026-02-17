@@ -35,8 +35,11 @@ export default function MyPurchases() {
 
   // Filter all items with purchase price
   const allItems = [...jerseys, ...collectionItems];
-  const purchasedItems = allItems.filter(j => j.purchase_price != null && j.purchase_price > 0);
-  const totalCost = purchasedItems.reduce((sum, j) => sum + (j.purchase_price || 0), 0);
+  const purchasedItems = allItems.filter(j => {
+    const price = j.purchase_price || j.data?.purchase_price;
+    return price != null && price > 0;
+  });
+  const totalCost = purchasedItems.reduce((sum, j) => sum + (j.purchase_price || j.data?.purchase_price || 0), 0);
   const isLoading = jerseysLoading || itemsLoading;
 
   if (isLoading || !user) {

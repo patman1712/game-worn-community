@@ -56,8 +56,8 @@ export default function Home() {
   const { data: userCountData } = useQuery({
     queryKey: ["userCount"],
     queryFn: async () => {
-      const response = await base44.functions.invoke('getUserCount');
-      return response.data;
+      const users = await base44.entities.User.list();
+      return { count: users.length };
     },
   });
 
@@ -127,33 +127,48 @@ export default function Home() {
   const likeMutation = useMutation({
     mutationFn: async (jerseyId) => {
       const existing = likes.find(l => l.jersey_id === jerseyId);
+      
+      // Determine if it's a Jersey or CollectionItem
+      const isJersey = jerseys.some(j => j.id === jerseyId);
+      const isCollectionItem = collectionItems.some(i => i.id === jerseyId);
+      const entity = isCollectionItem ? base44.entities.CollectionItem : base44.entities.Jersey;
+      
       if (existing) {
         await base44.entities.JerseyLike.delete(existing.id);
-        const jersey = jerseys.find(j => j.id === jerseyId);
-        if (jersey) await base44.entities.Jersey.update(jerseyId, { likes_count: Math.max(0, (jersey.likes_count || 0) - 1) });
+        const item = [...jerseys, ...collectionItems].find(j => j.id === jerseyId);
+        if (item) await entity.update(jerseyId, { likes_count: Math.max(0, (item.likes_count || 0) - 1) });
       } else {
         await base44.entities.JerseyLike.create({ jersey_id: jerseyId, user_email: currentUser.email });
-        const jersey = jerseys.find(j => j.id === jerseyId);
-        if (jersey) await base44.entities.Jersey.update(jerseyId, { likes_count: (jersey.likes_count || 0) + 1 });
+        const item = [...jerseys, ...collectionItems].find(j => j.id === jerseyId);
+        if (item) await entity.update(jerseyId, { likes_count: (item.likes_count || 0) + 1 });
       }
     },
     onMutate: async (jerseyId) => {
       // Optimistic update
       await queryClient.cancelQueries({ queryKey: ["jerseys"] });
+      await queryClient.cancelQueries({ queryKey: ["collectionItems"] });
       await queryClient.cancelQueries({ queryKey: ["likes"] });
 
       const previousJerseys = queryClient.getQueryData(["jerseys"]);
+      const previousCollectionItems = queryClient.getQueryData(["collectionItems"]);
       const previousLikes = queryClient.getQueryData(["likes", currentUser?.email]);
 
       const existing = likes.find(l => l.jersey_id === jerseyId);
       
+      // Helper to update item count
+      const updateItemCount = (list) => {
+          if (!Array.isArray(list)) return list;
+          return list.map(item => item.id === jerseyId 
+            ? { ...item, likes_count: existing ? Math.max(0, (item.likes_count || 0) - 1) : (item.likes_count || 0) + 1 }
+            : item
+          );
+      };
+
       // Update jerseys count optimistically
-      queryClient.setQueryData(["jerseys"], (old = []) => 
-        old.map(j => j.id === jerseyId 
-          ? { ...j, likes_count: existing ? Math.max(0, (j.likes_count || 0) - 1) : (j.likes_count || 0) + 1 }
-          : j
-        )
-      );
+      queryClient.setQueryData(["jerseys"], (old = []) => updateItemCount(old));
+      
+      // Update collection items count optimistically
+      queryClient.setQueryData(["collectionItems"], (old = []) => updateItemCount(old));
 
       // Update likes optimistically
       if (existing) {
@@ -167,15 +182,17 @@ export default function Home() {
         ]);
       }
 
-      return { previousJerseys, previousLikes };
+      return { previousJerseys, previousCollectionItems, previousLikes };
     },
     onError: (err, jerseyId, context) => {
       // Rollback on error
       queryClient.setQueryData(["jerseys"], context.previousJerseys);
+      queryClient.setQueryData(["collectionItems"], context.previousCollectionItems);
       queryClient.setQueryData(["likes", currentUser?.email], context.previousLikes);
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["jerseys"] });
+      queryClient.invalidateQueries({ queryKey: ["collectionItems"] });
       queryClient.invalidateQueries({ queryKey: ["likes"] });
     },
   });
@@ -226,10 +243,11 @@ export default function Home() {
     ? [...visibleJerseys, ...visibleCollectionItems].filter(j => j.sport_type === sport)
     : [...visibleJerseys, ...visibleCollectionItems];
   
-  const totalLikes = filteredBySport.filter(j => !j.product_type).reduce((s, j) => s + (j.likes_count || 0), 0);
+  // Calculate total likes including all product types
+  const totalLikes = filteredBySport.reduce((s, j) => s + (j.likes_count || 0), 0);
   const collectors = userCountData?.count || 0;
   const leagueCounts = {};
-  filteredBySport.filter(j => !j.product_type).forEach(j => { if (j.league) leagueCounts[j.league] = (leagueCounts[j.league] || 0) + 1; });
+  filteredBySport.forEach(j => { if (j.league) leagueCounts[j.league] = (leagueCounts[j.league] || 0) + 1; });
   const topLeague = Object.entries(leagueCounts).sort(([,a],[,b]) => b - a)[0]?.[0];
 
   return (

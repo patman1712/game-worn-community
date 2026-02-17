@@ -22,8 +22,16 @@ export default function Chat() {
   const { data: otherUser } = useQuery({
     queryKey: ["user", otherEmail],
     queryFn: async () => {
-      const response = await base44.functions.invoke('getUserDetails', { email: otherEmail });
-      return response.data;
+      // Try to find user in list first as we might not have a direct endpoint for details by email
+      const users = await base44.entities.User.list();
+      const found = users.find(u => u.email === otherEmail);
+      if (found) {
+          return {
+              ...found,
+              ...(found.data || {})
+          };
+      }
+      return null;
     },
     enabled: !!otherEmail,
   });
@@ -34,7 +42,7 @@ export default function Chat() {
       if (!currentUser || !otherEmail) return [];
       const convId = [currentUser.email, otherEmail].sort().join("_");
       const allMessages = await base44.entities.Message.filter({ conversation_id: convId });
-      return allMessages.sort((a, b) => new Date(a.created_date) - new Date(b.created_date));
+      return allMessages.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
     },
     enabled: !!currentUser && !!otherEmail,
     refetchInterval: 3000, // Poll for new messages
@@ -101,7 +109,7 @@ export default function Chat() {
           </div>
           <div>
             <h2 className="text-white font-medium">
-              {otherUser?.display_name || "Benutzer"}
+              {otherUser?.display_name || otherUser?.full_name || otherEmail}
             </h2>
             <p className="text-white/40 text-xs">Chat</p>
           </div>
@@ -140,7 +148,7 @@ export default function Chat() {
                   >
                     <p className="text-sm leading-relaxed break-words">{msg.message}</p>
                     <p className={`text-xs mt-1 ${isOwn ? "text-white/60" : "text-white/40"}`}>
-                      {new Date(msg.created_date).toLocaleTimeString('de-DE', {
+                      {new Date(msg.createdAt).toLocaleTimeString('de-DE', {
                         hour: '2-digit',
                         minute: '2-digit'
                       })}

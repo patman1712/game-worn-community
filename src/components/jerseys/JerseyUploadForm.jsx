@@ -19,6 +19,12 @@ import ConditionDialog from "./ConditionDialog";
 const compressImage = async (file, targetSizeKB = 1000) => {
   return new Promise((resolve, reject) => {
     try {
+      // If file is not an image (e.g. PDF), return it as is
+      if (!file.type.startsWith('image/')) {
+        resolve(file);
+        return;
+      }
+
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = (event) => {
@@ -31,17 +37,20 @@ const compressImage = async (file, targetSizeKB = 1000) => {
               let width = img.width;
               let height = img.height;
 
+              // Don't upscale small images
               const maxDimension = 1200;
-              if (width > height) {
-                if (width > maxDimension) {
-                  height = (height * maxDimension) / width;
-                  width = maxDimension;
-                }
-              } else {
-                if (height > maxDimension) {
-                  width = (width * maxDimension) / height;
-                  height = maxDimension;
-                }
+              if (width > maxDimension || height > maxDimension) {
+                  if (width > height) {
+                    if (width > maxDimension) {
+                      height = (height * maxDimension) / width;
+                      width = maxDimension;
+                    }
+                  } else {
+                    if (height > maxDimension) {
+                      width = (width * maxDimension) / height;
+                      height = maxDimension;
+                    }
+                  }
               }
 
               canvas.width = width;
@@ -56,11 +65,13 @@ const compressImage = async (file, targetSizeKB = 1000) => {
                 canvas.toBlob(
                   (blob) => {
                     if (!blob) {
-                      reject(new Error("Blob creation failed"));
+                      // Fallback to original if blob fails
+                      console.warn("Blob creation failed, using original file");
+                      resolve(file);
                       return;
                     }
                     if (blob.size > targetSize && quality > 0.3) {
-                      quality -= 0.08;
+                      quality -= 0.1; // Aggressive step
                       tryCompress();
                     } else {
                       const compressedFile = new File([blob], file.name, { type: "image/jpeg" });
@@ -74,17 +85,26 @@ const compressImage = async (file, targetSizeKB = 1000) => {
 
               tryCompress();
             } catch (e) {
-              reject(e);
+              console.error("Compression logic error:", e);
+              resolve(file); // Fallback to original
             }
           };
-          img.onerror = () => reject(new Error("Image load failed"));
+          img.onerror = () => {
+             console.error("Image load failed");
+             resolve(file); // Fallback to original
+          };
         } catch (e) {
-          reject(e);
+          console.error("Image processing error:", e);
+          resolve(file); // Fallback to original
         }
       };
-      reader.onerror = () => reject(new Error("File read failed"));
+      reader.onerror = () => {
+        console.error("File read failed");
+        resolve(file); // Fallback to original
+      };
     } catch (e) {
-      reject(e);
+      console.error("Compression setup error:", e);
+      resolve(file); // Fallback to original
     }
   });
 };

@@ -25,8 +25,27 @@ export default function AddJersey() {
   const createJerseyMutation = useMutation({
     mutationFn: (data) =>
       base44.entities.Jersey.create({
-        ...data,
-        owner_name: user?.display_name || user?.full_name || "Anonym",
+        team: data.team,
+        league: data.league,
+        season: data.season,
+        player_name: data.player_name,
+        number: data.player_number,
+        sport_type: data.sport_type,
+        product_type: "jersey",
+        image_url: data.image_url,
+        additional_images: data.additional_images,
+        is_game_worn: data.is_game_worn,
+        is_for_sale: data.for_sale,
+        is_private: data.is_private,
+        description: data.description,
+        brand: data.brand,
+        size: data.size,
+        purchase_price: data.purchase_price,
+        invoice_url: data.invoice_url,
+        data: {
+          ...data,
+        },
+        created_by: user?.display_name || user?.full_name || "Anonym",
         owner_email: user?.email,
       }),
     onSuccess: () => {
@@ -35,12 +54,36 @@ export default function AddJersey() {
   });
 
   const createItemMutation = useMutation({
-    mutationFn: (data) =>
-      base44.entities.CollectionItem.create({
-        ...data,
-        owner_name: user?.display_name || user?.full_name || "Anonym",
+    mutationFn: (formData) => {
+      const {
+        sport_type,
+        product_type,
+        image_url,
+        additional_images,
+        is_private,
+        description,
+        purchase_price,
+        invoice_url,
+        ...otherData
+      } = formData;
+
+      const title = `${otherData.team || ''} ${product_type || ''} ${otherData.player_name ? '- ' + otherData.player_name : ''}`.trim() || product_type || 'Unbenannt';
+
+      return base44.entities.CollectionItem.create({
+        sport_type,
+        type: product_type,
+        image_url,
+        additional_images,
+        is_private,
+        description,
+        purchase_price,
+        invoice_url,
+        title,
+        data: otherData,
+        created_by: user?.display_name || user?.full_name || "Anonym",
         owner_email: user?.email,
-      }),
+      });
+    },
     onSuccess: () => {
       navigate(createPageUrl("MyCollection"));
     },
