@@ -60,21 +60,8 @@ export default function JerseyCard({ jersey: initialJersey, isLiked, onLike, ind
     mutationFn: async (id) => {
       const entity = isCollectionItem ? base44.entities.CollectionItem : base44.entities.Jersey;
       
-      // Delete likes - try/catch to ignore errors
-      try {
-        const likes = await base44.entities.JerseyLike.filter({ jersey_id: id });
-        for (const like of likes) {
-            try { await base44.entities.JerseyLike.delete(like.id); } catch (e) {}
-        }
-      } catch (e) {}
-      
-      // Delete comments - try/catch to ignore errors
-      try {
-          const comments = await base44.entities.Comment.filter({ jersey_id: id });
-          for (const comment of comments) {
-            try { await base44.entities.Comment.delete(comment.id); } catch (e) {}
-          }
-      } catch (e) {}
+      // We don't need to manually delete likes/comments anymore
+      // The backend now handles this automatically (server-side cleanup)
       
       // Delete item
       await entity.delete(id);
@@ -90,11 +77,25 @@ export default function JerseyCard({ jersey: initialJersey, isLiked, onLike, ind
         alert("Fehler beim Löschen: " + error.message);
     }
   });
-
-  const handleDelete = (e) => {
+  
+  const handleDeleteClick = (e) => {
+      // STOP EVERYTHING to prevent card click
       e.preventDefault();
       e.stopPropagation();
+      console.log("Delete clicked for:", jersey.id);
       setOpen(true);
+  };
+  
+  const handleConfirmDelete = async (e) => {
+      // STOP EVERYTHING AGAIN
+      e.preventDefault();
+      e.stopPropagation();
+      console.log("Confirm delete for:", jersey.id);
+      try {
+          await deleteMutation.mutateAsync(jersey.id);
+      } catch (err) {
+          console.error("Delete failed:", err);
+      }
   };
 
   return (
@@ -123,7 +124,7 @@ export default function JerseyCard({ jersey: initialJersey, isLiked, onLike, ind
             />
 
             {/* Like and Edit buttons */}
-            <div className="absolute top-3 right-3 flex gap-2">
+            <div className="absolute top-3 right-3 flex gap-2 z-10">
               {isModerator && (
                 <>
                   <button 
@@ -135,17 +136,19 @@ export default function JerseyCard({ jersey: initialJersey, isLiked, onLike, ind
                   >
                     <Edit className="w-4 h-4 text-orange-400/70 hover:text-orange-400" />
                   </button>
+                  
+                  {/* Delete Button - Simplified Structure */}
                   <AlertDialog open={open} onOpenChange={setOpen}>
                     <AlertDialogTrigger asChild>
                       <button 
-                        onClick={handleDelete}
+                        onClick={handleDeleteClick}
                         className="p-2 rounded-full bg-black/30 backdrop-blur-sm hover:bg-red-500/40 transition-all"
                       >
                         <Trash2 className="w-4 h-4 text-red-400/70 hover:text-red-400" />
                       </button>
                     </AlertDialogTrigger>
                     <AlertDialogContent 
-                        className="bg-slate-900 border-white/10"
+                        className="bg-slate-900 border-white/10 z-50"
                         onClick={(e) => e.stopPropagation()}
                     >
                       <AlertDialogHeader>
@@ -165,14 +168,10 @@ export default function JerseyCard({ jersey: initialJersey, isLiked, onLike, ind
                             Abbrechen
                         </AlertDialogCancel>
                         <AlertDialogAction
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            deleteMutation.mutate(jersey.id);
-                          }}
-                          className="bg-red-600 hover:bg-red-700"
+                          onClick={handleConfirmDelete}
+                          className="bg-red-600 hover:bg-red-700 text-white"
                         >
-                          Löschen
+                          {deleteMutation.isPending ? "Löscht..." : "Löschen"}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
