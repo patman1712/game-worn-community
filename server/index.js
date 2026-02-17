@@ -37,6 +37,7 @@ app.use('/uploads', express.static(uploadDir));
 const authRoutes = require('./src/routes/auth');
 const entityRoutes = require('./src/routes/entities');
 const uploadRoutes = require('./src/routes/upload');
+const adminRoutes = require('./src/routes/admin'); // New admin routes
 
 // Emergency Admin Setup Route
 app.get('/api/admin/setup', async (req, res) => {
@@ -103,6 +104,7 @@ app.get('/api/admin/setup', async (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/entities', entityRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Serve static frontend in production
 if (process.env.NODE_ENV === 'production') {

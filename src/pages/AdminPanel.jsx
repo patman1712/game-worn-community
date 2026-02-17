@@ -3,12 +3,13 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, Shield, Users, Euro } from "lucide-react";
+import { Loader2, Shield, Users, Euro, Download, Database } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
 export default function AdminPanel() {
   const [user, setUser] = useState(null);
+  const [isBackingUp, setIsBackingUp] = useState(false);
   const queryClient = useQueryClient();
 
   React.useEffect(() => {
@@ -19,6 +20,36 @@ export default function AdminPanel() {
       setUser(u);
     }).catch(() => window.location.href = '/');
   }, []);
+
+  const handleBackup = async () => {
+    try {
+      setIsBackingUp(true);
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch('/api/admin/backup/full', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) throw new Error('Backup failed');
+
+      // Create blob from response
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `backup-full-${new Date().toISOString().slice(0,10)}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      alert('Backup fehlgeschlagen: ' + error.message);
+    } finally {
+      setIsBackingUp(false);
+    }
+  };
 
   const isLoading = false;
 
@@ -63,19 +94,50 @@ export default function AdminPanel() {
           </div>
         </div>
 
-        <Card className="bg-slate-900/60 border-white/5">
-          <CardHeader>
-            <CardTitle className="text-white text-lg">User Verwaltung</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-white/60 text-sm mb-4">
-              Verwalte alle registrierten User über den Button oben rechts.
-            </p>
-            <p className="text-white/40 text-xs">
-              Neue User können direkt über die Base44 Einladungsfunktion hinzugefügt werden.
-            </p>
-          </CardContent>
-        </Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card className="bg-slate-900/60 border-white/5">
+            <CardHeader>
+                <CardTitle className="text-white text-lg flex items-center gap-2">
+                    <Users className="w-5 h-5 text-cyan-400" /> User Verwaltung
+                </CardTitle>
+            </CardHeader>
+            <CardContent>
+                <p className="text-white/60 text-sm mb-4">
+                Verwalte alle registrierten User, blockiere oder lösche Accounts.
+                </p>
+                <Link to={createPageUrl("ManageUsers")}>
+                    <Button variant="secondary" className="w-full">
+                        User verwalten
+                    </Button>
+                </Link>
+            </CardContent>
+            </Card>
+
+            <Card className="bg-slate-900/60 border-white/5">
+            <CardHeader>
+                <CardTitle className="text-white text-lg flex items-center gap-2">
+                    <Database className="w-5 h-5 text-emerald-400" /> System Backup
+                </CardTitle>
+            </CardHeader>
+            <CardContent>
+                <p className="text-white/60 text-sm mb-4">
+                Erstelle ein vollständiges Backup aller Daten (Datenbank + Bilder).
+                </p>
+                <Button 
+                    onClick={handleBackup} 
+                    disabled={isBackingUp}
+                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+                >
+                    {isBackingUp ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                        <Download className="w-4 h-4 mr-2" />
+                    )}
+                    {isBackingUp ? 'Backup wird erstellt...' : 'Backup herunterladen'}
+                </Button>
+            </CardContent>
+            </Card>
+        </div>
       </div>
     </div>
   );
