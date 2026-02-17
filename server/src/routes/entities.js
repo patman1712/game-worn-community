@@ -124,6 +124,17 @@ const createHandler = (Model, name) => ({
       // CAPTURE IMAGES BEFORE DELETE
       const imagesToDelete = [];
       if (name === 'Jersey' || name === 'CollectionItem') {
+          // FIRST: Clean up dependencies (Likes, Comments) manually since no CASCADE
+          try {
+              const JerseyLike = require('../models/JerseyLike');
+              const Comment = require('../models/Comment');
+              await JerseyLike.destroy({ where: { jersey_id: item.id } });
+              await Comment.destroy({ where: { jersey_id: item.id } });
+          } catch (cleanupErr) {
+              console.error('Error cleaning up dependencies:', cleanupErr);
+              // Continue anyway, maybe it works
+          }
+
           if (item.image_url) imagesToDelete.push(item.image_url);
           if (item.additional_images && Array.isArray(item.additional_images)) {
               imagesToDelete.push(...item.additional_images);
