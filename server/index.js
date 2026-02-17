@@ -45,8 +45,8 @@ if (process.env.NODE_ENV === 'production') {
   app.use(express.static(distPath));
   
   // Handle SPA routing - send index.html for any unknown route
-  // Using regex /(.*)/ matches everything and works in Express 5+
-  app.get(/(.*)/, (req, res) => {
+  // Using app.use with a callback matches everything and avoids path-to-regexp issues in Express 5
+  app.use((req, res) => {
     res.sendFile(path.join(distPath, 'index.html'));
   });
 }
