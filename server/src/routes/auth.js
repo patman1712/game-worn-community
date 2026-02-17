@@ -54,6 +54,11 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
+    // Check if user is blocked
+    if (user.data && user.data.is_blocked) {
+      return res.status(403).json({ error: 'Ihr Account wurde gesperrt.' });
+    }
+
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
       return res.status(401).json({ error: 'Invalid credentials' });
@@ -77,6 +82,11 @@ router.get('/me', async (req, res) => {
     const user = await User.findByPk(decoded.id);
     
     if (!user) return res.status(404).json({ error: 'User not found' });
+    
+    // Check if user is blocked
+    if (user.data && user.data.is_blocked) {
+      return res.status(403).json({ error: 'Ihr Account wurde gesperrt.' });
+    }
     
     res.json(user);
   } catch (error) {
