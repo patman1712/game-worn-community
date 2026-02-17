@@ -151,102 +151,59 @@ export default function JerseyDetail() {
       // Don't execute if already pending to prevent double clicks
       const entity = isCollectionItem ? base44.entities.CollectionItem : base44.entities.Jersey;
       
-      // Use current local state instead of refetching
-      // Ensure we have a valid number, default to 0
-      let currentCount = parseInt(jersey.likes_count);
-      if (isNaN(currentCount)) currentCount = 0;
-
+      // 1. Perform the Like/Unlike Action
       if (isLiked) {
         const likeToDelete = likes[0];
         if (likeToDelete) {
             await base44.entities.JerseyLike.delete(likeToDelete.id);
-            const newCount = Math.max(0, currentCount - 1);
-            // Just update likes_count directly
-            return await entity.update(jerseyId, { likes_count: newCount });
         }
       } else {
         await base44.entities.JerseyLike.create({ jersey_id: jerseyId, user_email: currentUser.email });
-        const newCount = currentCount + 1;
-        // Just update likes_count directly
-        return await entity.update(jerseyId, { likes_count: newCount });
       }
+
+      // 2. SELF-HEALING: Count the ACTUAL number of likes in the DB
+      // This prevents any +/- 1 errors or drift
+      const allLikesForThisItem = await base44.entities.JerseyLike.filter({ jersey_id: jerseyId });
+      const realCount = allLikesForThisItem.length;
+
+      // 3. Update the item with the REAL count
+      return await entity.update(jerseyId, { likes_count: realCount });
     },
     onMutate: async () => {
-        // Optimistic update
+        // Optimistic update - Visual feedback only
         await queryClient.cancelQueries({ queryKey: ["jersey", jerseyId] });
         await queryClient.cancelQueries({ queryKey: ["myLike", jerseyId, currentUser?.email] });
 
         const previousJersey = queryClient.getQueryData(["jersey", jerseyId]);
         const previousLikes = queryClient.getQueryData(["myLike", jerseyId, currentUser?.email]);
         
-        // IMPORTANT: Calculate newIsLiked based on CURRENT state, not toggle
-        // If previousLikes has items, we are unliking (new state = false)
-        // If previousLikes is empty, we are liking (new state = true)
         const currentlyLiked = previousLikes && previousLikes.length > 0;
         const newIsLiked = !currentlyLiked;
         
+        // Optimistically update UI
         queryClient.setQueryData(["jersey", jerseyId], (old) => {
             if (!old) return old;
-            
-            // Ensure we work with numbers
             let currentCount = parseInt(old.likes_count);
             if (isNaN(currentCount)) currentCount = 0;
-            
-            // If we are liking, add 1. If unliking, subtract 1.
             const newCount = newIsLiked ? currentCount + 1 : Math.max(0, currentCount - 1);
-            
-            return {
-                ...old,
-                likes_count: newCount,
-            };
+            return { ...old, likes_count: newCount };
         });
         
-        // Update local like state immediately so UI updates
         if (newIsLiked) {
              queryClient.setQueryData(["myLike", jerseyId, currentUser?.email], [{ id: 'temp-optimistic', jersey_id: jerseyId, user_email: currentUser?.email }]);
         } else {
              queryClient.setQueryData(["myLike", jerseyId, currentUser?.email], []);
         }
         
-        // Also update global cache for this item
-        queryClient.setQueryData(["jerseys"], (old = []) => {
-            return old.map(j => {
-                if (j.id === jerseyId) {
-                    let c = parseInt(j.likes_count);
-                    if (isNaN(c)) c = 0;
-                    return { ...j, likes_count: newIsLiked ? c + 1 : Math.max(0, c - 1) };
-                }
-                return j;
-            });
-        });
-
-        queryClient.setQueryData(["collectionItems"], (old = []) => {
-            return old.map(j => {
-                if (j.id === jerseyId) {
-                    let c = parseInt(j.likes_count);
-                    if (isNaN(c)) c = 0;
-                    return { ...j, likes_count: newIsLiked ? c + 1 : Math.max(0, c - 1) };
-                }
-                return j;
-            });
-        });
-        
         return { previousJersey, previousLikes };
     },
     onSuccess: (updatedJersey) => {
-        // Force refetch everything related to likes to ensure consistency across pages
-        queryClient.invalidateQueries({ queryKey: ["jerseys"] }); // Home page list
-        queryClient.invalidateQueries({ queryKey: ["collectionItems"] }); // Home page list
-        queryClient.invalidateQueries({ queryKey: ["myLike"] }); // Current page like status
-        queryClient.invalidateQueries({ queryKey: ["likes"] }); // Global likes list for home page
-        
-        // Update with the actual server response if available
-        if (updatedJersey) {
-            queryClient.setQueryData(["jersey", jerseyId], (old) => {
-                 if (!old) return updatedJersey;
-                 return { ...old, ...updatedJersey, likes_count: updatedJersey.likes_count };
-            });
-        }
+        // 4. Force global refresh to ensure consistency
+        queryClient.invalidateQueries({ queryKey: ["jerseys"] });
+        queryClient.invalidateQueries({ queryKey: ["collectionItems"] });
+        queryClient.invalidateQueries({ queryKey: ["myLike"] }); 
+        queryClient.invalidateQueries({ queryKey: ["likes"] });
+        queryClient.invalidateQueries({ queryKey: ["jersey", jerseyId] }); // Ensure we fetch the server response
     },
     onError: (err, newTodo, context) => {
         console.error("Like mutation failed:", err);
