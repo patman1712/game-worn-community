@@ -5,6 +5,8 @@ const fs = require('fs');
 const path = require('path');
 const archiver = require('archiver');
 const User = require('../models/User');
+const SystemSetting = require('../models/SystemSetting');
+const nodemailer = require('nodemailer');
 
 const JWT_SECRET = 'your-secret-key-change-this-in-production';
 
@@ -27,6 +29,80 @@ const requireAdmin = async (req, res, next) => {
     res.status(401).json({ error: 'Invalid token' });
   }
 };
+
+// --- SMTP Settings ---
+
+// Get SMTP Settings
+router.get('/settings/smtp', requireAdmin, async (req, res) => {
+    try {
+        const setting = await SystemSetting.findByPk('smtp_config');
+        res.json(setting ? setting.value : {});
+    } catch (error) {
+        console.error('Error fetching SMTP settings:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Update SMTP Settings
+router.post('/settings/smtp', requireAdmin, async (req, res) => {
+    try {
+        const config = req.body;
+        
+        // Basic validation
+        if (!config.host || !config.user) {
+             return res.status(400).json({ error: 'Host and User are required' });
+        }
+        
+        let setting = await SystemSetting.findByPk('smtp_config');
+        if (setting) {
+            setting.value = config;
+            setting.changed('value', true); // Force update because JSON
+            await setting.save();
+        } else {
+            await SystemSetting.create({
+                key: 'smtp_config',
+                value: config
+            });
+        }
+        
+        res.json({ message: 'Settings saved' });
+    } catch (error) {
+        console.error('Error saving SMTP settings:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Test Email
+router.post('/settings/smtp/test', requireAdmin, async (req, res) => {
+    try {
+        const { config, to } = req.body;
+        
+        // Use provided config for test
+        const transporter = nodemailer.createTransport({
+            host: config.host,
+            port: config.port || 587,
+            secure: config.secure === true, // Check if boolean true
+            auth: {
+                user: config.user,
+                pass: config.pass,
+            },
+        });
+        
+        await transporter.verify();
+        
+        await transporter.sendMail({
+            from: config.from || config.user,
+            to: to || req.adminUser.email,
+            subject: 'Test Email - Game-Worn Community',
+            text: 'Dies ist eine Test-Email. Deine SMTP Einstellungen funktionieren!',
+        });
+        
+        res.json({ message: 'Test Email sent successfully' });
+    } catch (error) {
+        console.error('SMTP Test Failed:', error);
+        res.status(400).json({ error: 'SMTP Test Failed: ' + error.message });
+    }
+});
 
 // Full System Backup
 router.get('/backup/full', requireAdmin, async (req, res) => {

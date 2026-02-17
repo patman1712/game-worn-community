@@ -97,6 +97,21 @@ export const base44 = {
       localStorage.removeItem('token');
       window.location.reload();
     },
+    getSmtpSettings: async () => {
+        return request('/admin/settings/smtp');
+    },
+    saveSmtpSettings: async (config) => {
+        return request('/admin/settings/smtp', {
+            method: 'POST',
+            body: JSON.stringify(config)
+        });
+    },
+    testSmtpSettings: async (config, to) => {
+        return request('/admin/settings/smtp/test', {
+            method: 'POST',
+            body: JSON.stringify({ config, to })
+        });
+    },
     redirectToLogin: () => {
       // Basic redirect
       window.location.href = '/login';

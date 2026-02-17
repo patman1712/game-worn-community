@@ -6,6 +6,7 @@ const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const User = require('../models/User');
 const PendingUser = require('../models/PendingUser');
+const SystemSetting = require('../models/SystemSetting'); // Import SystemSetting
 
 const Jersey = require('../models/Jersey');
 const CollectionItem = require('../models/CollectionItem');
@@ -15,21 +16,29 @@ const JerseyLike = require('../models/JerseyLike'); // Added missing import
 
 const JWT_SECRET = 'your-secret-key-change-this-in-production';
 
-// Nodemailer Transporter Setup
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: process.env.SMTP_PORT || 587,
-  secure: process.env.SMTP_SECURE === 'true',
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
-
 // Helper to send email
 const sendEmail = async (to, subject, text) => {
+    // 1. Load Settings from DB
+    let smtpConfig = null;
+    try {
+        const setting = await SystemSetting.findByPk('smtp_config');
+        if (setting && setting.value) {
+            smtpConfig = setting.value;
+        }
+    } catch (e) {
+        console.error('Failed to load SMTP settings from DB:', e);
+    }
+    
+    // 2. Determine Config (DB > Env)
+    const host = smtpConfig?.host || process.env.SMTP_HOST;
+    const port = smtpConfig?.port || process.env.SMTP_PORT || 587;
+    const user = smtpConfig?.user || process.env.SMTP_USER;
+    const pass = smtpConfig?.pass || process.env.SMTP_PASS;
+    const secure = smtpConfig?.secure === true || process.env.SMTP_SECURE === 'true';
+    const from = smtpConfig?.from || process.env.SMTP_FROM || '"Game-Worn Community" <noreply@game-worn-community.de>';
+
     // If no SMTP host configured, log to console for development
-    if (!process.env.SMTP_HOST) {
+    if (!host) {
         console.log('---------------------------------------------------');
         console.log(`[Mock Email] To: ${to}`);
         console.log(`Subject: ${subject}`);
@@ -38,9 +47,16 @@ const sendEmail = async (to, subject, text) => {
         return;
     }
     
+    const transporter = nodemailer.createTransport({
+        host,
+        port,
+        secure,
+        auth: { user, pass },
+    });
+    
     try {
         await transporter.sendMail({
-            from: process.env.SMTP_FROM || '"Game-Worn Community" <noreply@game-worn-community.de>',
+            from,
             to,
             subject,
             text,
