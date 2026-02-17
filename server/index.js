@@ -35,6 +35,43 @@ const authRoutes = require('./src/routes/auth');
 const entityRoutes = require('./src/routes/entities');
 const uploadRoutes = require('./src/routes/upload');
 
+// Emergency Admin Setup Route
+app.get('/api/admin/setup', async (req, res) => {
+  try {
+    const targetEmail = 'info@foto-scheiber.de';
+    let message = '';
+
+    // 1. Check Pending Users
+    const pendingUser = await PendingUser.findOne({ where: { email: targetEmail } });
+    if (pendingUser) {
+      // Promote to User with Admin role
+      await User.create({
+        email: pendingUser.email,
+        password: pendingUser.password,
+        role: 'admin',
+        data: { ...pendingUser.data, role: 'admin' }
+      });
+      await pendingUser.destroy();
+      message = 'Success: Found in PendingUser. Promoted to Admin User.';
+    } else {
+      // 2. Check Existing Users
+      const user = await User.findOne({ where: { email: targetEmail } });
+      if (user) {
+        user.role = 'admin';
+        user.data = { ...user.data, role: 'admin' };
+        await user.save();
+        message = 'Success: Found existing User. Updated role to Admin.';
+      } else {
+        message = 'Error: User not found in PendingUser or User tables with email ' + targetEmail;
+      }
+    }
+    
+    res.send(`<h1>Admin Setup Result</h1><p>${message}</p><p><a href="/">Go to Home</a></p>`);
+  } catch (err) {
+    res.status(500).send(`<h1>Error</h1><p>${err.message}</p>`);
+  }
+});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/entities', entityRoutes);
 app.use('/api/upload', uploadRoutes);
