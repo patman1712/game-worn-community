@@ -6,6 +6,9 @@ export const CHANGELOG = [
     date: "2026-02-17",
     title: "Admin & Auth System Update",
     changes: [
+      { type: "feature", text: "Cookie-Consent Banner (DSGVO konform) implementiert." },
+      { type: "feature", text: "System Update Log: Changelog Seite und Versionsanzeige im Footer." },
+      { type: "improvement", text: "Login-Seite: Logo vergrößert." },
       { type: "feature", text: "Passwort vergessen Funktion implementiert (Email Reset Link)." },
       { type: "feature", text: "Admin Panel: Anzeige der Anzahl wartender Freischaltungen im Header." },
       { type: "feature", text: "Admin Panel: Benutzer können jetzt abgelehnt werden." },
