@@ -142,10 +142,17 @@ export const base44 = {
             }
             return response.json();
         },
-        update: (id, data) => request(`/entities/${entityName}/${id}`, {
-          method: 'PATCH',
-          body: JSON.stringify(data)
-        }),
+        update: (id, data) => {
+          const token = localStorage.getItem('token');
+          return request(`/entities/${entityName}/${id}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                ...(token && { 'Authorization': `Bearer ${token}` })
+            },
+            body: JSON.stringify(data)
+          });
+        },
         delete: async (id) => {
             const token = localStorage.getItem('token');
             const response = await fetch(`${API_URL}/entities/${entityName}/${id}`, {

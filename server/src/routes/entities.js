@@ -7,6 +7,7 @@ const User = require('../models/User');
 const JerseyLike = require('../models/JerseyLike');
 const PendingUser = require('../models/PendingUser');
 const Comment = require('../models/Comment');
+const SiteContent = require('../models/SiteContent');
 
 // Map entity names to models
 const models = {
@@ -16,7 +17,8 @@ const models = {
   'User': User,
   'JerseyLike': JerseyLike,
   'PendingUser': PendingUser,
-  'Comment': Comment
+  'Comment': Comment,
+  'SiteContent': SiteContent
 };
 
 // Generic CRUD handler factory

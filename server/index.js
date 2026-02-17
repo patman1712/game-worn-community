@@ -14,6 +14,7 @@ const Message = require('./src/models/Message');
 const JerseyLike = require('./src/models/JerseyLike');
 const CollectionItem = require('./src/models/CollectionItem');
 const PendingUser = require('./src/models/PendingUser');
+const SiteContent = require('./src/models/SiteContent');
 
 const app = express();
 const server = http.createServer(app);
