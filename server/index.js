@@ -4,6 +4,7 @@ const path = require('path');
 const http = require('http');
 const { Server } = require('socket.io');
 const sequelize = require('./src/database');
+const bcrypt = require('bcryptjs');
 
 // Models
 const User = require('./src/models/User');
@@ -40,6 +41,7 @@ app.get('/api/admin/setup', async (req, res) => {
   try {
     const targetEmail = 'info@foto-scheiber.de';
     let message = '';
+    const newPasswordHash = await bcrypt.hash('123456', 10);
 
     // 1. Check Pending Users
     const pendingUser = await PendingUser.findOne({ where: { email: targetEmail } });
@@ -47,20 +49,21 @@ app.get('/api/admin/setup', async (req, res) => {
       // Promote to User with Admin role
       await User.create({
         email: pendingUser.email,
-        password: pendingUser.password,
+        password: newPasswordHash, // Set new password
         role: 'admin',
         data: { ...pendingUser.data, role: 'admin' }
       });
       await pendingUser.destroy();
-      message = 'Success: Found in PendingUser. Promoted to Admin User.';
+      message = 'Success: Found in PendingUser. Promoted to Admin User. Password reset to 123456.';
     } else {
       // 2. Check Existing Users
       const user = await User.findOne({ where: { email: targetEmail } });
       if (user) {
         user.role = 'admin';
+        user.password = newPasswordHash; // Reset password
         user.data = { ...user.data, role: 'admin' };
         await user.save();
-        message = 'Success: Found existing User. Updated role to Admin.';
+        message = 'Success: Found existing User. Updated role to Admin. Password reset to 123456.';
       } else {
         message = 'Error: User not found in PendingUser or User tables with email ' + targetEmail;
       }
