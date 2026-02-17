@@ -142,8 +142,10 @@ export const base44 = {
         method: 'POST',
         body: JSON.stringify({ pendingUserId })
       });
-    },
-    updateUser: async (data) => {
+    }
+  },
+  
+  appLogs: {
     logUserInApp: async (pageName) => {
         // Placeholder implementation
         return Promise.resolve();
