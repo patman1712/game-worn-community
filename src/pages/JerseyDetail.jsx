@@ -440,7 +440,7 @@ export default function JerseyDetail() {
           {/* Info */}
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
             <div>
-              <h1 className="text-3xl font-bold text-white mb-2">{jersey.title || jersey.team || "Unbenanntes Objekt"}</h1>
+              {/* Removed H1 Title */}
               <div className="flex items-center gap-2 mb-3 flex-wrap">
                 {jersey.sport_type && (
                   <Badge className="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs">
@@ -514,6 +514,9 @@ export default function JerseyDetail() {
               </div>
 
             </div>
+
+            {/* Team Name Title */}
+            <h2 className="text-3xl font-bold text-white mb-2">{jersey.team || jersey.title || "Unbekannter Verein"}</h2>
 
             {/* Player info */}
             {(jersey.player_name || jersey.player_number) && (
