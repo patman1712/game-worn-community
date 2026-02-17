@@ -340,6 +340,14 @@ router.post('/change-password', async (req, res) => {
 // Admin: Approve User
 router.post('/approve', async (req, res) => {
   try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) return res.status(401).json({ error: 'No token provided' });
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const adminUser = await User.findByPk(decoded.id);
+    if (!adminUser || (adminUser.role !== 'admin' && adminUser.data?.role !== 'admin')) {
+        return res.status(403).json({ error: 'Unauthorized' });
+    }
+
     const { pendingUserId } = req.body;
     const pendingUser = await PendingUser.findByPk(pendingUserId);
     
@@ -352,10 +360,49 @@ router.post('/approve', async (req, res) => {
       data: pendingUser.data
     });
     
+    // Send Welcome Email
+    await sendEmail(
+        pendingUser.email,
+        'Willkommen bei Game-Worn Community - Dein Account wurde freigeschaltet!',
+        `Hallo,\n\ndein Account wurde soeben freigeschaltet.\nDu kannst dich jetzt unter https://www.game-worn-community.de/login einloggen.\n\nViel Spaß!`
+    );
+    
     // Remove pending user
     await pendingUser.destroy();
     
     res.json({ message: 'User approved', user });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Admin: Reject User
+router.post('/reject', async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) return res.status(401).json({ error: 'No token provided' });
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const adminUser = await User.findByPk(decoded.id);
+    if (!adminUser || (adminUser.role !== 'admin' && adminUser.data?.role !== 'admin')) {
+        return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    const { pendingUserId } = req.body;
+    const pendingUser = await PendingUser.findByPk(pendingUserId);
+    
+    if (!pendingUser) return res.status(404).json({ error: 'Pending user not found' });
+    
+    // Send Rejection Email
+    await sendEmail(
+        pendingUser.email,
+        'Game-Worn Community - Registrierung abgelehnt',
+        `Hallo,\n\ndeine Registrierung wurde leider abgelehnt.\nBei Fragen wende dich bitte an den Administrator.`
+    );
+    
+    // Remove pending user
+    await pendingUser.destroy();
+    
+    res.json({ message: 'User rejected' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

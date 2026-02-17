@@ -136,10 +136,14 @@ export const base44 = {
         method: 'POST',
         body: JSON.stringify({ pendingUserId })
       });
-    }
-  },
-  
-  appLogs: {
+    },
+    rejectUser: async (pendingUserId) => {
+      return request('/auth/reject', {
+        method: 'POST',
+        body: JSON.stringify({ pendingUserId })
+      });
+    },
+    updateUser: async (data) => {
     logUserInApp: async (pageName) => {
         // Placeholder implementation
         return Promise.resolve();

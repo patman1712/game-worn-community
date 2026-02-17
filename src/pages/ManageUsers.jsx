@@ -83,6 +83,20 @@ export default function ManageUsers() {
     }
   });
 
+  const rejectMutation = useMutation({
+    mutationFn: async (pendingUserId) => {
+      await base44.auth.rejectUser(pendingUserId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['allUsers'] });
+      queryClient.invalidateQueries({ queryKey: ['pendingApprovals'] });
+    },
+    onError: (error) => {
+      console.error('Reject user error:', error);
+      alert('Fehler beim Ablehnen: ' + error.message);
+    }
+  });
+
   const manageMutation = useMutation({
     mutationFn: async ({ action, userId, updates }) => {
       // Direct call to local client logic which now routes to /auth/manage-user
@@ -153,11 +167,22 @@ export default function ManageUsers() {
                     <div className="flex gap-2">
                       <Button 
                         onClick={() => approveMutation.mutate(pendingUser.id)}
-                        disabled={approveMutation.isPending}
-                        className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500"
+                        disabled={approveMutation.isPending || rejectMutation.isPending}
+                        className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500"
                       >
                         {approveMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4 mr-2" />}
-                        Freischalten
+                        Freigeben
+                      </Button>
+                      <Button 
+                        onClick={() => {
+                            if(confirm('Möchtest du diesen User wirklich ablehnen?')) rejectMutation.mutate(pendingUser.id);
+                        }}
+                        disabled={approveMutation.isPending || rejectMutation.isPending}
+                        variant="destructive"
+                        className="flex-1"
+                      >
+                        {rejectMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4 mr-2" />}
+                        Ablehnen
                       </Button>
                     </div>
                   </CardContent>
