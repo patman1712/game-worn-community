@@ -29,6 +29,21 @@ router.post('/', upload.single('file'), (req, res) => {
     return res.status(400).json({ error: 'No file uploaded' });
   }
   
+  // Cleanup old file if requested
+  const oldUrl = req.body.oldUrl;
+  if (oldUrl) {
+      try {
+          const oldFilename = path.basename(oldUrl);
+          const oldPath = path.join(uploadDir, oldFilename);
+          if (fs.existsSync(oldPath)) {
+              fs.unlinkSync(oldPath);
+              console.log('Deleted old file:', oldFilename);
+          }
+      } catch (e) {
+          console.error('Failed to delete old file:', e);
+      }
+  }
+  
   // Return the URL that the frontend can use to access the file
   const fileUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
   res.json({ url: fileUrl });

@@ -167,7 +167,10 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
   const handleSaveEditedImage = async (file) => {
     try {
       setUploading(true);
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await base44.integrations.Core.UploadFile({ 
+        file,
+        oldUrl: editingImage
+      });
       
       if (editingImageType === 'main') {
         handleChange("image_url", file_url);

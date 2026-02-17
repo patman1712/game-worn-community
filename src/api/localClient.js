@@ -199,6 +199,7 @@ export const base44 = {
       UploadFile: async (args) => {
         // Handle both { file } object (Base44 style) and direct file argument
         const file = args.file || args;
+        const oldUrl = args.oldUrl; // Optional: URL of file to replace/delete
         
         if (!file) {
           throw new Error('No file provided');
@@ -206,6 +207,9 @@ export const base44 = {
 
         const formData = new FormData();
         formData.append('file', file);
+        if (oldUrl) {
+            formData.append('oldUrl', oldUrl);
+        }
         
         const token = localStorage.getItem('token');
         const response = await fetch(`${API_URL}/upload`, {

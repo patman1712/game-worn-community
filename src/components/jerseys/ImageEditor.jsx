@@ -96,7 +96,7 @@ export default function ImageEditor({ imageUrl, onSave, onCancel }) {
       
       if (blob) {
         const file = new File([blob], "rotated-image.jpg", { type: "image/jpeg" });
-        await onSave(file);
+        await onSave(file, imageUrl); // Pass original URL to identify what to replace
       }
     } catch (error) {
       console.error("Error saving image:", error);
