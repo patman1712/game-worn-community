@@ -64,6 +64,7 @@ import Settings from './pages/Settings';
 import Share from './pages/Share';
 import UserProfile from './pages/UserProfile';
 import UserPurchases from './pages/UserPurchases';
+import UpdateLog from './pages/UpdateLog';
 import __Layout from './Layout.jsx';
 
 
@@ -85,6 +86,7 @@ export const PAGES = {
     "Share": Share,
     "UserProfile": UserProfile,
     "UserPurchases": UserPurchases,
+    "UpdateLog": UpdateLog,
 }
 
 export const pagesConfig = {
