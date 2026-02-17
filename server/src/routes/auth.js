@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const { Resend } = require('resend');
 const User = require('../models/User');
@@ -20,13 +19,8 @@ const JWT_SECRET = 'your-secret-key-change-this-in-production';
 // Helper to send email
 const sendEmail = async (to, subject, text) => {
     // 1. Load Settings from DB
-    let smtpConfig = null;
     let resendConfig = null;
     try {
-        const setting = await SystemSetting.findByPk('smtp_config');
-        if (setting && setting.value) {
-            smtpConfig = setting.value;
-        }
         const resendSetting = await SystemSetting.findByPk('resend_config');
         if (resendSetting && resendSetting.value) {
             resendConfig = resendSetting.value;
@@ -35,7 +29,7 @@ const sendEmail = async (to, subject, text) => {
         console.error('Failed to load settings from DB:', e);
     }
     
-    // 2. Try Resend API first (HTTP based, bypasses SMTP blocking)
+    // 2. Try Resend API (HTTP based, bypasses SMTP blocking)
     if (resendConfig && resendConfig.apiKey) {
         try {
             const resend = new Resend(resendConfig.apiKey);
@@ -57,51 +51,15 @@ const sendEmail = async (to, subject, text) => {
             return;
         } catch (error) {
             console.error('Resend failed:', error);
-            // If Resend fails, we could fall back to SMTP, but usually one is enough
         }
     }
     
-    // 3. Fallback to SMTP
-    const host = smtpConfig?.host || process.env.SMTP_HOST;
-    const port = smtpConfig?.port || process.env.SMTP_PORT || 587;
-    const user = smtpConfig?.user || process.env.SMTP_USER;
-    const pass = smtpConfig?.pass || process.env.SMTP_PASS;
-    const secure = smtpConfig?.secure === true || process.env.SMTP_SECURE === 'true';
-    const from = smtpConfig?.from || process.env.SMTP_FROM || '"Game-Worn Community" <noreply@game-worn-community.de>';
-
-    // If no SMTP host configured, log to console for development
-    if (!host) {
-        console.log('---------------------------------------------------');
-        console.log(`[Mock Email] To: ${to}`);
-        console.log(`Subject: ${subject}`);
-        console.log(`Body: ${text}`);
-        console.log('---------------------------------------------------');
-        return;
-    }
-    
-    const transporter = nodemailer.createTransport({
-        host,
-        port,
-        secure,
-        auth: { user, pass },
-        tls: {
-            // Do not fail on invalid certs
-            rejectUnauthorized: false
-        },
-        connectionTimeout: 10000 // 10 seconds timeout
-    });
-    
-    try {
-        await transporter.sendMail({
-            from,
-            to,
-            subject,
-            text,
-        });
-        console.log(`Email sent via SMTP to ${to}`);
-    } catch (error) {
-        console.error('Error sending email via SMTP:', error);
-    }
+    // 3. Fallback: Just log if no config
+    console.log('---------------------------------------------------');
+    console.log(`[Mock Email - No Config] To: ${to}`);
+    console.log(`Subject: ${subject}`);
+    console.log(`Body: ${text}`);
+    console.log('---------------------------------------------------');
 };
 
 // Register

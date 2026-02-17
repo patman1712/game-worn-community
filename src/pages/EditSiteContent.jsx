@@ -7,9 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Loader2, Save, Mail, Shield, CheckCircle, Server } from "lucide-react";
+import { ArrowLeft, Loader2, Save, Mail, Shield, Server } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 export default function EditSiteContent() {
@@ -17,15 +16,11 @@ export default function EditSiteContent() {
   const [impressumText, setImpressumText] = useState("");
   const [agbText, setAgbText] = useState("");
   
-  // SMTP State
-  const [smtpConfig, setSmtpConfig] = useState({
-    host: '', port: 587, user: '', pass: '', secure: false, from: ''
-  });
   const [resendConfig, setResendConfig] = useState({
       apiKey: '', from: ''
   });
   const [testEmail, setTestEmail] = useState('');
-  const [isTestingSmtp, setIsTestingSmtp] = useState(false);
+  const [isTesting, setIsTesting] = useState(false);
   
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -38,12 +33,6 @@ export default function EditSiteContent() {
       setUser(u);
       if (u) {
           setTestEmail(u.email);
-          // Load SMTP settings
-          base44.auth.getSmtpSettings().then(config => {
-              if (config && Object.keys(config).length > 0) {
-                  setSmtpConfig(prev => ({...prev, ...config}));
-              }
-          });
           // Load Resend settings
           base44.auth.getResendSettings().then(config => {
               if (config && Object.keys(config).length > 0) {
@@ -86,50 +75,21 @@ export default function EditSiteContent() {
     },
   });
   
-  const saveSmtpMutation = useMutation({
-    mutationFn: async (config) => {
-      return base44.auth.saveSmtpSettings(config);
-    },
-    onSuccess: () => {
-      toast({ title: "Gespeichert", description: "Email-Einstellungen wurden aktualisiert." });
-    },
-    onError: (err) => {
-      toast({ variant: "destructive", title: "Fehler", description: err.message });
-    }
-  });
-
   const saveResendMutation = useMutation({
     mutationFn: async (config) => base44.auth.saveResendSettings(config),
-    onSuccess: () => toast({ title: "Gespeichert", description: "Resend Einstellungen aktualisiert." }),
+    onSuccess: () => toast({ title: "Gespeichert", description: "Email-Einstellungen aktualisiert." }),
     onError: (err) => toast({ variant: "destructive", title: "Fehler", description: err.message })
   });
 
-  const handleTestEmail = async () => {
-    setIsTestingSmtp(true);
-    try {
-      const res = await base44.auth.testSmtpSettings(smtpConfig, testEmail);
-      // Assuming response structure: { data: { message, details } } because of how base44.functions.invoke or request works?
-      // No, request returns JSON directly. So res is { message, details }
-      toast({ 
-        title: "Erfolg", 
-        description: `${res.message}. ${res.details || ''}` 
-      });
-    } catch (err) {
-      toast({ variant: "destructive", title: "Fehler", description: err.message });
-    } finally {
-      setIsTestingSmtp(false);
-    }
-  };
-
   const handleTestResend = async () => {
-    setIsTestingSmtp(true);
+    setIsTesting(true);
     try {
       const res = await base44.auth.testResendSettings(resendConfig, testEmail);
       toast({ title: "Erfolg", description: res.message });
     } catch (err) {
       toast({ variant: "destructive", title: "Fehler", description: err.message });
     } finally {
-      setIsTestingSmtp(false);
+      setIsTesting(false);
     }
   };
 
@@ -155,20 +115,16 @@ export default function EditSiteContent() {
         <h1 className="text-3xl font-bold text-white mb-8">System Einstellungen</h1>
 
         <Tabs defaultValue="legal" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 bg-slate-800/50 border border-white/10 mb-8">
-        <TabsTrigger value="legal" className="data-[state=active]:bg-cyan-600 data-[state=active]:text-white">
-          <Shield className="w-4 h-4 mr-2" />
-          Rechtliches & Inhalt
-        </TabsTrigger>
-        <TabsTrigger value="email" className="data-[state=active]:bg-cyan-600 data-[state=active]:text-white">
-          <Mail className="w-4 h-4 mr-2" />
-          Email Server (SMTP)
-        </TabsTrigger>
-        <TabsTrigger value="resend" className="data-[state=active]:bg-cyan-600 data-[state=active]:text-white">
-          <Mail className="w-4 h-4 mr-2" />
-          Resend API (Empfohlen)
-        </TabsTrigger>
-      </TabsList>
+            <TabsList className="grid w-full grid-cols-2 bg-slate-800/50 border border-white/10 mb-8">
+                <TabsTrigger value="legal" className="data-[state=active]:bg-cyan-600 data-[state=active]:text-white">
+                    <Shield className="w-4 h-4 mr-2" />
+                    Rechtliches & Inhalt
+                </TabsTrigger>
+                <TabsTrigger value="email" className="data-[state=active]:bg-cyan-600 data-[state=active]:text-white">
+                    <Mail className="w-4 h-4 mr-2" />
+                    Email Konfiguration
+                </TabsTrigger>
+            </TabsList>
 
             <TabsContent value="legal" className="space-y-8">
                 {/* Impressum */}
@@ -212,118 +168,15 @@ export default function EditSiteContent() {
                 </div>
             </TabsContent>
 
-            <TabsContent value="email">
-                <div className="bg-slate-800/50 rounded-xl p-6 border border-white/10">
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center">
-                            <Server className="w-5 h-5 text-cyan-400" />
-                        </div>
-                        <div>
-                            <h2 className="text-xl font-bold text-white">SMTP Konfiguration</h2>
-                            <p className="text-white/40 text-sm">Hier konfigurierst du den Email-Versand (z.B. für Passwort Reset).</p>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                        <div>
-                            <Label className="text-white mb-2 block">SMTP Host</Label>
-                            <Input 
-                                value={smtpConfig.host} 
-                                onChange={e => setSmtpConfig({...smtpConfig, host: e.target.value})}
-                                placeholder="smtp.example.com"
-                                className="bg-slate-900/50 border-white/10 text-white"
-                            />
-                        </div>
-                        <div>
-                            <Label className="text-white mb-2 block">Port</Label>
-                            <Input 
-                                type="number"
-                                value={smtpConfig.port} 
-                                onChange={e => setSmtpConfig({...smtpConfig, port: parseInt(e.target.value) || 587})}
-                                placeholder="587"
-                                className="bg-slate-900/50 border-white/10 text-white"
-                            />
-                        </div>
-                        <div>
-                            <Label className="text-white mb-2 block">Benutzername (User)</Label>
-                            <Input 
-                                value={smtpConfig.user} 
-                                onChange={e => setSmtpConfig({...smtpConfig, user: e.target.value})}
-                                placeholder="user@example.com"
-                                className="bg-slate-900/50 border-white/10 text-white"
-                            />
-                        </div>
-                        <div>
-                            <Label className="text-white mb-2 block">Passwort</Label>
-                            <Input 
-                                type="password"
-                                value={smtpConfig.pass} 
-                                onChange={e => setSmtpConfig({...smtpConfig, pass: e.target.value})}
-                                placeholder="••••••••"
-                                className="bg-slate-900/50 border-white/10 text-white"
-                            />
-                        </div>
-                        <div className="md:col-span-2">
-                            <Label className="text-white mb-2 block">Absender Adresse (From)</Label>
-                            <Input 
-                                value={smtpConfig.from} 
-                                onChange={e => setSmtpConfig({...smtpConfig, from: e.target.value})}
-                                placeholder='"Game-Worn Community" <noreply@example.com>'
-                                className="bg-slate-900/50 border-white/10 text-white"
-                            />
-                        </div>
-                        <div className="flex items-center space-x-2">
-                            <Switch 
-                                id="secure"
-                                checked={smtpConfig.secure}
-                                onCheckedChange={checked => setSmtpConfig({...smtpConfig, secure: checked})}
-                            />
-                            <Label htmlFor="secure" className="text-white">SSL/TLS nutzen (Secure)</Label>
-                        </div>
-                    </div>
-
-                    <div className="flex gap-4 border-t border-white/10 pt-6">
-                        <Button
-                            onClick={() => saveSmtpMutation.mutate(smtpConfig)}
-                            disabled={saveSmtpMutation.isPending}
-                            className="bg-emerald-600 hover:bg-emerald-700 text-white"
-                        >
-                            {saveSmtpMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
-                            Einstellungen speichern
-                        </Button>
-                    </div>
-
-                    <div className="mt-8 pt-8 border-t border-white/10">
-                        <h3 className="text-white font-semibold mb-4">Verbindung testen</h3>
-                        <div className="flex gap-4">
-                            <Input 
-                                value={testEmail}
-                                onChange={e => setTestEmail(e.target.value)}
-                                placeholder="test@example.com"
-                                className="bg-slate-900/50 border-white/10 text-white max-w-sm"
-                            />
-                            <Button
-                                onClick={handleTestEmail}
-                                disabled={isTestingSmtp}
-                                variant="secondary"
-                            >
-                                {isTestingSmtp ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Mail className="w-4 h-4 mr-2" />}
-                                Test-Email senden
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            </TabsContent>
-
-      <TabsContent value="resend">
+      <TabsContent value="email">
         <div className="bg-slate-800/50 rounded-xl p-6 border border-white/10">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center">
               <Server className="w-5 h-5 text-cyan-400" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-white">Resend API Konfiguration</h2>
-              <p className="text-white/40 text-sm">Empfohlen, wenn SMTP blockiert wird. Erstelle einen Key auf resend.com.</p>
+              <h2 className="text-xl font-bold text-white">Email API (Resend)</h2>
+              <p className="text-white/40 text-sm">Konfiguriere hier den Email-Versand über Resend.com.</p>
             </div>
           </div>
           
@@ -362,10 +215,10 @@ export default function EditSiteContent() {
             
             <Button
               onClick={handleTestResend}
-              disabled={isTestingSmtp}
+              disabled={isTesting}
               variant="secondary"
             >
-              {isTestingSmtp ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Mail className="w-4 h-4 mr-2" />}
+              {isTesting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Mail className="w-4 h-4 mr-2" />}
               Test-Email senden
             </Button>
           </div>
