@@ -35,7 +35,8 @@ export default function JerseyCard({ jersey: initialJersey, isLiked, onLike, ind
 
   const isModerator = currentUser?.data?.role === 'moderator' || currentUser?.role === 'admin' || currentUser?.data?.role === 'admin';
 
-  const isCollectionItem = !!jersey.product_type;
+  // Fix: Check explicit value, not just existence
+  const isCollectionItem = jersey.product_type === 'collection_item';
 
   const likeMutation = useMutation({
     mutationFn: async () => {

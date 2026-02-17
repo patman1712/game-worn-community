@@ -141,7 +141,9 @@ export default function JerseyDetail() {
   const userAcceptsMessages = currentUser ? (currentUser.data?.accept_messages ?? currentUser.accept_messages ?? true) : false;
   const isOwner = currentUser && jersey && (jersey.owner_email === currentUser.email || jersey.created_by === currentUser.email);
   const isAdmin = currentUser && (currentUser.role === 'admin' || currentUser.data?.role === 'admin');
-  const isCollectionItem = !!jersey?.product_type;
+  
+  // Fix: Check explicit value, not just existence
+  const isCollectionItem = jersey?.product_type === 'collection_item';
 
   // Logic updated: Allow seeing certificates if they are public OR if user is owner/admin
   const canSeeCertificates = jersey?.has_loa && jersey.loa_certificate_images?.length > 0 && (jersey.loa_certificates_public === true || isOwner || isAdmin);
