@@ -6,7 +6,6 @@ const path = require('path');
 const archiver = require('archiver');
 const User = require('../models/User');
 const SystemSetting = require('../models/SystemSetting');
-const nodemailer = require('nodemailer');
 
 const JWT_SECRET = 'your-secret-key-change-this-in-production';
 
