@@ -75,10 +75,28 @@ router.get('/backup/full', requireAdmin, async (req, res) => {
     // pipe archive data to the response
     archive.pipe(res);
 
-    // 1. Add Database
-    const dbPath = path.join(__dirname, '../../database.sqlite');
-    if (fs.existsSync(dbPath)) {
-      archive.file(dbPath, { name: 'database.sqlite' });
+    // 1. Add Database - Try multiple locations
+    const possibleDbPaths = [
+        path.join(__dirname, '../../database.sqlite'), // server root
+        path.join(__dirname, '../../../database.sqlite'), // project root (local dev)
+        path.join(process.cwd(), 'database.sqlite'), // current working directory
+        path.join(process.cwd(), 'server/database.sqlite') // inside server dir
+    ];
+
+    let dbAdded = false;
+    for (const dbPath of possibleDbPaths) {
+        if (fs.existsSync(dbPath)) {
+            console.log('Adding DB from:', dbPath);
+            archive.file(dbPath, { name: 'database.sqlite' });
+            dbAdded = true;
+            break;
+        }
+    }
+    
+    if (!dbAdded) {
+        console.warn('WARNING: database.sqlite not found in any standard location!');
+        // Create a dummy file to warn user inside the zip
+        archive.append('WARNING: database.sqlite could not be found during backup.', { name: 'DB_MISSING_WARNING.txt' });
     }
 
     // 2. Add Uploads
