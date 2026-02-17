@@ -515,8 +515,13 @@ export default function JerseyDetail() {
 
             </div>
 
-            {/* Team Name Title */}
-            <h2 className="text-3xl font-bold text-white mb-2">{jersey.team || jersey.title || "Unbekannter Verein"}</h2>
+            {/* Team Name Title - Styled as Box */}
+            <div className="flex items-center gap-3 p-4 rounded-xl bg-slate-800/50 border border-white/5 mb-4">
+              <div className="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center">
+                 <Shield className="w-6 h-6 text-cyan-400" />
+              </div>
+              <h2 className="text-2xl font-bold text-white">{jersey.team || jersey.title || "Unbekannter Verein"}</h2>
+            </div>
 
             {/* Player info */}
             {(jersey.player_name || jersey.player_number) && (
