@@ -54,8 +54,18 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // Check if user is blocked
-    if (user.data && user.data.is_blocked) {
+    // Check if user is blocked - Robust JSON handling
+    let userData = user.data;
+    if (typeof userData === 'string') {
+        try {
+            userData = JSON.parse(userData);
+        } catch (e) {
+            console.error('Error parsing user data for blocked check:', e);
+            userData = {};
+        }
+    }
+
+    if (userData && userData.is_blocked) {
       return res.status(403).json({ error: 'Ihr Account wurde gesperrt.' });
     }
 
@@ -83,8 +93,17 @@ router.get('/me', async (req, res) => {
     
     if (!user) return res.status(404).json({ error: 'User not found' });
     
-    // Check if user is blocked
-    if (user.data && user.data.is_blocked) {
+    // Check if user is blocked - Robust JSON handling
+    let userData = user.data;
+    if (typeof userData === 'string') {
+        try {
+            userData = JSON.parse(userData);
+        } catch (e) {
+            userData = {};
+        }
+    }
+    
+    if (userData && userData.is_blocked) {
       return res.status(403).json({ error: 'Ihr Account wurde gesperrt.' });
     }
     
@@ -251,8 +270,14 @@ router.post('/manage-user', async (req, res) => {
     if (action === 'block') {
       const targetUser = await User.findByPk(userId);
       if (!targetUser) return res.status(404).json({ error: 'User not found' });
-      const currentData = targetUser.data || {};
+      
+      let currentData = targetUser.data || {};
+      if (typeof currentData === 'string') {
+          try { currentData = JSON.parse(currentData); } catch(e) { currentData = {}; }
+      }
+      
       targetUser.data = { ...currentData, is_blocked: true };
+      targetUser.changed('data', true); // Force update
       await targetUser.save();
       return res.json({ message: 'User blocked', user: targetUser });
     }
@@ -260,8 +285,14 @@ router.post('/manage-user', async (req, res) => {
     if (action === 'unblock') {
       const targetUser = await User.findByPk(userId);
       if (!targetUser) return res.status(404).json({ error: 'User not found' });
-      const currentData = targetUser.data || {};
+      
+      let currentData = targetUser.data || {};
+      if (typeof currentData === 'string') {
+          try { currentData = JSON.parse(currentData); } catch(e) { currentData = {}; }
+      }
+      
       targetUser.data = { ...currentData, is_blocked: false };
+      targetUser.changed('data', true); // Force update
       await targetUser.save();
       return res.json({ message: 'User unblocked', user: targetUser });
     }
