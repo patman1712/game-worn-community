@@ -6,10 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Shield, Users, Euro, Download, Database } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import { Progress } from "@/components/ui/progress";
 
 export default function AdminPanel() {
   const [user, setUser] = useState(null);
   const [isBackingUp, setIsBackingUp] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState(0);
   const queryClient = useQueryClient();
 
   React.useEffect(() => {
@@ -24,6 +26,7 @@ export default function AdminPanel() {
   const handleBackup = async () => {
     try {
       setIsBackingUp(true);
+      setDownloadProgress(0);
       const token = localStorage.getItem('token');
       
       const response = await fetch('/api/admin/backup/full', {
@@ -34,21 +37,49 @@ export default function AdminPanel() {
 
       if (!response.ok) throw new Error('Backup failed');
 
-      // Create blob from response
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `backup-full-${new Date().toISOString().slice(0,10)}.zip`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      // Attempt to read stream for progress
+      const contentLength = response.headers.get('Content-Length');
+      const reader = response.body.getReader();
+      const chunks = [];
+      let receivedLength = 0;
+
+      while(true) {
+        const {done, value} = await reader.read();
+        if (done) {
+          break;
+        }
+        chunks.push(value);
+        receivedLength += value.length;
+        
+        if (contentLength) {
+            setDownloadProgress(Math.round((receivedLength / parseInt(contentLength)) * 100));
+        } else {
+            // Fake progress if unknown length
+            setDownloadProgress((prev) => Math.min(prev + 5, 90));
+        }
+      }
+
+      const blob = new Blob(chunks);
+      setDownloadProgress(100);
+      triggerDownload(blob);
+
     } catch (error) {
       alert('Backup fehlgeschlagen: ' + error.message);
     } finally {
       setIsBackingUp(false);
+      setTimeout(() => setDownloadProgress(0), 1000);
     }
+  };
+
+  const triggerDownload = (blob) => {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `backup-full-${new Date().toISOString().slice(0,10)}.zip`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
   };
 
   const isLoading = false;
@@ -123,6 +154,12 @@ export default function AdminPanel() {
                 <p className="text-white/60 text-sm mb-4">
                 Erstelle ein vollständiges Backup aller Daten (Datenbank + Bilder).
                 </p>
+                {isBackingUp && (
+                    <div className="mb-4 space-y-2">
+                        <Progress value={downloadProgress} className="h-2 bg-slate-800" indicatorClassName="bg-emerald-500" />
+                        <p className="text-emerald-400 text-xs text-center">{downloadProgress}% heruntergeladen</p>
+                    </div>
+                )}
                 <Button 
                     onClick={handleBackup} 
                     disabled={isBackingUp}
