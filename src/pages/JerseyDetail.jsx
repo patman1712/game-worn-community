@@ -179,7 +179,11 @@ export default function JerseyDetail() {
         const previousJersey = queryClient.getQueryData(["jersey", jerseyId]);
         const previousLikes = queryClient.getQueryData(["myLike", jerseyId, currentUser?.email]);
         
-        const newIsLiked = !(previousLikes && previousLikes.length > 0);
+        // IMPORTANT: Calculate newIsLiked based on CURRENT state, not toggle
+        // If previousLikes has items, we are unliking (new state = false)
+        // If previousLikes is empty, we are liking (new state = true)
+        const currentlyLiked = previousLikes && previousLikes.length > 0;
+        const newIsLiked = !currentlyLiked;
         
         queryClient.setQueryData(["jersey", jerseyId], (old) => {
             if (!old) return old;
@@ -188,12 +192,12 @@ export default function JerseyDetail() {
             let currentCount = parseInt(old.likes_count);
             if (isNaN(currentCount)) currentCount = 0;
             
+            // If we are liking, add 1. If unliking, subtract 1.
             const newCount = newIsLiked ? currentCount + 1 : Math.max(0, currentCount - 1);
             
             return {
                 ...old,
                 likes_count: newCount,
-                // Only update top-level property for optimistic update
             };
         });
         
@@ -206,16 +210,19 @@ export default function JerseyDetail() {
         return { previousJersey, previousLikes };
     },
     onSuccess: (updatedJersey) => {
+        // Force refetch everything related to likes to ensure consistency across pages
+        queryClient.invalidateQueries({ queryKey: ["jerseys"] }); // Home page list
+        queryClient.invalidateQueries({ queryKey: ["collectionItems"] }); // Home page list
+        queryClient.invalidateQueries({ queryKey: ["myLike"] }); // Current page like status
+        queryClient.invalidateQueries({ queryKey: ["likes"] }); // Global likes list for home page
+        
         // Update with the actual server response if available
         if (updatedJersey) {
             queryClient.setQueryData(["jersey", jerseyId], (old) => {
                  if (!old) return updatedJersey;
-                 // Merge to keep client-side props if any
                  return { ...old, ...updatedJersey, likes_count: updatedJersey.likes_count };
             });
         }
-        // Invalidate to be sure, but the data should already be correct
-        queryClient.invalidateQueries({ queryKey: ["myLike"] });
     },
     onError: (err, newTodo, context) => {
         console.error("Like mutation failed:", err);
