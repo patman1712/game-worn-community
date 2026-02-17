@@ -45,7 +45,8 @@ if (process.env.NODE_ENV === 'production') {
   app.use(express.static(distPath));
   
   // Handle SPA routing - send index.html for any unknown route
-  app.get('*', (req, res) => {
+  // In Express 5+, wildcard '*' requires careful handling. Using '/*' or regex is safer.
+  app.get('/*', (req, res) => {
     res.sendFile(path.join(distPath, 'index.html'));
   });
 }
