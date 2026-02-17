@@ -150,26 +150,25 @@ export default function JerseyDetail() {
     mutationFn: async () => {
       // Don't execute if already pending to prevent double clicks
       const entity = isCollectionItem ? base44.entities.CollectionItem : base44.entities.Jersey;
+      
+      // Fetch fresh item data to ensure we have the latest count
+      const items = await entity.filter({ id: jerseyId });
+      const currentItem = items[0];
+      const currentCount = currentItem ? (parseInt(currentItem.likes_count) || 0) : 0;
+
       if (isLiked) {
-        // Need to find the like ID. Optimistically we might not have it if we just created it.
-        // But in `likes` array from useQuery we should have it.
+        // Need to find the like ID
         const likeToDelete = likes[0];
         if (likeToDelete) {
             await base44.entities.JerseyLike.delete(likeToDelete.id);
-            // Fetch current item to get accurate count before decrementing
-            // Or just trust the decrement if we assume consistency
-            const items = await entity.filter({ id: jerseyId });
-            const currentItem = items[0];
             if (currentItem) {
-                await entity.update(jerseyId, { likes_count: Math.max(0, (currentItem.likes_count || 0) - 1) });
+                await entity.update(jerseyId, { likes_count: Math.max(0, currentCount - 1) });
             }
         }
       } else {
         await base44.entities.JerseyLike.create({ jersey_id: jerseyId, user_email: currentUser.email });
-        const items = await entity.filter({ id: jerseyId });
-        const currentItem = items[0];
         if (currentItem) {
-            await entity.update(jerseyId, { likes_count: (currentItem.likes_count || 0) + 1 });
+            await entity.update(jerseyId, { likes_count: currentCount + 1 });
         }
       }
     },
@@ -186,7 +185,7 @@ export default function JerseyDetail() {
         
         queryClient.setQueryData(["jersey", jerseyId], (old) => {
             if (!old) return old;
-            const currentCount = typeof old.likes_count === 'number' ? old.likes_count : 0;
+            const currentCount = parseInt(old.likes_count) || 0;
             const newCount = newIsLiked ? currentCount + 1 : Math.max(0, currentCount - 1);
             
             return {
