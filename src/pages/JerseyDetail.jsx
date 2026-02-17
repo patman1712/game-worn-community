@@ -151,25 +151,23 @@ export default function JerseyDetail() {
       // Don't execute if already pending to prevent double clicks
       const entity = isCollectionItem ? base44.entities.CollectionItem : base44.entities.Jersey;
       
-      // Use current local state instead of refetching, similar to Home.jsx
-      // This prevents race conditions where the fetch returns stale data
-      const currentCount = parseInt(jersey.likes_count) || 0;
-      const currentData = jersey?.data || {};
+      // Use current local state instead of refetching
+      // Ensure we have a valid number, default to 0
+      let currentCount = parseInt(jersey.likes_count);
+      if (isNaN(currentCount)) currentCount = 0;
 
       if (isLiked) {
         const likeToDelete = likes[0];
         if (likeToDelete) {
             await base44.entities.JerseyLike.delete(likeToDelete.id);
             const newCount = Math.max(0, currentCount - 1);
-            // Just update likes_count directly without touching data JSON for now
-            // This is safer as backend handles merging
+            // Just update likes_count directly
             return await entity.update(jerseyId, { likes_count: newCount });
         }
       } else {
         await base44.entities.JerseyLike.create({ jersey_id: jerseyId, user_email: currentUser.email });
         const newCount = currentCount + 1;
-        // Just update likes_count directly without touching data JSON for now
-        // This is safer as backend handles merging
+        // Just update likes_count directly
         return await entity.update(jerseyId, { likes_count: newCount });
       }
     },
@@ -185,14 +183,17 @@ export default function JerseyDetail() {
         
         queryClient.setQueryData(["jersey", jerseyId], (old) => {
             if (!old) return old;
-            const currentCount = parseInt(old.likes_count) || 0;
+            
+            // Ensure we work with numbers
+            let currentCount = parseInt(old.likes_count);
+            if (isNaN(currentCount)) currentCount = 0;
+            
             const newCount = newIsLiked ? currentCount + 1 : Math.max(0, currentCount - 1);
             
             return {
                 ...old,
                 likes_count: newCount,
                 // Only update top-level property for optimistic update
-                // data: { ...(old.data || {}), likes_count: newCount } // Don't touch data here to avoid confusion
             };
         });
         
