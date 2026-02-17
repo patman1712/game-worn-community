@@ -21,6 +21,9 @@ const models = {
   'SiteContent': SiteContent
 };
 
+const fs = require('fs');
+const path = require('path');
+
 // Generic CRUD handler factory
 const createHandler = (Model, name) => ({
   list: async (req, res) => {
@@ -118,7 +121,39 @@ const createHandler = (Model, name) => ({
       
       const jerseyId = item.jersey_id; // Capture ID before delete for Likes
       
+      // CAPTURE IMAGES BEFORE DELETE
+      const imagesToDelete = [];
+      if (name === 'Jersey' || name === 'CollectionItem') {
+          if (item.image_url) imagesToDelete.push(item.image_url);
+          if (item.additional_images && Array.isArray(item.additional_images)) {
+              imagesToDelete.push(...item.additional_images);
+          }
+          if (item.loa_certificate_images && Array.isArray(item.loa_certificate_images)) {
+              imagesToDelete.push(...item.loa_certificate_images);
+          }
+      }
+      
       await item.destroy();
+      
+      // CLEANUP IMAGES
+      if (imagesToDelete.length > 0) {
+          const uploadDir = process.env.UPLOAD_DIR || path.join(__dirname, '../../uploads');
+          for (const url of imagesToDelete) {
+              try {
+                  const filename = path.basename(url);
+                  // Basic security check to prevent directory traversal
+                  if (!filename || filename.includes('..') || filename.includes('/')) continue;
+                  
+                  const filePath = path.join(uploadDir, filename);
+                  if (fs.existsSync(filePath)) {
+                      fs.unlinkSync(filePath);
+                      console.log('Deleted orphan image:', filename);
+                  }
+              } catch (e) {
+                  console.error('Failed to delete image:', e.message);
+              }
+          }
+      }
       
       // Notify clients via socket.io if available
       const io = req.app.get('io');
