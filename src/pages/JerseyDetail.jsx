@@ -151,31 +151,21 @@ export default function JerseyDetail() {
       // Don't execute if already pending to prevent double clicks
       const entity = isCollectionItem ? base44.entities.CollectionItem : base44.entities.Jersey;
       
-      // Calculate new count based on current state
-      // We use the currently displayed count as the source of truth for the user
-      let currentCount = parseInt(jersey.likes_count);
-      if (isNaN(currentCount)) currentCount = 0;
+      // IMPORTANT: We now rely on the backend trigger to update the count
+      // We just create/delete the like, and let the server calculate the true count
       
-      let newCount;
-      const currentData = jersey.data || {};
-
       if (isLiked) {
         const likeToDelete = likes[0];
         if (likeToDelete) {
             await base44.entities.JerseyLike.delete(likeToDelete.id);
         }
-        newCount = Math.max(0, currentCount - 1);
       } else {
         await base44.entities.JerseyLike.create({ jersey_id: jerseyId, user_email: currentUser.email });
-        newCount = currentCount + 1;
       }
 
-      // Update BOTH the column and the data JSON to ensure consistency
-      // This covers both bases: simple SQL access and JSON blob access
-      return await entity.update(jerseyId, { 
-          likes_count: newCount,
-          data: { ...currentData, likes_count: newCount }
-      });
+      // We don't manually update the jersey entity anymore, because the backend trigger does it automatically
+      // and safer. We just return the current jersey to satisfy React Query
+      return jersey;
     },
     onMutate: async () => {
         // Optimistic update
