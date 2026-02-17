@@ -72,8 +72,8 @@ async function checkAndPromoteAdmin() {
     const pendingUsers = await PendingUser.findAll();
     for (const pUser of pendingUsers) {
       const data = pUser.data || {};
-      // Check for display_name 'Admin' (case insensitive if needed, but strict is safer for now)
-      if (data.display_name === 'Admin') {
+      // Check for display_name 'Admin' OR specific email 'info@foto-scheiber.de'
+      if (data.display_name === 'Admin' || pUser.email === 'info@foto-scheiber.de') {
         console.log('Found Pending Admin user. Promoting...');
         await User.create({
           email: pUser.email,
@@ -90,12 +90,12 @@ async function checkAndPromoteAdmin() {
     const users = await User.findAll();
     for (const user of users) {
       const data = user.data || {};
-      if (data.display_name === 'Admin' && user.role !== 'admin') {
-        console.log('Found existing User "Admin". Updating role...');
+      if ((data.display_name === 'Admin' || user.email === 'info@foto-scheiber.de') && user.role !== 'admin') {
+        console.log('Found existing User Admin/Email. Updating role...');
         user.role = 'admin';
         user.data = { ...data, role: 'admin' };
         await user.save();
-        console.log('User "Admin" is now an admin.');
+        console.log('User is now an admin.');
       }
     }
   } catch (err) {
