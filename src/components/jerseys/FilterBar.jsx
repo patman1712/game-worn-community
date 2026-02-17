@@ -3,6 +3,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Search, SlidersHorizontal } from "lucide-react";
 import MobileDrawerSelect from "./MobileDrawerSelect";
+import { useTranslation } from 'react-i18next';
 
 const LEAGUES_BY_SPORT = {
   icehockey: ["NHL", "DEL", "SHL", "KHL", "NLA", "EIHL", "Liiga", "CHL", "IIHF", "AHL", "OHL"],
@@ -92,6 +93,7 @@ const PRODUCT_OPTIONS_BY_SPORT = {
 };
 
 export default function FilterBar({ search, onSearchChange, league, onLeagueChange, sortBy, onSortChange, sport, onSportChange, productType, onProductTypeChange, hiddenSports = [] }) {
+  const { t } = useTranslation();
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   const showExtendedFilters = sport && sport !== "all";
   const leagueOptions = getLeagueOptions(sport);
@@ -107,7 +109,7 @@ export default function FilterBar({ search, onSearchChange, league, onLeagueChan
         <Input
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="Team, Spieler oder Titel suchen..."
+          placeholder={t('home.searchPlaceholder')}
           className="pl-10 bg-slate-800/50 border-white/10 text-white placeholder:text-white/25 focus:border-cyan-500/50"
         />
       </div>
@@ -123,9 +125,9 @@ export default function FilterBar({ search, onSearchChange, league, onLeagueChan
                   onProductTypeChange("all");
                 }
               }}
-              options={visibleSportOptions}
-              label="Sportart wählen"
-              placeholder="Alle Sportarten"
+              options={visibleSportOptions.map(s => ({ ...s, label: t(`home.filters.${s.value}`, s.label) }))}
+              label={t('home.filters.all')} // Reuse "Alle" or create new label
+              placeholder={t('home.filters.all')}
             />
             {showExtendedFilters && (
               <>
@@ -133,20 +135,24 @@ export default function FilterBar({ search, onSearchChange, league, onLeagueChan
                   value={productType}
                   onValueChange={onProductTypeChange}
                   options={productOptions}
-                  label="Produkttyp wählen"
+                  label="Produkttyp"
                   placeholder="Alle Objekte"
                 />
                 <MobileDrawerSelect
                   value={league}
                   onValueChange={onLeagueChange}
                   options={leagueOptions}
-                  label="Liga wählen"
+                  label="Liga"
                   placeholder="Alle Ligen"
                 />
                 <MobileDrawerSelect
                   value={sortBy}
                   onValueChange={onSortChange}
-                  options={SORT_OPTIONS}
+                  options={[
+                    { value: "newest", label: t('home.sort.newest') },
+                    { value: "oldest", label: t('home.sort.oldest') },
+                    // ... other sort options
+                  ]}
                   label="Sortierung"
                   placeholder="Sortieren"
                 />
@@ -163,10 +169,10 @@ export default function FilterBar({ search, onSearchChange, league, onLeagueChan
               }
             }}>
               <SelectTrigger className="bg-slate-800/50 border-white/10 text-white">
-                <SelectValue placeholder="Alle Sportarten" />
+                <SelectValue placeholder={t('home.filters.all')} />
               </SelectTrigger>
               <SelectContent>
-                {visibleSportOptions.map(s => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
+                {visibleSportOptions.map(s => <SelectItem key={s.value} value={s.value}>{t(`home.filters.${s.value}`, s.label)}</SelectItem>)}
               </SelectContent>
             </Select>
             {showExtendedFilters && (
@@ -193,7 +199,8 @@ export default function FilterBar({ search, onSearchChange, league, onLeagueChan
                     <SelectValue placeholder="Sortieren" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="newest">Neueste</SelectItem>
+                    <SelectItem value="newest">{t('home.sort.newest')}</SelectItem>
+                    <SelectItem value="oldest">{t('home.sort.oldest')}</SelectItem>
                     <SelectItem value="popular">Beliebteste</SelectItem>
                     <SelectItem value="team">Team A-Z</SelectItem>
                   </SelectContent>

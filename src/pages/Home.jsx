@@ -3,12 +3,14 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Shirt, Loader2, RefreshCw } from "lucide-react";
+import { useTranslation } from 'react-i18next';
 
 import JerseyCard from "@/components/jerseys/JerseyCard";
 import FilterBar from "@/components/jerseys/FilterBar";
 import StatsBar from "@/components/jerseys/StatsBar";
 
 export default function Home() {
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [league, setLeague] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
@@ -279,7 +281,7 @@ export default function Home() {
               className="h-56 md:h-72 w-auto object-contain mx-auto drop-shadow-[0_4px_20px_rgba(6,182,212,0.4)]"
             />
             <p className="text-white/40 mt-3 max-w-md mx-auto text-sm">
-              Zeige deine Eishockey-Trikots der Welt. Entdecke Sammlungen aus der ganzen Community.
+              {t('home.subtitle')}
             </p>
           </motion.div>
 
@@ -317,7 +319,7 @@ export default function Home() {
         ) : filtered.length === 0 ? (
           <div className="text-center py-20">
             <Shirt className="w-12 h-12 text-white/10 mx-auto mb-4" />
-            <p className="text-white/30 text-sm">Noch keine Trikots gefunden.</p>
+            <p className="text-white/30 text-sm">{t('home.noResults')}</p>
             <p className="text-white/20 text-xs mt-1">Sei der Erste und teile deine Sammlung!</p>
           </div>
         ) : (

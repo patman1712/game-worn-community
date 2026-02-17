@@ -12,8 +12,10 @@ import {
   ArrowLeft, Heart, Star, Award, User, Calendar,
   Shirt, Tag, Shield, Loader2, ChevronLeft, ChevronRight, MessageCircle, Send, Trash2, Share2, X
 } from "lucide-react";
+import { useTranslation } from 'react-i18next';
 
 export default function JerseyDetail() {
+  const { t } = useTranslation();
   const params = new URLSearchParams(window.location.search);
   const jerseyId = params.get("id");
   const [currentUser, setCurrentUser] = useState(null);
@@ -299,7 +301,7 @@ export default function JerseyDetail() {
           className="inline-flex items-center gap-2 text-white/40 hover:text-white/70 text-sm mb-8 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          Zurück zur Übersicht
+          {t('detail.back')}
         </Link>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
@@ -370,7 +372,7 @@ export default function JerseyDetail() {
                   </div>
                   <div>
                     <p className="text-white text-sm font-medium">{ownerName}</p>
-                    <p className="text-white/30 text-xs">Sammlung ansehen</p>
+                    <p className="text-white/30 text-xs">{t('detail.viewCollection')}</p>
                   </div>
                 </Link>
                 <div className="flex items-center gap-2">
@@ -379,7 +381,7 @@ export default function JerseyDetail() {
                       onClick={() => {
                         const shareUrl = `${window.location.protocol}//${window.location.host}${createPageUrl("Share")}?id=${jersey.id}`;
                         navigator.clipboard.writeText(shareUrl);
-                        alert('Link kopiert! Du kannst ihn jetzt teilen.');
+                        alert(t('detail.linkCopied'));
                       }}
                       variant="ghost"
                       className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
@@ -409,12 +411,12 @@ export default function JerseyDetail() {
               {(isOwner || isAdmin) && (jersey.purchase_price || jersey.invoice_url) && (
                 <div className="pt-4 border-t border-white/5">
                   <h3 className="text-white/60 text-xs font-medium flex items-center gap-2 mb-3">
-                    <Shield className="w-3 h-3" /> Private Informationen
+                    <Shield className="w-3 h-3" /> {t('detail.privateInfo')}
                   </h3>
                   <div className="grid grid-cols-2 gap-4">
                     {jersey.purchase_price && (
                       <div>
-                        <span className="text-white/40 text-[10px] uppercase tracking-wider block mb-1">Kaufpreis</span>
+                        <span className="text-white/40 text-[10px] uppercase tracking-wider block mb-1">{t('detail.purchasePrice')}</span>
                         <span className="text-white font-mono text-sm">
                           {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(jersey.purchase_price)}
                         </span>
@@ -422,12 +424,12 @@ export default function JerseyDetail() {
                     )}
                     {jersey.invoice_url && (
                       <div>
-                        <span className="text-white/40 text-[10px] uppercase tracking-wider block mb-1">Dokumente</span>
+                        <span className="text-white/40 text-[10px] uppercase tracking-wider block mb-1">{t('detail.documents')}</span>
                         <button 
                           onClick={() => setCertificateImageOpen(jersey.invoice_url)}
                           className="text-cyan-400 text-sm hover:underline flex items-center gap-1"
                         >
-                          Rechnung ansehen
+                          {t('detail.viewInvoice')}
                         </button>
                       </div>
                     )}
@@ -444,8 +446,8 @@ export default function JerseyDetail() {
               <div className="flex items-center gap-2 mb-3 flex-wrap">
                 {jersey.sport_type && (
                   <Badge className="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs">
-                    {jersey.sport_type === 'icehockey' ? 'Eishockey' :
-                     jersey.sport_type === 'soccer' ? 'Fussball' :
+                    {jersey.sport_type === 'icehockey' ? t('home.filters.icehockey') :
+                     jersey.sport_type === 'soccer' ? t('home.filters.soccer') :
                      jersey.sport_type === 'football' ? 'Football' :
                      jersey.sport_type === 'basketball' ? 'Basketball' :
                      jersey.sport_type === 'baseball' ? 'Baseball' : jersey.sport_type}
@@ -520,7 +522,7 @@ export default function JerseyDetail() {
               <div className="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center">
                  <Shield className="w-6 h-6 text-cyan-400" />
               </div>
-              <h2 className="text-2xl font-bold text-white">{jersey.team || jersey.title || "Unbekannter Verein"}</h2>
+              <h2 className="text-2xl font-bold text-white">{jersey.team || jersey.title || t('detail.unknownTeam')}</h2>
             </div>
 
             {/* Player info */}
@@ -530,7 +532,7 @@ export default function JerseyDetail() {
                   #{jersey.player_number || ""}
                 </div>
                 <div>
-                  <p className="text-white font-semibold">{jersey.player_name || "Unbekannter Spieler"}</p>
+                  <p className="text-white font-semibold">{jersey.player_name || t('detail.unknownPlayer')}</p>
                   <p className="text-white/40 text-sm">{jersey.season || ""}</p>
                 </div>
               </div>
@@ -541,7 +543,7 @@ export default function JerseyDetail() {
               {jersey.season && (
                 <div className="p-3 rounded-xl bg-slate-800/30 border border-white/5">
                   <div className="flex items-center gap-2 text-white/30 text-xs mb-1">
-                    <Calendar className="w-3 h-3" /> Saison
+                    <Calendar className="w-3 h-3" /> {t('detail.season')}
                   </div>
                   <p className="text-white text-sm font-medium">{jersey.season}</p>
                 </div>
@@ -549,7 +551,7 @@ export default function JerseyDetail() {
               {jersey.brand && (
                 <div className="p-3 rounded-xl bg-slate-800/30 border border-white/5">
                   <div className="flex items-center gap-2 text-white/30 text-xs mb-1">
-                    <Tag className="w-3 h-3" /> Marke
+                    <Tag className="w-3 h-3" /> {t('detail.brand')}
                   </div>
                   <p className="text-white text-sm font-medium">{jersey.brand}</p>
                 </div>
@@ -557,7 +559,7 @@ export default function JerseyDetail() {
               {jersey.size && (
                 <div className="p-3 rounded-xl bg-slate-800/30 border border-white/5">
                   <div className="flex items-center gap-2 text-white/30 text-xs mb-1">
-                    <Shirt className="w-3 h-3" /> Größe
+                    <Shirt className="w-3 h-3" /> {t('detail.size')}
                   </div>
                   <p className="text-white text-sm font-medium">{jersey.size}</p>
                 </div>
@@ -565,7 +567,7 @@ export default function JerseyDetail() {
               {jersey.condition && (
                 <div className="p-3 rounded-xl bg-slate-800/30 border border-white/5">
                   <div className="flex items-center gap-2 text-white/30 text-xs mb-1">
-                    <Shield className="w-3 h-3" /> Zustand
+                    <Shield className="w-3 h-3" /> {t('detail.condition')}
                   </div>
                   <p className="text-white text-sm font-medium">{jersey.condition}</p>
                 </div>
@@ -575,7 +577,7 @@ export default function JerseyDetail() {
             {/* Details Section */}
             {jersey.details && jersey.details.length > 0 && (
               <div>
-                <h3 className="text-white/60 text-sm font-medium mb-2">Details</h3>
+                <h3 className="text-white/60 text-sm font-medium mb-2">{t('detail.details')}</h3>
                 <div className="flex flex-wrap gap-2">
                   {jersey.details.map(detail => (
                     <Badge key={detail} className="bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-xs">
@@ -589,7 +591,7 @@ export default function JerseyDetail() {
             {/* Description */}
             {jersey.description && (
               <div>
-                <h3 className="text-white/60 text-sm font-medium mb-2">Über dieses Trikot</h3>
+                <h3 className="text-white/60 text-sm font-medium mb-2">{t('detail.about')}</h3>
                 <p className="text-white/40 text-sm leading-relaxed">{jersey.description}</p>
               </div>
             )}
@@ -600,7 +602,7 @@ export default function JerseyDetail() {
             {/* Certificate Section - Moved below actions as requested */}
             {canSeeCertificates && (
               <div className="pt-6 border-t border-white/5">
-                <h3 className="text-white font-medium mb-4">Zertifikate (LOA)</h3>
+                <h3 className="text-white font-medium mb-4">{t('detail.coa')}</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {jersey.loa_certificate_images.map((url, i) => (
                     <div 
@@ -635,12 +637,12 @@ export default function JerseyDetail() {
               <div className="pt-6 border-t border-white/5 flex gap-2">
                 <Link to={createPageUrl("EditJersey") + `?id=${jersey.id}`} className="flex-1">
                   <Button variant="outline" className="w-full text-orange-400 border-orange-500/30 hover:text-orange-300 hover:bg-orange-500/10">
-                    Bearbeiten
+                    {t('detail.edit')}
                   </Button>
                 </Link>
                 <Button
                   onClick={async () => {
-                    if (confirm('Objekt wirklich löschen?')) {
+                    if (confirm(t('detail.deleteConfirmText'))) {
                       try {
                         const entity = isCollectionItem ? base44.entities.CollectionItem : base44.entities.Jersey;
                         // Delete likes - try/catch
@@ -663,14 +665,14 @@ export default function JerseyDetail() {
                         await entity.delete(jersey.id);
                         window.location.href = createPageUrl("Home");
                       } catch (error) {
-                        alert('Fehler beim Löschen: ' + error.message);
+                        alert(t('detail.errorDelete') + ': ' + error.message);
                       }
                     }
                   }}
                   variant="outline"
                   className="flex-1 text-red-400 border-red-500/30 hover:text-red-300 hover:bg-red-500/10"
                 >
-                  Löschen
+                  {t('detail.delete')}
                 </Button>
               </div>
             )}
@@ -678,14 +680,14 @@ export default function JerseyDetail() {
             {/* Comments Section - Only for logged in users */}
             {currentUser && (
               <div className="pt-6 border-t border-white/5">
-                <h3 className="text-white font-medium mb-4">Kommentare ({comments.length})</h3>
+                <h3 className="text-white font-medium mb-4">{t('detail.comments')} ({comments.length})</h3>
                 
                 {/* Comment Input */}
                 <div className="flex gap-2 mb-6">
                   <Input
                     value={commentText}
                     onChange={(e) => setCommentText(e.target.value)}
-                    placeholder="Schreibe einen Kommentar..."
+                    placeholder={t('detail.writeComment')}
                     className="bg-slate-800/50 border-white/10 text-white placeholder:text-white/20 flex-1"
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && commentText.trim()) {
@@ -745,7 +747,7 @@ export default function JerseyDetail() {
                   ))}
                   {comments.length === 0 && (
                     <p className="text-white/30 text-sm text-center py-8">
-                      Noch keine Kommentare. Sei der Erste!
+                      {t('detail.noComments')}
                     </p>
                   )}
                 </div>
