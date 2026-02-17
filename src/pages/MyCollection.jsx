@@ -17,8 +17,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useTranslation } from 'react-i18next';
 
 export default function MyCollection() {
+  const { t } = useTranslation();
   const [user, setUser] = useState(null);
   const queryClient = useQueryClient();
 
@@ -74,19 +76,19 @@ export default function MyCollection() {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-2xl font-bold text-white">Meine Sammlung</h1>
-              <p className="text-white/40 text-sm mt-1">{allProducts.length} Objekt{allProducts.length !== 1 ? "e" : ""}</p>
+              <h1 className="text-2xl font-bold text-white">{t('myCollection.title')}</h1>
+              <p className="text-white/40 text-sm mt-1">{allProducts.length} {t('stats.jerseys')}</p>
             </div>
             <Link to={createPageUrl("AddJersey")}>
               <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white">
                 <Plus className="w-4 h-4 mr-2" />
-                Objekt hinzufügen
+                {t('myCollection.addItem')}
               </Button>
             </Link>
           </div>
           <Link to={createPageUrl("MyPurchases")}>
             <Button variant="outline" className="text-cyan-400 border-cyan-500/30 hover:bg-cyan-500/10">
-              💰 Meine Käufe
+              💰 {t('admin.userPurchases')}
             </Button>
           </Link>
         </div>
@@ -98,11 +100,11 @@ export default function MyCollection() {
         ) : allProducts.length === 0 ? (
           <div className="text-center py-20 rounded-2xl border border-dashed border-white/10">
             <Shirt className="w-12 h-12 text-white/10 mx-auto mb-4" />
-            <p className="text-white/30 text-sm">Du hast noch keine Objekte.</p>
+            <p className="text-white/30 text-sm">{t('myCollection.noItems')}</p>
             <Link to={createPageUrl("AddJersey")}>
               <Button className="mt-4 bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30">
                 <Plus className="w-4 h-4 mr-2" />
-                Erstes Objekt hinzufügen
+                {t('myCollection.startCollection')}
               </Button>
             </Link>
           </div>

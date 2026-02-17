@@ -8,8 +8,10 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Progress } from "@/components/ui/progress";
 import { APP_VERSION } from "@/config/changelog";
+import { useTranslation, Trans } from 'react-i18next';
 
 export default function AdminPanel() {
+  const { t } = useTranslation();
   const [user, setUser] = useState(null);
   const [isBackingUp, setIsBackingUp] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
@@ -101,7 +103,7 @@ export default function AdminPanel() {
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
               <Shield className="w-5 h-5 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-white">Admin Panel</h1>
+            <h1 className="text-2xl font-bold text-white">{t('admin.title')}</h1>
           </div>
         </div>
 
@@ -110,22 +112,22 @@ export default function AdminPanel() {
             <Card className="bg-slate-900/60 border-white/5 h-full">
             <CardHeader>
                 <CardTitle className="text-white text-lg flex items-center gap-2">
-                    <Users className="w-5 h-5 text-cyan-400" /> User Verwaltung
+                    <Users className="w-5 h-5 text-cyan-400" /> {t('admin.users')}
                 </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
                 <p className="text-white/60 text-sm h-10">
-                Verwalte registrierte User, blockiere Accounts und prüfe Käufe.
+                {t('admin.userManageDesc')}
                 </p>
                 <Link to={createPageUrl("ManageUsers")}>
                     <Button variant="secondary" className="w-full mb-2 bg-slate-800 hover:bg-slate-700 text-white border border-white/10">
-                        User Liste & Bearbeiten
+                        {t('admin.userList')}
                     </Button>
                 </Link>
                 <Link to={createPageUrl("UserPurchases")}>
                     <Button variant="outline" className="w-full text-cyan-400 border-cyan-500/30 hover:bg-cyan-500/10">
                         <Euro className="w-4 h-4 mr-2" />
-                        User Käufe einsehen
+                        {t('admin.userPurchases')}
                     </Button>
                 </Link>
             </CardContent>
@@ -135,17 +137,17 @@ export default function AdminPanel() {
             <Card className="bg-slate-900/60 border-white/5 h-full">
             <CardHeader>
                 <CardTitle className="text-white text-lg flex items-center gap-2">
-                    <Settings className="w-5 h-5 text-purple-400" /> Seite Verwalten
+                    <Settings className="w-5 h-5 text-purple-400" /> {t('admin.manageSite')}
                 </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
                 <p className="text-white/60 text-sm h-10">
-                Bearbeite rechtliche Texte und Seiteninhalte.
+                {t('admin.siteManageDesc')}
                 </p>
                 <Link to={createPageUrl("EditSiteContent")}>
                     <Button variant="secondary" className="w-full bg-slate-800 hover:bg-slate-700 text-white border border-white/10">
                         <FileText className="w-4 h-4 mr-2" />
-                        Impressum & Datenschutz
+                        {t('admin.legalContent')}
                     </Button>
                 </Link>
             </CardContent>
@@ -155,12 +157,12 @@ export default function AdminPanel() {
             <Card className="bg-slate-900/60 border-white/5 h-full">
             <CardHeader>
                 <CardTitle className="text-white text-lg flex items-center gap-2">
-                    <Database className="w-5 h-5 text-emerald-400" /> System Backup
+                    <Database className="w-5 h-5 text-emerald-400" /> {t('admin.systemBackup')}
                 </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
                 <p className="text-white/60 text-sm h-10">
-                Erstelle ein vollständiges Backup aller Daten (Datenbank + Bilder).
+                {t('admin.backupDesc')}
                 </p>
                 {isBackingUp && (
                     <div className="mb-4 space-y-2">
@@ -178,7 +180,7 @@ export default function AdminPanel() {
                     ) : (
                         <Download className="w-4 h-4 mr-2" />
                     )}
-                    {isBackingUp ? 'Backup wird erstellt...' : 'Backup herunterladen'}
+                    {isBackingUp ? t('admin.backupProgress') : t('admin.createBackup')}
                 </Button>
             </CardContent>
             </Card>
@@ -187,19 +189,21 @@ export default function AdminPanel() {
             <Card className="bg-slate-900/60 border-white/5 h-full">
             <CardHeader>
                 <CardTitle className="text-white text-lg flex items-center gap-2">
-                    <Clock className="w-5 h-5 text-orange-400" /> System Updates
+                    <Clock className="w-5 h-5 text-orange-400" /> {t('admin.systemUpdates')}
                 </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
                 <p className="text-white/60 text-sm h-10">
-                Aktuelle Version: <span className="text-cyan-400 font-mono font-bold">v{APP_VERSION}</span>
-                <br />
-                Verlauf der Updates einsehen.
+                  <Trans i18nKey="admin.changelogDesc" values={{ version: APP_VERSION }}>
+                    Aktuelle Version: <span className="text-cyan-400 font-mono font-bold">v{APP_VERSION}</span>
+                    <br />
+                    Verlauf der Updates einsehen.
+                  </Trans>
                 </p>
                 <Link to={createPageUrl("UpdateLog")}>
                     <Button variant="secondary" className="w-full bg-slate-800 hover:bg-slate-700 text-white border border-white/10">
                         <Sparkles className="w-4 h-4 mr-2" />
-                        Changelog öffnen
+                        {t('admin.openChangelog')}
                     </Button>
                 </Link>
             </CardContent>

@@ -19,8 +19,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useTranslation } from 'react-i18next';
 
 export default function Messages() {
+  const { t } = useTranslation();
   const [currentUser, setCurrentUser] = useState(null);
   const [search, setSearch] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -136,7 +138,7 @@ export default function Messages() {
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
               <MessageCircle className="w-5 h-5 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-white">Nachrichten</h1>
+            <h1 className="text-2xl font-bold text-white">{t('chat.inbox')}</h1>
           </div>
           <NewMessageDialog currentUser={currentUser} />
         </div>
@@ -147,7 +149,7 @@ export default function Messages() {
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Suche Konversationen..."
+            placeholder={t('chat.searchConversations')}
             className="bg-slate-800/50 border-white/10 text-white pl-10 placeholder:text-white/20"
           />
         </div>
@@ -162,7 +164,7 @@ export default function Messages() {
         ) : filtered.length === 0 ? (
           <div className="text-center py-20">
             <MessageCircle className="w-12 h-12 text-white/10 mx-auto mb-4" />
-            <p className="text-white/30 text-sm">Keine Nachrichten gefunden</p>
+            <p className="text-white/30 text-sm">{t('chat.noMessages')}</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -230,14 +232,14 @@ export default function Messages() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent className="bg-slate-900 border-white/10 text-white">
           <AlertDialogHeader>
-            <AlertDialogTitle>Konversation löschen?</AlertDialogTitle>
+            <AlertDialogTitle>{t('chat.deleteConversation')}</AlertDialogTitle>
             <AlertDialogDescription className="text-white/60">
-              Möchtest du diese Konversation wirklich löschen? Alle Nachrichten werden dauerhaft entfernt.
+              {t('chat.deleteConversationText')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="bg-slate-800 text-white border-white/10 hover:bg-slate-700">
-              Abbrechen
+              {t('detail.cancel')}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={() => deleteMutation.mutate(conversationToDelete)}
@@ -247,7 +249,7 @@ export default function Messages() {
               {deleteMutation.isPending ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
-                "Löschen"
+                t('detail.delete')
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

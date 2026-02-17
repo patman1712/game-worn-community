@@ -5,8 +5,10 @@ import { motion } from "framer-motion";
 import { Send, Loader2, User } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from 'react-i18next';
 
 export default function Chat() {
+  const { t } = useTranslation();
   const [currentUser, setCurrentUser] = useState(null);
   const [messageText, setMessageText] = useState("");
   const messagesEndRef = useRef(null);
@@ -125,8 +127,8 @@ export default function Chat() {
             </div>
           ) : messages.length === 0 ? (
             <div className="text-center py-20">
-              <p className="text-white/30 text-sm">Noch keine Nachrichten</p>
-              <p className="text-white/20 text-xs mt-1">Schreibe die erste Nachricht!</p>
+              <p className="text-white/30 text-sm">{t('chat.noMessages')}</p>
+              <p className="text-white/20 text-xs mt-1">{t('chat.startChat')}</p>
             </div>
           ) : (
             messages.map((msg, i) => {
@@ -168,7 +170,7 @@ export default function Chat() {
           <Input
             value={messageText}
             onChange={(e) => setMessageText(e.target.value)}
-            placeholder="Nachricht schreiben..."
+            placeholder={t('chat.typeMessage')}
             className="bg-slate-800/50 border-white/10 text-white placeholder:text-white/20 flex-1"
             disabled={sendMutation.isPending}
           />

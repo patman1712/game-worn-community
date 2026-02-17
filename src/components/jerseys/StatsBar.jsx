@@ -1,13 +1,16 @@
 import React from "react";
 import { Shirt, Users, Heart, Trophy } from "lucide-react";
 import { motion } from "framer-motion";
+import { useTranslation } from 'react-i18next';
 
 export default function StatsBar({ totalJerseys, totalCollectors, totalLikes, topLeague }) {
+  const { t } = useTranslation();
+
   const stats = [
-    { icon: Shirt, label: "Objekte", value: totalJerseys, color: "from-cyan-400 to-blue-500" },
-    { icon: Users, label: "Sammler", value: totalCollectors, color: "from-violet-400 to-purple-500" },
-    { icon: Heart, label: "Likes", value: totalLikes, color: "from-rose-400 to-pink-500" },
-    { icon: Trophy, label: "Top Liga", value: topLeague || "–", color: "from-amber-400 to-orange-500" },
+    { icon: Shirt, label: t('stats.jerseys'), value: totalJerseys, color: "from-cyan-400 to-blue-500" },
+    { icon: Users, label: t('stats.members'), value: totalCollectors, color: "from-violet-400 to-purple-500" },
+    { icon: Heart, label: t('stats.likes'), value: totalLikes, color: "from-rose-400 to-pink-500" },
+    { icon: Trophy, label: t('stats.topLeague'), value: topLeague || "–", color: "from-amber-400 to-orange-500" },
   ];
 
   return (

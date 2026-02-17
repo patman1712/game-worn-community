@@ -8,8 +8,10 @@ import { Link } from "react-router-dom";
 import SportProductSelector from "../components/products/SportProductSelector";
 import JerseyUploadForm from "@/components/jerseys/JerseyUploadForm";
 import GenericProductForm from "../components/products/GenericProductForm";
+import { useTranslation } from 'react-i18next';
 
 export default function AddJersey() {
+  const { t } = useTranslation();
   const [user, setUser] = useState(null);
   const [showSelector, setShowSelector] = useState(true);
   const [selectedSport, setSelectedSport] = useState(null);
@@ -115,13 +117,13 @@ export default function AddJersey() {
             className="inline-flex items-center gap-2 text-white/40 hover:text-white/70 text-sm mb-8 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            Zurück
+            {t('detail.back')}
           </Link>
 
           <h1 className="text-2xl font-bold text-white mb-2">
-            {selectedProduct?.name} hinzufügen
+            {t('products.' + selectedProduct?.id)} {t('common.add')}
           </h1>
-          <p className="text-white/40 text-sm mb-8">{selectedSport?.name}</p>
+          <p className="text-white/40 text-sm mb-8">{t('home.filters.' + selectedSport?.id)}</p>
 
           {useOldJerseyForm ? (
             <JerseyUploadForm

@@ -18,8 +18,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useTranslation } from 'react-i18next';
 
 export default function JerseyCard({ jersey: initialJersey, isLiked, onLike, index = 0 }) {
+  const { t } = useTranslation();
   // Flatten data if available (for CollectionItems)
   const jersey = { ...(initialJersey.data || {}), ...initialJersey };
   
@@ -153,9 +155,9 @@ export default function JerseyCard({ jersey: initialJersey, isLiked, onLike, ind
                         onClick={(e) => e.stopPropagation()}
                     >
                       <AlertDialogHeader>
-                        <AlertDialogTitle className="text-white">Objekt löschen?</AlertDialogTitle>
+                        <AlertDialogTitle className="text-white">{t('detail.deleteConfirmTitle')}</AlertDialogTitle>
                         <AlertDialogDescription className="text-white/50">
-                          Das Objekt wird unwiderruflich gelöscht.
+                          {t('detail.deleteConfirmText')}
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
@@ -166,13 +168,13 @@ export default function JerseyCard({ jersey: initialJersey, isLiked, onLike, ind
                             }}
                             className="bg-white/5 text-white border-white/10 hover:bg-white/10"
                         >
-                            Abbrechen
+                            {t('detail.cancel')}
                         </AlertDialogCancel>
                         <AlertDialogAction
                           onClick={handleConfirmDelete}
                           className="bg-red-600 hover:bg-red-700 text-white"
                         >
-                          {deleteMutation.isPending ? "Löscht..." : "Löschen"}
+                          {deleteMutation.isPending ? t('common.loading') : t('detail.delete')}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
@@ -198,11 +200,11 @@ export default function JerseyCard({ jersey: initialJersey, isLiked, onLike, ind
           <div className="px-4 py-3 bg-slate-900/80">
             <div className="flex items-center gap-1.5 mb-2 flex-wrap">
               <Badge className="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] px-2 py-0">
-                {jersey.sport_type === 'icehockey' ? 'Eishockey' :
-                 jersey.sport_type === 'soccer' ? 'Fussball' :
+                {jersey.sport_type === 'icehockey' ? t('home.filters.icehockey') :
+                 jersey.sport_type === 'soccer' ? t('home.filters.soccer') :
                  jersey.sport_type === 'football' ? 'Football' :
                  jersey.sport_type === 'basketball' ? 'Basketball' :
-                 jersey.sport_type === 'baseball' ? 'Baseball' : 'Eishockey'}
+                 jersey.sport_type === 'baseball' ? 'Baseball' : t('home.filters.icehockey')}
               </Badge>
               {jersey.league && (
                 <Badge className="bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-[10px] px-2 py-0">
@@ -229,47 +231,47 @@ export default function JerseyCard({ jersey: initialJersey, isLiked, onLike, ind
               {jersey.is_game_worn && (
                 <Badge className="bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] px-1.5 py-0">
                   <Award className="w-2.5 h-2.5 mr-1" />
-                  {jersey.sport_type === 'soccer' ? 'Matchworn' : 'Game-Worn'}
+                  {jersey.sport_type === 'soccer' ? t('badges.matchworn') : t('badges.gameworn')}
                 </Badge>
               )}
               {jersey.is_game_issued && (
                 <Badge className="bg-orange-500/20 text-orange-300 border border-orange-500/30 text-[10px] px-1.5 py-0">
                   <Award className="w-2.5 h-2.5 mr-1" />
-                  {jersey.sport_type === 'soccer' ? 'Player Edition' : 'Game-Issued'}
+                  {jersey.sport_type === 'soccer' ? t('badges.playeredition') : t('badges.gameissued')}
                 </Badge>
               )}
               {jersey.is_authentic && (
                 <Badge className="bg-blue-500/20 text-blue-300 border border-blue-500/30 text-[10px] px-1.5 py-0">
                   <Award className="w-2.5 h-2.5 mr-1" />
-                  Authentic
+                  {t('badges.authentic')}
                 </Badge>
               )}
               {jersey.is_fan_jersey && (
                 <Badge className="bg-pink-500/20 text-pink-300 border border-pink-500/30 text-[10px] px-1.5 py-0">
                   <Award className="w-2.5 h-2.5 mr-1" />
-                  Fantrikot
+                  {t('badges.fanjersey')}
                 </Badge>
               )}
               {jersey.is_signed && (
                 <Badge className="bg-violet-500/20 text-violet-300 border border-violet-500/30 text-[10px] px-1.5 py-0">
                   <Star className="w-2.5 h-2.5 mr-1" />
-                  Signiert
+                  {t('badges.signed')}
                 </Badge>
               )}
               {jersey.is_photomatch && (
                <Badge className="bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] px-1.5 py-0">
-                 📸 Photomatch
+                 📸 {t('badges.photomatch')}
                </Badge>
               )}
               {jersey.for_sale && (
                <Badge className="bg-green-500/20 text-green-300 border border-green-500/30 text-[10px] px-1.5 py-0 flex items-center gap-1">
                  <DollarSign className="w-2.5 h-2.5" />
-                 Verkauf
+                 {t('card.forSale')}
                </Badge>
               )}
               {!jersey.for_sale && (
                <Badge className="bg-slate-500/20 text-slate-300 border border-slate-500/30 text-[10px] px-1.5 py-0 flex items-center gap-1">
-                 Nicht zum Verkauf
+                 {t('card.notForSale')}
                </Badge>
               )}
             </div>

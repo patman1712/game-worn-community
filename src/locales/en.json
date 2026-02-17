@@ -77,7 +77,97 @@
     "linkCopied": "Link copied! You can share it now.",
     "deleteConfirm": "Really delete item?",
     "errorDelete": "Error deleting item",
-    "errorComment": "Error sending comment"
+    "errorComment": "Error sending comment",
+    "notFound": "Item not found.",
+    "noPermission": "You do not have permission to edit this item."
+  },
+  "stats": {
+    "jerseys": "Jerseys",
+    "value": "Total Value",
+    "members": "Members",
+    "likes": "Likes",
+    "topLeague": "Top League"
+  },
+  "chat": {
+    "inbox": "Inbox",
+    "chatWith": "Chat with",
+    "typeMessage": "Type a message...",
+    "send": "Send",
+    "noMessages": "No messages",
+    "startChat": "Start a conversation",
+    "selectChat": "Select a chat",
+    "searchConversations": "Search conversations...",
+    "deleteConversation": "Delete conversation?",
+    "deleteConversationText": "Are you sure you want to delete this conversation? All messages will be permanently removed."
+  },
+  "myCollection": {
+    "title": "My Collection",
+    "addItem": "Add Item",
+    "noItems": "You have no items yet.",
+    "startCollection": "Start your collection now!",
+    "chooseSport": "Choose Sport",
+    "chooseProduct": "Choose Product"
+  },
+  "admin": {
+    "title": "Admin Panel",
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "pending": "Pending",
+    "settings": "Settings",
+    "systemUpdates": "System Updates",
+    "openChangelog": "Open Changelog",
+    "manageUsers": "Manage Users",
+    "backToPanel": "Back to Panel",
+    "approve": "Approve",
+    "reject": "Reject",
+    "manageSite": "Manage Site",
+    "systemBackup": "System Backup",
+    "backupDesc": "Create a full backup of all data (database + images).",
+    "createBackup": "Download Backup",
+    "backupProgress": "Creating Backup...",
+    "legalContent": "Imprint & Privacy",
+    "userPurchases": "View User Purchases",
+    "userList": "User List & Edit",
+    "userManageDesc": "Manage registered users, block accounts and check purchases.",
+    "siteManageDesc": "Edit legal texts and site content.",
+    "changelogDesc": "Current Version: <1>v{{version}}</1>. View update history."
+  },
+  "card": {
+    "forSale": "For Sale",
+    "notForSale": "Not For Sale",
+    "view": "View"
+  },
+  "badges": {
+    "gameworn": "Game-Worn",
+    "matchworn": "Matchworn",
+    "gameissued": "Game-Issued",
+    "playeredition": "Player Edition",
+    "authentic": "Authentic",
+    "fanjersey": "Fan Jersey",
+    "signed": "Signed",
+    "photomatch": "Photomatch"
+  },
+  "products": {
+    "jersey": "Jersey",
+    "stick": "Stick",
+    "helmet": "Helmet",
+    "skates": "Skates",
+    "pants": "Pants",
+    "bag": "Bag",
+    "goalie_mask": "Goalie Mask",
+    "catcher": "Catcher",
+    "blocker": "Blocker",
+    "leg_pads": "Leg Pads",
+    "pucks": "Pucks",
+    "shorts": "Shorts",
+    "shoes": "Shoes",
+    "training": "Training Gear",
+    "gloves": "Gloves",
+    "football": "Football",
+    "glove": "Glove",
+    "ball": "Ball",
+    "bat": "Bat",
+    "other": "Other"
   },
   "settings": {
     "title": "Settings",
@@ -88,6 +178,7 @@
   "common": {
     "loading": "Loading...",
     "error": "Error",
-    "success": "Success"
+    "success": "Success",
+    "add": "add"
   }
 }

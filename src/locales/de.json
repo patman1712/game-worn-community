@@ -77,7 +77,97 @@
     "linkCopied": "Link kopiert! Du kannst ihn jetzt teilen.",
     "deleteConfirm": "Objekt wirklich löschen?",
     "errorDelete": "Fehler beim Löschen",
-    "errorComment": "Fehler beim Senden des Kommentars"
+    "errorComment": "Fehler beim Senden des Kommentars",
+    "notFound": "Objekt nicht gefunden.",
+    "noPermission": "Du hast keine Berechtigung, dieses Objekt zu bearbeiten."
+  },
+  "stats": {
+    "jerseys": "Trikots",
+    "value": "Gesamtwert",
+    "members": "Mitglieder",
+    "likes": "Likes",
+    "topLeague": "Top Liga"
+  },
+  "chat": {
+    "inbox": "Posteingang",
+    "chatWith": "Chat mit",
+    "typeMessage": "Nachricht schreiben...",
+    "send": "Senden",
+    "noMessages": "Keine Nachrichten",
+    "startChat": "Starte eine Unterhaltung",
+    "selectChat": "Wähle einen Chat aus",
+    "searchConversations": "Suche Konversationen...",
+    "deleteConversation": "Konversation löschen?",
+    "deleteConversationText": "Möchtest du diese Konversation wirklich löschen? Alle Nachrichten werden dauerhaft entfernt."
+  },
+  "myCollection": {
+    "title": "Meine Sammlung",
+    "addItem": "Objekt hinzufügen",
+    "noItems": "Du hast noch keine Objekte.",
+    "startCollection": "Starte jetzt deine Sammlung!",
+    "chooseSport": "Sportart wählen",
+    "chooseProduct": "Produkt wählen"
+  },
+  "admin": {
+    "title": "Admin Panel",
+    "dashboard": "Dashboard",
+    "users": "Benutzer",
+    "pending": "Ausstehend",
+    "settings": "Einstellungen",
+    "systemUpdates": "System Updates",
+    "openChangelog": "Changelog öffnen",
+    "manageUsers": "Benutzer verwalten",
+    "backToPanel": "Zurück zum Panel",
+    "approve": "Freigeben",
+    "reject": "Ablehnen",
+    "manageSite": "Seite Verwalten",
+    "systemBackup": "System Backup",
+    "backupDesc": "Erstelle ein vollständiges Backup aller Daten (Datenbank + Bilder).",
+    "createBackup": "Backup herunterladen",
+    "backupProgress": "Backup wird erstellt...",
+    "legalContent": "Impressum & Datenschutz",
+    "userPurchases": "User Käufe einsehen",
+    "userList": "User Liste & Bearbeiten",
+    "userManageDesc": "Verwalte registrierte User, blockiere Accounts und prüfe Käufe.",
+    "siteManageDesc": "Bearbeite rechtliche Texte und Seiteninhalte.",
+    "changelogDesc": "Aktuelle Version: <1>v{{version}}</1>. Verlauf der Updates einsehen."
+  },
+  "card": {
+    "forSale": "For Sale",
+    "notForSale": "Not For Sale",
+    "view": "Ansehen"
+  },
+  "badges": {
+    "gameworn": "Game-Worn",
+    "matchworn": "Matchworn",
+    "gameissued": "Game-Issued",
+    "playeredition": "Player Edition",
+    "authentic": "Authentic",
+    "fanjersey": "Fantrikot",
+    "signed": "Signiert",
+    "photomatch": "Photomatch"
+  },
+  "products": {
+    "jersey": "Trikot",
+    "stick": "Schläger",
+    "helmet": "Helm",
+    "skates": "Schlittschuhe",
+    "pants": "Hose",
+    "bag": "Tasche",
+    "goalie_mask": "Torwart-Maske",
+    "catcher": "Fanghand",
+    "blocker": "Blockhand",
+    "leg_pads": "Beinschienen",
+    "pucks": "Pucks",
+    "shorts": "Hose",
+    "shoes": "Schuhe",
+    "training": "Trainingsklamotten",
+    "gloves": "Handschuhe",
+    "football": "Football",
+    "glove": "Fanghandschuh",
+    "ball": "Ball",
+    "bat": "Schläger",
+    "other": "Sonstiges"
   },
   "settings": {
     "title": "Einstellungen",
@@ -88,6 +178,7 @@
   "common": {
     "loading": "Lädt...",
     "error": "Fehler",
-    "success": "Erfolg"
+    "success": "Erfolg",
+    "add": "hinzufügen"
   }
 }

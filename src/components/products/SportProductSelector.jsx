@@ -3,10 +3,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
+import { useTranslation } from 'react-i18next';
 
 const SPORTS = [
-  { id: "icehockey", name: "Eishockey" },
-  { id: "soccer", name: "Fussball" },
+  { id: "icehockey" },
+  { id: "soccer" },
   // Temporarily disabled sports (can be re-enabled later):
   // { id: "football", name: "Football" },
   // { id: "basketball", name: "Basketball" },
@@ -16,51 +17,52 @@ const SPORTS = [
 
 const PRODUCTS = {
   icehockey: [
-    { id: "jersey", name: "Trikot" },
-    { id: "stick", name: "Schläger" },
-    { id: "helmet", name: "Spielerhelm" },
-    { id: "skates", name: "Schlittschuhe" },
-    { id: "pants", name: "Hose" },
-    { id: "bag", name: "Tasche" },
-    { id: "goalie_mask", name: "Torwart-Maske" },
-    { id: "catcher", name: "Fanghand" },
-    { id: "blocker", name: "Blockhand" },
-    { id: "leg_pads", name: "Beinschienen" },
-    { id: "pucks", name: "Pucks" },
-    { id: "other", name: "Sonstiges" },
+    { id: "jersey" },
+    { id: "stick" },
+    { id: "helmet" },
+    { id: "skates" },
+    { id: "pants" },
+    { id: "bag" },
+    { id: "goalie_mask" },
+    { id: "catcher" },
+    { id: "blocker" },
+    { id: "leg_pads" },
+    { id: "pucks" },
+    { id: "other" },
   ],
   soccer: [
-    { id: "jersey", name: "Trikot" },
-    { id: "shorts", name: "Hose" },
-    { id: "shoes", name: "Fussballschuhe" },
-    { id: "training", name: "Trainingsklamotten" },
-    { id: "other", name: "Sonstiges" },
+    { id: "jersey" },
+    { id: "shorts" },
+    { id: "shoes" },
+    { id: "training" },
+    { id: "other" },
   ],
   football: [
-    { id: "jersey", name: "Trikot" },
-    { id: "gloves", name: "Handschuhe" },
-    { id: "helmet", name: "Helm" },
-    { id: "football", name: "Football" },
-    { id: "other", name: "Sonstiges" },
+    { id: "jersey" },
+    { id: "gloves" },
+    { id: "helmet" },
+    { id: "football" },
+    { id: "other" },
   ],
   basketball: [
-    { id: "jersey", name: "Trikots" },
-    { id: "shoes", name: "Schuhe" },
-    { id: "other", name: "Sonstiges" },
+    { id: "jersey" },
+    { id: "shoes" },
+    { id: "other" },
   ],
   baseball: [
-    { id: "jersey", name: "Trikot" },
-    { id: "glove", name: "Fanghandschuh" },
-    { id: "ball", name: "Ball" },
-    { id: "bat", name: "Schläger" },
-    { id: "other", name: "Sonstiges" },
+    { id: "jersey" },
+    { id: "glove" },
+    { id: "ball" },
+    { id: "bat" },
+    { id: "other" },
   ],
   other: [
-    { id: "other", name: "Sonstiges" },
+    { id: "other" },
   ],
 };
 
 export default function SportProductSelector({ open, onSelect, onCancel }) {
+  const { t } = useTranslation();
   const [step, setStep] = useState("sport");
   const [selectedSport, setSelectedSport] = useState(null);
 
@@ -92,7 +94,7 @@ export default function SportProductSelector({ open, onSelect, onCancel }) {
       <DialogContent className="bg-slate-900 border-white/10 text-white max-w-md">
         <DialogHeader>
           <DialogTitle className="text-xl">
-            {step === "sport" ? "Sportart wählen" : "Produkt wählen"}
+            {step === "sport" ? t('myCollection.chooseSport') : t('myCollection.chooseProduct')}
           </DialogTitle>
         </DialogHeader>
 
@@ -107,7 +109,7 @@ export default function SportProductSelector({ open, onSelect, onCancel }) {
                 onClick={() => handleSportSelect(sport)}
                 className="w-full p-4 rounded-xl bg-slate-800/50 border border-white/10 hover:border-cyan-500/50 hover:bg-slate-800/80 transition-all flex items-center justify-between group"
               >
-                <span className="font-medium">{sport.name}</span>
+                <span className="font-medium">{t('home.filters.' + sport.id)}</span>
                 <ChevronRight className="w-5 h-5 text-white/40 group-hover:text-cyan-400 transition-colors" />
               </motion.button>
             ))
@@ -118,7 +120,7 @@ export default function SportProductSelector({ open, onSelect, onCancel }) {
                 variant="ghost"
                 className="text-white/50 hover:text-white hover:bg-white/5 mb-2"
               >
-                ← Zurück
+                ← {t('detail.back')}
               </Button>
               {PRODUCTS[selectedSport.id].map((product, i) => (
                 <motion.button
@@ -129,7 +131,7 @@ export default function SportProductSelector({ open, onSelect, onCancel }) {
                   onClick={() => handleProductSelect(product)}
                   className="w-full p-4 rounded-xl bg-slate-800/50 border border-white/10 hover:border-cyan-500/50 hover:bg-slate-800/80 transition-all flex items-center justify-between group"
                 >
-                  <span className="font-medium">{product.name}</span>
+                  <span className="font-medium">{t('products.' + product.id)}</span>
                   <ChevronRight className="w-5 h-5 text-white/40 group-hover:text-cyan-400 transition-colors" />
                 </motion.button>
               ))}

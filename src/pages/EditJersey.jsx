@@ -19,8 +19,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useTranslation } from 'react-i18next';
 
 export default function EditJersey() {
+  const { t } = useTranslation();
   const params = new URLSearchParams(window.location.search);
   const jerseyId = params.get("id");
   const navigate = useNavigate();
@@ -183,7 +185,7 @@ export default function EditJersey() {
   }
 
   if (!jersey) {
-    return <div className="text-center py-20 text-white/40">Trikot nicht gefunden.</div>;
+    return <div className="text-center py-20 text-white/40">{t('detail.notFound')}</div>;
   }
 
   // Check authorization: owner or moderator/admin
@@ -191,7 +193,7 @@ export default function EditJersey() {
   const isModerator = user?.data?.role === 'moderator' || user?.role === 'admin' || user?.data?.role === 'admin';
   
   if (!isOwner && !isModerator) {
-    return <div className="text-center py-20 text-white/40">Du hast keine Berechtigung, dieses Trikot zu bearbeiten.</div>;
+    return <div className="text-center py-20 text-white/40">{t('detail.noPermission')}</div>;
   }
 
   // Use old JerseyUploadForm only for old Jersey entities (icehockey jerseys)
@@ -206,11 +208,11 @@ export default function EditJersey() {
           className="inline-flex items-center gap-2 text-white/40 hover:text-white/70 text-sm mb-8 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          Zurück
+          {t('detail.back')}
         </Link>
 
         <h1 className="text-2xl font-bold text-white mb-8">
-          {isCollectionItem ? 'Objekt bearbeiten' : 'Trikot bearbeiten'}
+          {isCollectionItem ? t('detail.editObject', 'Objekt bearbeiten') : t('detail.editJersey', 'Trikot bearbeiten')}
         </h1>
         
         <div className="flex justify-end mb-4">
@@ -226,14 +228,14 @@ export default function EditJersey() {
                         className="bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20"
                     >
                         <Trash2 className="w-4 h-4 mr-2" />
-                        Löschen
+                        {t('detail.delete')}
                     </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent className="bg-slate-900 border-white/10">
                     <AlertDialogHeader>
-                        <AlertDialogTitle className="text-white">Objekt löschen?</AlertDialogTitle>
+                        <AlertDialogTitle className="text-white">{t('detail.deleteConfirmTitle')}</AlertDialogTitle>
                         <AlertDialogDescription className="text-white/50">
-                            Das Objekt wird unwiderruflich gelöscht.
+                            {t('detail.deleteConfirmText')}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -241,7 +243,7 @@ export default function EditJersey() {
                             onClick={() => setDeleteOpen(false)}
                             className="bg-white/5 text-white border-white/10 hover:bg-white/10"
                         >
-                            Abbrechen
+                            {t('detail.cancel')}
                         </AlertDialogCancel>
                         <AlertDialogAction
                             onClick={(e) => {
@@ -251,7 +253,7 @@ export default function EditJersey() {
                             }}
                             className="bg-red-600 hover:bg-red-700"
                         >
-                            Löschen
+                            {t('detail.delete')}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
