@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from '@/api/apiClient';
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -11,7 +11,7 @@ export default function UserPurchases() {
   const [filter, setFilter] = useState("all"); // "all", "jerseys", "other"
 
   useEffect(() => {
-    base44.auth.me().then(u => {
+    api.auth.me().then(u => {
       if (u?.role !== 'admin' && u?.data?.role !== 'admin') {
         window.location.href = '/';
       }
@@ -21,19 +21,19 @@ export default function UserPurchases() {
 
   const { data: jerseys = [], isLoading: jerseysLoading } = useQuery({
     queryKey: ["allJerseys"],
-    queryFn: () => base44.entities.Jersey.list(),
+    queryFn: () => api.entities.Jersey.list(),
     enabled: !!user,
   });
 
   const { data: collectionItems = [], isLoading: itemsLoading } = useQuery({
     queryKey: ["allCollectionItems"],
-    queryFn: () => base44.entities.CollectionItem.list(),
+    queryFn: () => api.entities.CollectionItem.list(),
     enabled: !!user,
   });
 
   const { data: users = [] } = useQuery({
     queryKey: ["allUsers"],
-    queryFn: () => base44.entities.User.list(),
+    queryFn: () => api.entities.User.list(),
     enabled: !!user,
   });
 

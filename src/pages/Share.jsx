@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from '@/api/apiClient';
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -15,7 +15,7 @@ export default function Share() {
     queryKey: ["shareItem", itemId],
     queryFn: async () => {
       try {
-        const jerseyList = await base44.entities.Jersey.filter({ id: itemId });
+        const jerseyList = await api.entities.Jersey.filter({ id: itemId });
         if (jerseyList.length > 0) {
             const item = jerseyList[0];
             let itemData = item.data || {};
@@ -34,7 +34,7 @@ export default function Share() {
             return merged;
         }
         
-        const itemList = await base44.entities.CollectionItem.filter({ id: itemId });
+        const itemList = await api.entities.CollectionItem.filter({ id: itemId });
         if (itemList.length > 0) {
             const item = itemList[0];
             let itemData = item.data || {};
@@ -63,7 +63,7 @@ export default function Share() {
     queryFn: async () => {
       const ownerEmail = item?.owner_email || item?.created_by;
       if (!ownerEmail) return null;
-      const users = await base44.entities.User.list();
+      const users = await api.entities.User.list();
       const user = users.find(u => u.email === ownerEmail);
       if (user) {
           return {

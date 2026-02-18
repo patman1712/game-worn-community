@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { base44 } from "@/api/base44Client";
+import { api } from '@/api/apiClient';
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   AlertDialog,
@@ -32,7 +32,7 @@ export default function JerseyCard({ jersey: initialJersey, isLiked, onLike, ind
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    base44.auth.me().then(setCurrentUser).catch(() => {});
+    api.auth.me().then(setCurrentUser).catch(() => {});
   }, []);
 
   const isModerator = currentUser?.data?.role === 'moderator' || currentUser?.role === 'admin' || currentUser?.data?.role === 'admin';
@@ -42,7 +42,7 @@ export default function JerseyCard({ jersey: initialJersey, isLiked, onLike, ind
 
   const likeMutation = useMutation({
     mutationFn: async () => {
-      const entity = isCollectionItem ? base44.entities.CollectionItem : base44.entities.Jersey;
+      const entity = isCollectionItem ? api.entities.CollectionItem : api.entities.Jersey;
       if (isLiked) {
         // Unlike
         // We need the like ID. But JerseyCard only gets isLiked boolean from parent.
@@ -61,7 +61,7 @@ export default function JerseyCard({ jersey: initialJersey, isLiked, onLike, ind
   
   const deleteMutation = useMutation({
     mutationFn: async (id) => {
-      const entity = isCollectionItem ? base44.entities.CollectionItem : base44.entities.Jersey;
+      const entity = isCollectionItem ? api.entities.CollectionItem : api.entities.Jersey;
       
       // We don't need to manually delete likes/comments anymore
       // The backend now handles this automatically (server-side cleanup)

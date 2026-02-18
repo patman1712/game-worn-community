@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from '@/api/apiClient';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -31,15 +31,15 @@ export default function EditJersey() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    base44.auth.me().then(u => {
+    api.auth.me().then(u => {
       if (!u) {
-        base44.auth.redirectToLogin(window.location.href);
+        api.auth.redirectToLogin(window.location.href);
       } else if (u.data?.role !== 'moderator' && u.role !== 'admin' && u.data?.role !== 'admin') {
         // Not admin/moderator, will check if user owns the jersey later
       }
       setUser(u);
     }).catch(() => {
-      base44.auth.redirectToLogin(window.location.href);
+      api.auth.redirectToLogin(window.location.href);
     });
   }, []);
 
@@ -47,7 +47,7 @@ export default function EditJersey() {
     queryKey: ["jersey", jerseyId],
     queryFn: async () => {
       // Try Jersey first
-      const jerseyList = await base44.entities.Jersey.filter({ id: jerseyId });
+      const jerseyList = await api.entities.Jersey.filter({ id: jerseyId });
       if (jerseyList.length > 0) {
         const j = jerseyList[0];
         return { 
@@ -60,7 +60,7 @@ export default function EditJersey() {
       }
       
       // Try CollectionItem
-      const collectionList = await base44.entities.CollectionItem.filter({ id: jerseyId });
+      const collectionList = await api.entities.CollectionItem.filter({ id: jerseyId });
       if (collectionList.length > 0) {
         const item = collectionList[0];
         return { 
@@ -94,7 +94,7 @@ export default function EditJersey() {
         
         const title = `${otherData.team || ''} ${product_type || ''} ${otherData.player_name ? '- ' + otherData.player_name : ''}`.trim() || product_type || 'Unbenannt';
 
-        return base44.entities.CollectionItem.update(jerseyId, {
+        return api.entities.CollectionItem.update(jerseyId, {
           sport_type,
           type: product_type,
           image_url,
@@ -107,7 +107,7 @@ export default function EditJersey() {
           data: otherData
         });
       }
-      return base44.entities.Jersey.update(jerseyId, {
+      return api.entities.Jersey.update(jerseyId, {
         team: data.team,
         league: data.league,
         season: data.season,
@@ -138,21 +138,21 @@ export default function EditJersey() {
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
-      const entity = jersey.entityType === 'CollectionItem' ? base44.entities.CollectionItem : base44.entities.Jersey;
+      const entity = jersey.entityType === 'CollectionItem' ? api.entities.CollectionItem : api.entities.Jersey;
       
       // Delete likes
       try {
-        const likes = await base44.entities.JerseyLike.filter({ jersey_id: jerseyId });
+        const likes = await api.entities.JerseyLike.filter({ jersey_id: jerseyId });
         for (const like of likes) {
-            try { await base44.entities.JerseyLike.delete(like.id); } catch (e) {}
+            try { await api.entities.JerseyLike.delete(like.id); } catch (e) {}
         }
       } catch (e) {}
       
       // Delete comments
       try {
-          const comments = await base44.entities.Comment.filter({ jersey_id: jerseyId });
+          const comments = await api.entities.Comment.filter({ jersey_id: jerseyId });
           for (const comment of comments) {
-            try { await base44.entities.Comment.delete(comment.id); } catch (e) {}
+            try { await api.entities.Comment.delete(comment.id); } catch (e) {}
           }
       } catch (e) {}
       

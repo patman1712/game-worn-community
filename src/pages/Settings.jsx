@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/apiClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -46,13 +46,13 @@ export default function Settings() {
   const [changingPassword, setChangingPassword] = useState(false);
 
   useEffect(() => {
-    base44.auth.me().then(async (u) => {
+    api.auth.me().then(async (u) => {
       setUser(u);
       
       // Load from PendingUser if exists
       let accept_messages = u.accept_messages !== false;
       try {
-        const pendingUsers = await base44.entities.PendingUser.filter({ email: u.email });
+        const pendingUsers = await api.entities.PendingUser.filter({ email: u.email });
         if (pendingUsers.length > 0) {
           accept_messages = pendingUsers[0].accept_messages !== false;
         }
@@ -70,21 +70,21 @@ export default function Settings() {
         hidden_sports: u.hidden_sports || [],
       });
     }).catch(() => {
-      base44.auth.redirectToLogin(window.location.href);
+      api.auth.redirectToLogin(window.location.href);
     });
   }, []);
 
   const handleSaveProfile = async () => {
     setIsSaving(true);
-    await base44.auth.updateMe(profile);
-    const updatedUser = await base44.auth.me();
+    await api.auth.updateMe(profile);
+    const updatedUser = await api.auth.me();
     setUser(updatedUser);
     
     // Update PendingUser with accept_messages
     try {
-      const pendingUsers = await base44.entities.PendingUser.filter({ email: user.email });
+      const pendingUsers = await api.entities.PendingUser.filter({ email: user.email });
       if (pendingUsers.length > 0) {
-        await base44.entities.PendingUser.update(pendingUsers[0].id, {
+        await api.entities.PendingUser.update(pendingUsers[0].id, {
           accept_messages: profile.accept_messages,
           display_name: profile.display_name,
         });
@@ -97,15 +97,15 @@ export default function Settings() {
     if (profile.display_name && profile.display_name !== user.display_name) {
       try {
         // Update Jerseys
-        const jerseys = await base44.entities.Jersey.filter({ owner_email: user.email });
+        const jerseys = await api.entities.Jersey.filter({ owner_email: user.email });
         for (const jersey of jerseys) {
-          await base44.entities.Jersey.update(jersey.id, { created_by: profile.display_name });
+          await api.entities.Jersey.update(jersey.id, { created_by: profile.display_name });
         }
         
         // Update CollectionItems
-        const items = await base44.entities.CollectionItem.filter({ owner_email: user.email });
+        const items = await api.entities.CollectionItem.filter({ owner_email: user.email });
         for (const item of items) {
-          await base44.entities.CollectionItem.update(item.id, { created_by: profile.display_name });
+          await api.entities.CollectionItem.update(item.id, { created_by: profile.display_name });
         }
       } catch (error) {
         console.error('Error updating items:', error);
@@ -127,7 +127,7 @@ export default function Settings() {
     setChangingPassword(true);
     try {
       // Base44 API für Passwort-Änderung (simplified - actual API may differ)
-      await base44.auth.updatePassword(passwordData.current, passwordData.new);
+      await api.auth.updatePassword(passwordData.current, passwordData.new);
       alert("Passwort erfolgreich geändert");
       setPasswordData({ current: "", new: "", confirm: "" });
     } catch (error) {
@@ -141,22 +141,22 @@ export default function Settings() {
     setIsDeleting(true);
     
     // Delete all user's jerseys first
-    const jerseys = await base44.entities.Jersey.filter({ owner_email: user.email });
+    const jerseys = await api.entities.Jersey.filter({ owner_email: user.email });
     for (const jersey of jerseys) {
-      await base44.entities.Jersey.delete(jersey.id);
+      await api.entities.Jersey.delete(jersey.id);
     }
     
     // Delete all user's likes
-    const likes = await base44.entities.JerseyLike.filter({ user_email: user.email });
+    const likes = await api.entities.JerseyLike.filter({ user_email: user.email });
     for (const like of likes) {
-      await base44.entities.JerseyLike.delete(like.id);
+      await api.entities.JerseyLike.delete(like.id);
     }
 
     // Delete the user account (note: this will log them out)
-    await base44.entities.User.delete(user.id);
+    await api.entities.User.delete(user.id);
     
     // Logout and redirect
-    base44.auth.logout();
+    api.auth.logout();
   };
 
   if (!user) {
@@ -409,7 +409,7 @@ export default function Settings() {
         <Card className="bg-slate-900/60 border-white/5 mb-4">
           <CardContent className="pt-6">
             <Button
-              onClick={() => base44.auth.logout()}
+              onClick={() => api.auth.logout()}
               variant="outline"
               className="w-full bg-white/5 text-white border-white/10 hover:bg-white/10"
             >

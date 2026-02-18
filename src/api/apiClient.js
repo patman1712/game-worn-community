@@ -30,7 +30,7 @@ const request = async (endpoint, options = {}) => {
   return response.json();
 };
 
-export const base44 = {
+export const api = {
   auth: {
     login: async (email, password) => {
       const data = await request('/auth/login', {

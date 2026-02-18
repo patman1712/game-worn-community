@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from '@/api/apiClient';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -26,7 +26,7 @@ export default function EditSiteContent() {
   const { toast } = useToast();
 
   useEffect(() => {
-    base44.auth.me().then(u => {
+    api.auth.me().then(u => {
       if (!u || (u.role !== 'admin' && u.data?.role !== 'admin')) {
         window.location.href = createPageUrl("Home");
       }
@@ -34,7 +34,7 @@ export default function EditSiteContent() {
       if (u) {
           setTestEmail(u.email);
           // Load Resend settings
-          base44.auth.getResendSettings().then(config => {
+          api.auth.getResendSettings().then(config => {
               if (config && Object.keys(config).length > 0) {
                   setResendConfig(prev => ({...prev, ...config}));
               }
@@ -47,7 +47,7 @@ export default function EditSiteContent() {
 
   const { data: contents, isLoading } = useQuery({
     queryKey: ["allSiteContent"],
-    queryFn: () => base44.entities.SiteContent.list(),
+    queryFn: () => api.entities.SiteContent.list(),
     enabled: !!user,
   });
 
@@ -64,9 +64,9 @@ export default function EditSiteContent() {
     mutationFn: async ({ type, text }) => {
       const existing = contents?.find(c => c.content_type === type);
       if (existing) {
-        return base44.entities.SiteContent.update(existing.id, { content: text });
+        return api.entities.SiteContent.update(existing.id, { content: text });
       } else {
-        return base44.entities.SiteContent.create({ content_type: type, content: text });
+        return api.entities.SiteContent.create({ content_type: type, content: text });
       }
     },
     onSuccess: () => {
@@ -76,7 +76,7 @@ export default function EditSiteContent() {
   });
   
   const saveResendMutation = useMutation({
-    mutationFn: async (config) => base44.auth.saveResendSettings(config),
+    mutationFn: async (config) => api.auth.saveResendSettings(config),
     onSuccess: () => toast({ title: "Gespeichert", description: "Email-Einstellungen aktualisiert." }),
     onError: (err) => toast({ variant: "destructive", title: "Fehler", description: err.message })
   });
@@ -84,7 +84,7 @@ export default function EditSiteContent() {
   const handleTestResend = async () => {
     setIsTesting(true);
     try {
-      const res = await base44.auth.testResendSettings(resendConfig, testEmail);
+      const res = await api.auth.testResendSettings(resendConfig, testEmail);
       toast({ title: "Erfolg", description: res.message });
     } catch (err) {
       toast({ variant: "destructive", title: "Fehler", description: err.message });

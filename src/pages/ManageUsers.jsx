@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from '@/api/apiClient';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,7 +19,7 @@ export default function ManageUsers() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    base44.auth.me().then((u) => {
+    api.auth.me().then((u) => {
       if (!u || (u.role !== 'admin' && u.data?.role !== 'admin')) {
         window.location.href = '/';
       } else {
@@ -31,8 +31,8 @@ export default function ManageUsers() {
   const { data: users = [], isLoading } = useQuery({
     queryKey: ['allUsers'],
     queryFn: async () => {
-      const allUsers = await base44.entities.User.list();
-      const pendingUsers = await base44.entities.PendingUser.list();
+      const allUsers = await api.entities.User.list();
+      const pendingUsers = await api.entities.PendingUser.list();
       
       // Merge PendingUser data with User data for display names if needed
       return allUsers.map(user => {
@@ -59,7 +59,7 @@ export default function ManageUsers() {
   const { data: pendingApprovals = [], isLoading: isLoadingPending } = useQuery({
     queryKey: ['pendingApprovals'],
     queryFn: async () => {
-      return await base44.entities.PendingUser.list();
+      return await api.entities.PendingUser.list();
     },
     enabled: !!user,
   });
@@ -71,7 +71,7 @@ export default function ManageUsers() {
 
   const approveMutation = useMutation({
     mutationFn: async (pendingUserId) => {
-      await base44.auth.approveUser(pendingUserId);
+      await api.auth.approveUser(pendingUserId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['allUsers'] });
@@ -85,7 +85,7 @@ export default function ManageUsers() {
 
   const rejectMutation = useMutation({
     mutationFn: async (pendingUserId) => {
-      await base44.auth.rejectUser(pendingUserId);
+      await api.auth.rejectUser(pendingUserId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['allUsers'] });
@@ -101,7 +101,7 @@ export default function ManageUsers() {
     mutationFn: async ({ action, userId, updates }) => {
       // Direct call to local client logic which now routes to /auth/manage-user
       // The client now returns { data: ... }
-      const response = await base44.functions.invoke('manageUser', { action, userId, updates });
+      const response = await api.functions.invoke('manageUser', { action, userId, updates });
       return response.data;
     },
     onSuccess: () => {
@@ -255,7 +255,7 @@ export default function ManageUsers() {
                         <Button
                           onClick={async () => {
                             // Fetch fresh PendingUser data when opening edit dialog
-                            const pendingUsers = await base44.entities.PendingUser.filter({ email: u.email });
+                            const pendingUsers = await api.entities.PendingUser.filter({ email: u.email });
                             const pendingUser = pendingUsers[0];
                             if (pendingUser) {
                               setEditingUser({

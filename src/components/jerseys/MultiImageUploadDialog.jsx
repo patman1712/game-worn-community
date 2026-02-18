@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Upload, X, CheckCircle2 } from "lucide-react";
-import { base44 } from "@/api/base44Client";
+import { api } from '@/api/apiClient';
 import { useTranslation } from 'react-i18next';
 
 const compressImage = async (file, targetSizeKB = 1000) => {
@@ -122,7 +122,7 @@ export default function MultiImageUploadDialog({ open, onOpenChange, onImagesUpl
         
         while (retries > 0 && !uploaded) {
           try {
-            const { file_url } = await base44.integrations.Core.UploadFile({ file: compressed });
+            const { file_url } = await api.integrations.Core.UploadFile({ file: compressed });
             uploadedUrls.push(file_url);
             uploaded = true;
             setProgress((prev) => ({ ...prev, [i]: 100 }));

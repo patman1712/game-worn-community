@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from '@/api/apiClient';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -26,7 +26,7 @@ export default function JerseyDetail() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    base44.auth.me().then(setCurrentUser).catch(() => {});
+    api.auth.me().then(setCurrentUser).catch(() => {});
   }, []);
 
   // Real-time subscription for jersey updates
@@ -34,13 +34,13 @@ export default function JerseyDetail() {
     if (!jerseyId) return;
     
     // Subscribe to updates for this specific item
-    const unsubscribeJersey = base44.entities.Jersey.subscribe((event) => {
+    const unsubscribeJersey = api.entities.Jersey.subscribe((event) => {
       if (event.type === 'update' && event.id === jerseyId) {
         queryClient.invalidateQueries({ queryKey: ["jersey", jerseyId] });
       }
     });
     
-    const unsubscribeItem = base44.entities.CollectionItem.subscribe((event) => {
+    const unsubscribeItem = api.entities.CollectionItem.subscribe((event) => {
       if (event.type === 'update' && event.id === jerseyId) {
         queryClient.invalidateQueries({ queryKey: ["jersey", jerseyId] });
       }
@@ -56,7 +56,7 @@ export default function JerseyDetail() {
     queryKey: ["jersey", jerseyId],
     queryFn: async () => {
       try {
-        const jerseyList = await base44.entities.Jersey.filter({ id: jerseyId });
+        const jerseyList = await api.entities.Jersey.filter({ id: jerseyId });
         if (jerseyList.length > 0) {
             const item = jerseyList[0];
             // ... merging logic ...
@@ -80,7 +80,7 @@ export default function JerseyDetail() {
             return merged;
         }
         
-        const itemList = await base44.entities.CollectionItem.filter({ id: jerseyId });
+        const itemList = await api.entities.CollectionItem.filter({ id: jerseyId });
         if (itemList.length > 0) {
             const item = itemList[0];
             // ... merging logic ...
@@ -107,13 +107,13 @@ export default function JerseyDetail() {
 
   const { data: likes = [] } = useQuery({
     queryKey: ["myLike", jerseyId, currentUser?.email],
-    queryFn: () => base44.entities.JerseyLike.filter({ jersey_id: jerseyId, user_email: currentUser.email }),
+    queryFn: () => api.entities.JerseyLike.filter({ jersey_id: jerseyId, user_email: currentUser.email }),
     enabled: !!currentUser && !!jerseyId,
   });
 
   const { data: comments = [] } = useQuery({
     queryKey: ["comments", jerseyId],
-    queryFn: () => base44.entities.Comment.filter({ jersey_id: jerseyId }),
+    queryFn: () => api.entities.Comment.filter({ jersey_id: jerseyId }),
     enabled: !!jerseyId && !!currentUser,
   });
 
@@ -122,7 +122,7 @@ export default function JerseyDetail() {
     queryFn: async () => {
       const ownerEmail = jersey?.owner_email || jersey?.created_by;
       if (!ownerEmail) return null;
-      const users = await base44.entities.User.list();
+      const users = await api.entities.User.list();
       const user = users.find(u => u.email === ownerEmail);
       // Ensure we return an object with display_name, potentially from data
       if (user) {
@@ -153,7 +153,7 @@ export default function JerseyDetail() {
   const likeMutation = useMutation({
     mutationFn: async () => {
       // Don't execute if already pending to prevent double clicks
-      const entity = isCollectionItem ? base44.entities.CollectionItem : base44.entities.Jersey;
+      const entity = isCollectionItem ? api.entities.CollectionItem : api.entities.Jersey;
       
       // IMPORTANT: We now rely on the backend trigger to update the count
       // We just create/delete the like, and let the server calculate the true count
@@ -161,10 +161,10 @@ export default function JerseyDetail() {
       if (isLiked) {
         const likeToDelete = likes[0];
         if (likeToDelete) {
-            await base44.entities.JerseyLike.delete(likeToDelete.id);
+            await api.entities.JerseyLike.delete(likeToDelete.id);
         }
       } else {
-        await base44.entities.JerseyLike.create({ jersey_id: jerseyId, user_email: currentUser.email });
+        await api.entities.JerseyLike.create({ jersey_id: jerseyId, user_email: currentUser.email });
       }
 
       // We don't manually update the jersey entity anymore, because the backend trigger does it automatically
@@ -250,7 +250,7 @@ export default function JerseyDetail() {
 
   const commentMutation = useMutation({
     mutationFn: async (text) => {
-      const result = await base44.entities.Comment.create({
+      const result = await api.entities.Comment.create({
         jersey_id: jerseyId,
         user_email: currentUser.email,
         user_name: currentUser.display_name || currentUser.full_name || currentUser.email,
@@ -268,7 +268,7 @@ export default function JerseyDetail() {
   });
 
   const deleteCommentMutation = useMutation({
-    mutationFn: (commentId) => base44.entities.Comment.delete(commentId),
+    mutationFn: (commentId) => api.entities.Comment.delete(commentId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["comments", jerseyId] });
     },
@@ -397,7 +397,7 @@ export default function JerseyDetail() {
                     </Link>
                   )}
                   <Button
-                    onClick={() => currentUser ? likeMutation.mutate() : base44.auth.redirectToLogin()}
+                    onClick={() => currentUser ? likeMutation.mutate() : api.auth.redirectToLogin()}
                     variant="ghost"
                     className={`flex items-center gap-2 ${isLiked ? 'text-red-400 hover:text-red-300' : 'text-white/40 hover:text-white/70'} hover:bg-white/5`}
                   >
@@ -644,20 +644,20 @@ export default function JerseyDetail() {
                   onClick={async () => {
                     if (confirm(t('detail.deleteConfirmText'))) {
                       try {
-                        const entity = isCollectionItem ? base44.entities.CollectionItem : base44.entities.Jersey;
+                        const entity = isCollectionItem ? api.entities.CollectionItem : api.entities.Jersey;
                         // Delete likes - try/catch
                         try {
-                            const likes = await base44.entities.JerseyLike.filter({ jersey_id: jersey.id });
+                            const likes = await api.entities.JerseyLike.filter({ jersey_id: jersey.id });
                             for (const like of likes) {
-                              try { await base44.entities.JerseyLike.delete(like.id); } catch (e) {}
+                              try { await api.entities.JerseyLike.delete(like.id); } catch (e) {}
                             }
                         } catch (e) {}
                         
                         // Delete comments - try/catch
                         try {
-                            const comments = await base44.entities.Comment.filter({ jersey_id: jersey.id });
+                            const comments = await api.entities.Comment.filter({ jersey_id: jersey.id });
                             for (const comment of comments) {
-                              try { await base44.entities.Comment.delete(comment.id); } catch (e) {}
+                              try { await api.entities.Comment.delete(comment.id); } catch (e) {}
                             }
                         } catch (e) {}
                         

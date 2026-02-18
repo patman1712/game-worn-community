@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from '@/api/apiClient';
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -19,14 +19,14 @@ export default function AddJersey() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {
-      base44.auth.redirectToLogin(window.location.href);
+    api.auth.me().then(setUser).catch(() => {
+      api.auth.redirectToLogin(window.location.href);
     });
   }, []);
 
   const createJerseyMutation = useMutation({
     mutationFn: (data) =>
-      base44.entities.Jersey.create({
+      api.entities.Jersey.create({
         team: data.team,
         league: data.league,
         season: data.season,
@@ -71,7 +71,7 @@ export default function AddJersey() {
 
       const title = `${otherData.team || ''} ${product_type || ''} ${otherData.player_name ? '- ' + otherData.player_name : ''}`.trim() || product_type || 'Unbenannt';
 
-      return base44.entities.CollectionItem.create({
+      return api.entities.CollectionItem.create({
         sport_type,
         type: product_type,
         image_url,

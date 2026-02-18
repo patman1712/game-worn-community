@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from '@/api/apiClient';
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -13,25 +13,25 @@ export default function MyPurchases() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    base44.auth.me().then(u => {
+    api.auth.me().then(u => {
       if (!u) {
-        base44.auth.redirectToLogin(window.location.href);
+        api.auth.redirectToLogin(window.location.href);
       }
       setUser(u);
     }).catch(() => {
-      base44.auth.redirectToLogin(window.location.href);
+      api.auth.redirectToLogin(window.location.href);
     });
   }, []);
 
   const { data: jerseys = [], isLoading: jerseysLoading } = useQuery({
     queryKey: ["myPurchases", user?.email],
-    queryFn: () => base44.entities.Jersey.filter({ owner_email: user.email }),
+    queryFn: () => api.entities.Jersey.filter({ owner_email: user.email }),
     enabled: !!user,
   });
 
   const { data: collectionItems = [], isLoading: itemsLoading } = useQuery({
     queryKey: ["myPurchasesItems", user?.email],
-    queryFn: () => base44.entities.CollectionItem.filter({ owner_email: user.email }),
+    queryFn: () => api.entities.CollectionItem.filter({ owner_email: user.email }),
     enabled: !!user,
   });
 

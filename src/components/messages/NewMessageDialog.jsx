@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from '@/api/apiClient';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,7 @@ export default function NewMessageDialog({ currentUser, onMessageSent }) {
   const { data: users = [] } = useQuery({
     queryKey: ['allUsers'],
     queryFn: async () => {
-      const allUsers = await base44.entities.User.list();
+      const allUsers = await api.entities.User.list();
       return allUsers.filter(u => {
         // User accepts messages if flag is explicitly true or undefined (default true)
         // AND checks if 'data' field has it (sometimes stored there)
@@ -42,7 +42,7 @@ export default function NewMessageDialog({ currentUser, onMessageSent }) {
       const [email1, email2] = [currentUser.email, selectedUser].sort();
       const conversationId = `${email1}_${email2}`;
 
-      return base44.entities.Message.create({
+      return api.entities.Message.create({
         sender_email: currentUser.email,
         receiver_email: selectedUser,
         message: message,

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from '@/api/apiClient';
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -181,7 +181,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
     if (!file) return;
     setUploading(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await api.integrations.Core.UploadFile({ file });
       if (isMain) {
         handleChange("image_url", file_url);
       } else {
@@ -203,7 +203,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
   const handleSaveEditedImage = async (file) => {
     try {
       setUploading(true);
-      const { file_url } = await base44.integrations.Core.UploadFile({ 
+      const { file_url } = await api.integrations.Core.UploadFile({ 
         file,
         oldUrl: editingImage // Pass old URL for cleanup
       });
@@ -223,7 +223,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
       
       // Update jersey directly in DB if we have an ID
       if (initialData?.id && Object.keys(updateData).length > 0) {
-        await base44.entities.Jersey.update(initialData.id, updateData);
+        await api.entities.Jersey.update(initialData.id, updateData);
       }
       
       queryClient.invalidateQueries({ queryKey: ["jerseys"] });
@@ -296,7 +296,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
           
           while (retries > 0 && !uploaded) {
             try {
-              const { file_url } = await base44.integrations.Core.UploadFile({ file: compressed });
+              const { file_url } = await api.integrations.Core.UploadFile({ file: compressed });
               uploadedUrls.push(file_url);
               uploaded = true;
             } catch (uploadError) {
@@ -737,7 +737,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
                     const filesToUpload = files.slice(0, maxAllowed);
                     setUploading(true);
                     try {
-                      const uploadPromises = filesToUpload.map(file => base44.integrations.Core.UploadFile({ file }));
+                      const uploadPromises = filesToUpload.map(file => api.integrations.Core.UploadFile({ file }));
                       const results = await Promise.all(uploadPromises);
                       const newUrls = results.map(r => r.file_url);
                       handleChange("loa_certificate_images", [...(form.loa_certificate_images || []), ...newUrls]);
@@ -761,7 +761,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
                       if (!file) return;
                       setUploading(true);
                       try {
-                        const { file_url } = await base44.integrations.Core.UploadFile({ file });
+                        const { file_url } = await api.integrations.Core.UploadFile({ file });
                         handleChange("loa_certificate_images", [...(form.loa_certificate_images || []), file_url]);
                         setCopyrightDialogOpen(true);
                       } catch (error) {
@@ -895,7 +895,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
                 const file = files[0];
                 setUploading(true);
                 try {
-                  const { file_url } = await base44.integrations.Core.UploadFile({ file });
+                  const { file_url } = await api.integrations.Core.UploadFile({ file });
                   handleChange("invoice_url", file_url);
                 } catch (error) {
                   alert(t('form.errorUpload'));
@@ -916,7 +916,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
                   if (!file) return;
                   setUploading(true);
                   try {
-                    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+                    const { file_url } = await api.integrations.Core.UploadFile({ file });
                     handleChange("invoice_url", file_url);
                   } catch (error) {
                     alert(t('form.errorUpload'));

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api/apiClient';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,7 +28,7 @@ export default function ResetPassword() {
     setMessage(null);
 
     try {
-      const response = await base44.auth.resetPassword(token, password);
+      const response = await api.auth.resetPassword(token, password);
       setMessage(response.message);
     } catch (err) {
       setError(err.message || 'Ein Fehler ist aufgetreten');

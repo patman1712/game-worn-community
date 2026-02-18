@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from '@/api/apiClient';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -25,20 +25,20 @@ export default function MyCollection() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {
-      base44.auth.redirectToLogin(window.location.href);
+    api.auth.me().then(setUser).catch(() => {
+      api.auth.redirectToLogin(window.location.href);
     });
   }, []);
 
   const { data: jerseys = [], isLoading: jerseysLoading } = useQuery({
     queryKey: ["myJerseys", user?.email],
-    queryFn: () => base44.entities.Jersey.filter({ owner_email: user.email }, "-created_date"),
+    queryFn: () => api.entities.Jersey.filter({ owner_email: user.email }, "-created_date"),
     enabled: !!user,
   });
 
   const { data: items = [], isLoading: itemsLoading } = useQuery({
     queryKey: ["myItems", user?.email],
-    queryFn: () => base44.entities.CollectionItem.filter({ owner_email: user.email }, "-created_date"),
+    queryFn: () => api.entities.CollectionItem.filter({ owner_email: user.email }, "-created_date"),
     enabled: !!user,
   });
 
@@ -46,14 +46,14 @@ export default function MyCollection() {
   const isLoading = jerseysLoading || itemsLoading;
 
   const deleteJerseyMutation = useMutation({
-    mutationFn: (id) => base44.entities.Jersey.delete(id),
+    mutationFn: (id) => api.entities.Jersey.delete(id),
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["myJerseys"] });
     },
   });
 
   const deleteItemMutation = useMutation({
-    mutationFn: (id) => base44.entities.CollectionItem.delete(id),
+    mutationFn: (id) => api.entities.CollectionItem.delete(id),
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["myItems"] });
     },

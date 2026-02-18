@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from '@/api/apiClient';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Shirt, Loader2, RefreshCw } from "lucide-react";
@@ -24,12 +24,12 @@ export default function Home() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    base44.auth.me().then(setCurrentUser).catch(() => {});
+    api.auth.me().then(setCurrentUser).catch(() => {});
   }, []);
 
   // Real-time subscription for jersey updates
   useEffect(() => {
-    const unsubscribe = base44.entities.Jersey.subscribe((event) => {
+    const unsubscribe = api.entities.Jersey.subscribe((event) => {
       if (event.type === 'update') {
         queryClient.setQueryData(['jerseys'], (old) => {
           if (!Array.isArray(old)) return old;
@@ -42,23 +42,23 @@ export default function Home() {
 
   const { data: allJerseys = [], isLoading, refetch } = useQuery({
     queryKey: ["jerseys"],
-    queryFn: () => base44.entities.Jersey.list("-created_date", 200),
+    queryFn: () => api.entities.Jersey.list("-created_date", 200),
   });
 
   const { data: allCollectionItems = [] } = useQuery({
     queryKey: ["collectionItems"],
-    queryFn: () => base44.entities.CollectionItem.list("-created_date", 200),
+    queryFn: () => api.entities.CollectionItem.list("-created_date", 200),
   });
 
   const { data: allUsers = [] } = useQuery({
     queryKey: ["allUsers"],
-    queryFn: () => base44.entities.User.list(),
+    queryFn: () => api.entities.User.list(),
   });
 
   const { data: userCountData } = useQuery({
     queryKey: ["userCount"],
     queryFn: async () => {
-      const users = await base44.entities.User.list();
+      const users = await api.entities.User.list();
       return { count: users.length };
     },
   });
@@ -81,7 +81,7 @@ export default function Home() {
 
   const { data: likes = [] } = useQuery({
     queryKey: ["likes", currentUser?.email],
-    queryFn: () => currentUser ? base44.entities.JerseyLike.filter({ user_email: currentUser.email }) : [],
+    queryFn: () => currentUser ? api.entities.JerseyLike.filter({ user_email: currentUser.email }) : [],
     enabled: !!currentUser,
   });
 
@@ -133,14 +133,14 @@ export default function Home() {
       // Determine if it's a Jersey or CollectionItem
       const isJersey = jerseys.some(j => j.id === jerseyId);
       const isCollectionItem = collectionItems.some(i => i.id === jerseyId);
-      const entity = isCollectionItem ? base44.entities.CollectionItem : base44.entities.Jersey;
+      const entity = isCollectionItem ? api.entities.CollectionItem : api.entities.Jersey;
       
       if (existing) {
-        await base44.entities.JerseyLike.delete(existing.id);
+        await api.entities.JerseyLike.delete(existing.id);
         const item = [...jerseys, ...collectionItems].find(j => j.id === jerseyId);
         if (item) await entity.update(jerseyId, { likes_count: Math.max(0, (item.likes_count || 0) - 1) });
       } else {
-        await base44.entities.JerseyLike.create({ jersey_id: jerseyId, user_email: currentUser.email });
+        await api.entities.JerseyLike.create({ jersey_id: jerseyId, user_email: currentUser.email });
         const item = [...jerseys, ...collectionItems].find(j => j.id === jerseyId);
         if (item) await entity.update(jerseyId, { likes_count: (item.likes_count || 0) + 1 });
       }
@@ -330,7 +330,7 @@ export default function Home() {
                 jersey={jersey}
                 index={i}
                 isLiked={likedIds.has(jersey.id)}
-                onLike={(id) => currentUser ? likeMutation.mutate(id) : base44.auth.redirectToLogin()}
+                onLike={(id) => currentUser ? likeMutation.mutate(id) : api.auth.redirectToLogin()}
               />
             ))}
           </div>

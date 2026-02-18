@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from '@/api/apiClient';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -169,7 +169,7 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
   const handleSaveEditedImage = async (file) => {
     try {
       setUploading(true);
-      const { file_url } = await base44.integrations.Core.UploadFile({ 
+      const { file_url } = await api.integrations.Core.UploadFile({ 
         file,
         oldUrl: editingImage
       });
@@ -230,7 +230,7 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
         try {
           const file = files[i];
           const compressed = await compressImage(file, 1000);
-          const { file_url } = await base44.integrations.Core.UploadFile({ file: compressed });
+          const { file_url } = await api.integrations.Core.UploadFile({ file: compressed });
           uploadedUrls.push(file_url);
         } catch (fileError) {
           console.error(`Error processing file ${i}:`, fileError);
@@ -591,7 +591,7 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
                     const filesToUpload = files.slice(0, maxAllowed);
                     setUploading(true);
                     try {
-                      const uploadPromises = filesToUpload.map(file => base44.integrations.Core.UploadFile({ file }));
+                      const uploadPromises = filesToUpload.map(file => api.integrations.Core.UploadFile({ file }));
                       const results = await Promise.all(uploadPromises);
                       const newUrls = results.map(r => r.file_url);
                       handleChange("loa_certificate_images", [...(form.loa_certificate_images || []), ...newUrls]);
@@ -615,7 +615,7 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
                       if (!file) return;
                       setUploading(true);
                       try {
-                        const { file_url } = await base44.integrations.Core.UploadFile({ file });
+                        const { file_url } = await api.integrations.Core.UploadFile({ file });
                         handleChange("loa_certificate_images", [...(form.loa_certificate_images || []), file_url]);
                         setCopyrightDialogOpen(true);
                       } catch (error) {
@@ -728,7 +728,7 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
                 const file = files[0];
                 setUploading(true);
                 try {
-                  const { file_url } = await base44.integrations.Core.UploadFile({ file });
+                  const { file_url } = await api.integrations.Core.UploadFile({ file });
                   handleChange("invoice_url", file_url);
                 } catch (error) {
                   alert(t('form.errorUpload'));
@@ -749,7 +749,7 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
                   if (!file) return;
                   setUploading(true);
                   try {
-                    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+                    const { file_url } = await api.integrations.Core.UploadFile({ file });
                     handleChange("invoice_url", file_url);
                   } catch (error) {
                     alert(t('form.errorUpload'));

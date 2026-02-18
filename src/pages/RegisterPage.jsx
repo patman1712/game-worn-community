@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api/apiClient';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,7 +28,7 @@ export default function RegisterPage() {
     }
 
     try {
-      await base44.auth.register(email, password, {
+      await api.auth.register(email, password, {
         display_name: displayName,
         avatar_url: '',
         role: 'user'

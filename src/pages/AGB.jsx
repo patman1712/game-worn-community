@@ -1,5 +1,5 @@
 import React from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from '@/api/apiClient';
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 
@@ -7,7 +7,7 @@ export default function AGB() {
   const { data: content, isLoading } = useQuery({
     queryKey: ["siteContent", "agb"],
     queryFn: async () => {
-      const result = await base44.entities.SiteContent.filter({ content_type: "agb" });
+      const result = await api.entities.SiteContent.filter({ content_type: "agb" });
       return result[0]?.content || "Noch keine AGB vorhanden.";
     },
   });

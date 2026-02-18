@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from '@/api/apiClient';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { MessageCircle, Search, Loader2, User, Users, Trash2 } from "lucide-react";
@@ -30,15 +30,15 @@ export default function Messages() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    base44.auth.me().then(setCurrentUser).catch(() => {});
+    api.auth.me().then(setCurrentUser).catch(() => {});
   }, []);
 
   const { data: messages = [], isLoading } = useQuery({
     queryKey: ["messages", currentUser?.email],
     queryFn: async () => {
       if (!currentUser) return [];
-      const sent = await base44.entities.Message.filter({ sender_email: currentUser.email });
-      const received = await base44.entities.Message.filter({ receiver_email: currentUser.email });
+      const sent = await api.entities.Message.filter({ sender_email: currentUser.email });
+      const received = await api.entities.Message.filter({ receiver_email: currentUser.email });
       return [...sent, ...received];
     },
     enabled: !!currentUser,
@@ -48,7 +48,7 @@ export default function Messages() {
     queryKey: ["all-users-names"],
     queryFn: async () => {
       // Use direct list instead of function
-      return await base44.entities.User.list();
+      return await api.entities.User.list();
     },
     enabled: !!currentUser,
   });
@@ -104,8 +104,8 @@ export default function Messages() {
   const deleteMutation = useMutation({
     mutationFn: async (otherEmail) => {
       const convId = [currentUser.email, otherEmail].sort().join("_");
-      const allMessages = await base44.entities.Message.filter({ conversation_id: convId });
-      await Promise.all(allMessages.map(msg => base44.entities.Message.delete(msg.id)));
+      const allMessages = await api.entities.Message.filter({ conversation_id: convId });
+      await Promise.all(allMessages.map(msg => api.entities.Message.delete(msg.id)));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["messages"] });

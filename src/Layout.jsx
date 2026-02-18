@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { base44 } from "@/api/base44Client";
+import { api } from '@/api/apiClient';
 import { useQuery } from "@tanstack/react-query";
 import { Shirt, Home, Plus, FolderOpen, LogIn, LogOut, ChevronLeft, Settings, MessageCircle, UserCog } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -28,7 +28,7 @@ export default function Layout({ children, currentPageName }) {
   };
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => setUser(null));
+    api.auth.me().then(setUser).catch(() => setUser(null));
   }, []);
 
   const { data: pendingUser, isLoading: isLoadingPendingUser } = useQuery({
@@ -36,7 +36,7 @@ export default function Layout({ children, currentPageName }) {
     queryFn: async () => {
       if (!user?.email) return null;
       try {
-        const pendingUsers = await base44.entities.PendingUser.filter({ email: user.email });
+        const pendingUsers = await api.entities.PendingUser.filter({ email: user.email });
         return pendingUsers[0] || null;
       } catch (e) {
         return null;
@@ -65,7 +65,7 @@ export default function Layout({ children, currentPageName }) {
 
   const { data: unreadMessages = [] } = useQuery({
     queryKey: ["unreadMessages", user?.email],
-    queryFn: () => user ? base44.entities.Message.filter({ receiver_email: user.email, read: false }) : [],
+    queryFn: () => user ? api.entities.Message.filter({ receiver_email: user.email, read: false }) : [],
     enabled: !!user && !isLoadingPendingUser && showMessages,
   });
   
@@ -75,7 +75,7 @@ export default function Layout({ children, currentPageName }) {
     queryFn: async () => {
       if (!user || (user.role !== 'admin' && user.data?.role !== 'admin')) return 0;
       try {
-        const list = await base44.entities.PendingUser.list();
+        const list = await api.entities.PendingUser.list();
         return list.length;
       } catch (e) {
         return 0;
@@ -216,7 +216,7 @@ export default function Layout({ children, currentPageName }) {
                     </Button>
                   </Link>
                   <Button
-                    onClick={() => base44.auth.logout()}
+                    onClick={() => api.auth.logout()}
                     size="sm"
                     variant="ghost"
                     className="text-white/70 hover:text-white hover:bg-white/5 text-xs h-8 px-3"

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from '@/api/apiClient';
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -12,19 +12,19 @@ export default function UserProfile() {
   const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
-    base44.auth.me().then(setCurrentUser).catch(() => {});
+    api.auth.me().then(setCurrentUser).catch(() => {});
   }, []);
 
   const { data: jerseys = [], isLoading } = useQuery({
     queryKey: ["userJerseys", email],
-    queryFn: () => base44.entities.Jersey.filter({ owner_email: email }, "-created_date"),
+    queryFn: () => api.entities.Jersey.filter({ owner_email: email }, "-created_date"),
     enabled: !!email,
   });
 
   const { data: profileUser } = useQuery({
     queryKey: ["profileUser", email],
     queryFn: async () => {
-      const users = await base44.entities.User.filter({ email });
+      const users = await api.entities.User.filter({ email });
       return users[0];
     },
     enabled: !!email,
@@ -32,7 +32,7 @@ export default function UserProfile() {
 
   const { data: likes = [] } = useQuery({
     queryKey: ["likes", currentUser?.email],
-    queryFn: () => currentUser ? base44.entities.JerseyLike.filter({ user_email: currentUser.email }) : [],
+    queryFn: () => currentUser ? api.entities.JerseyLike.filter({ user_email: currentUser.email }) : [],
     enabled: !!currentUser,
   });
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from '@/api/apiClient';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Send, Loader2, User } from "lucide-react";
@@ -18,14 +18,14 @@ export default function Chat() {
   const otherEmail = urlParams.get("email");
 
   useEffect(() => {
-    base44.auth.me().then(setCurrentUser).catch(() => {});
+    api.auth.me().then(setCurrentUser).catch(() => {});
   }, []);
 
   const { data: otherUser } = useQuery({
     queryKey: ["user", otherEmail],
     queryFn: async () => {
       // Try to find user in list first as we might not have a direct endpoint for details by email
-      const users = await base44.entities.User.list();
+      const users = await api.entities.User.list();
       const found = users.find(u => u.email === otherEmail);
       if (found) {
           return {
@@ -43,7 +43,7 @@ export default function Chat() {
     queryFn: async () => {
       if (!currentUser || !otherEmail) return [];
       const convId = [currentUser.email, otherEmail].sort().join("_");
-      const allMessages = await base44.entities.Message.filter({ conversation_id: convId });
+      const allMessages = await api.entities.Message.filter({ conversation_id: convId });
       return allMessages.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
     },
     enabled: !!currentUser && !!otherEmail,
@@ -59,7 +59,7 @@ export default function Chat() {
     );
     
     unreadMessages.forEach(msg => {
-      base44.entities.Message.update(msg.id, { read: true }).then(() => {
+      api.entities.Message.update(msg.id, { read: true }).then(() => {
         queryClient.invalidateQueries({ queryKey: ["unreadMessages"] });
         queryClient.invalidateQueries({ queryKey: ["messages"] });
       });
@@ -69,7 +69,7 @@ export default function Chat() {
   const sendMutation = useMutation({
     mutationFn: async (text) => {
       const convId = [currentUser.email, otherEmail].sort().join("_");
-      return base44.entities.Message.create({
+      return api.entities.Message.create({
         sender_email: currentUser.email,
         receiver_email: otherEmail,
         message: text,

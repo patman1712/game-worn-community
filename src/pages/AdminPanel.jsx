@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { base44 } from "@/api/base44Client";
+import { api } from '@/api/apiClient';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,7 @@ export default function AdminPanel() {
   const queryClient = useQueryClient();
 
   React.useEffect(() => {
-    base44.auth.me().then(u => {
+    api.auth.me().then(u => {
       if (u?.role !== 'admin' && u?.data?.role !== 'admin') {
         window.location.href = '/';
       }
