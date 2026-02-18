@@ -1,6 +1,20 @@
-export const APP_VERSION = "1.2.0";
+export const APP_VERSION = "1.2.1";
 
 export const CHANGELOG = [
+  {
+    version: "1.2.1",
+    date: "2026-02-18",
+    title: "Performance, Sortierung & Cleanup",
+    changes: [
+      { type: "improvement", text: "Komplette Übersetzung aller Bereiche (inkl. Settings, Nachrichten)." },
+      { type: "improvement", text: "Startseite: Performance-Optimierung durch Pagination (25 Items pro Seite) und Lazy Loading der Bilder." },
+      { type: "feature", text: "Startseite: Neue Sortierung 'Älteste zuerst' und verbesserte 'Team A-Z' Sortierung." },
+      { type: "bugfix", text: "Sortierung von Trikots und anderen Objekten korrigiert (werden nun korrekt gemischt)." },
+      { type: "improvement", text: "Formulare: Liga-Eingabe verbessert (kein automatisches Überschreiben bei manueller Eingabe)." },
+      { type: "improvement", text: "Meine Sammlung: Detaillierte Ansicht mit Bearbeiten/Löschen Funktionen." },
+      { type: "improvement", text: "System Cleanup: Entfernung alter Abhängigkeiten und Optimierung der API." }
+    ]
+  },
   {
     version: "1.2.0",
     date: "2026-02-18",
