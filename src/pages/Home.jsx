@@ -2,8 +2,9 @@ import React, { useState, useEffect, useMemo } from "react";
 import { api } from '@/api/apiClient';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Shirt, Loader2, RefreshCw } from "lucide-react";
+import { Shirt, Loader2, RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
 import { useTranslation } from 'react-i18next';
+import { Button } from "@/components/ui/button";
 
 import JerseyCard from "@/components/jerseys/JerseyCard";
 import FilterBar from "@/components/jerseys/FilterBar";
@@ -259,6 +260,25 @@ export default function Home() {
     ? [...visibleJerseys, ...visibleCollectionItems].filter(j => j.sport_type === sport)
     : [...visibleJerseys, ...visibleCollectionItems];
   
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 25;
+
+  // Reset pagination when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, league, sport, productType, sortBy]);
+
+  // Pagination Calculation
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const currentItems = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  const handlePageChange = (newPage) => {
+    if (newPage < 1 || newPage > totalPages) return;
+    setCurrentPage(newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  
   // Calculate total likes including all product types
   const totalLikes = filteredBySport.reduce((s, j) => s + (j.likes_count || 0), 0);
   const collectors = userCountData?.count || 0;
@@ -337,17 +357,45 @@ export default function Home() {
             <p className="text-white/20 text-xs mt-1">Sei der Erste und teile deine Sammlung!</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {filtered.map((jersey, i) => (
-              <JerseyCard
-                key={jersey.id}
-                jersey={jersey}
-                index={i}
-                isLiked={likedIds.has(jersey.id)}
-                onLike={(id) => currentUser ? likeMutation.mutate(id) : api.auth.redirectToLogin()}
-              />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+              {currentItems.map((jersey, i) => (
+                <JerseyCard
+                  key={jersey.id}
+                  jersey={jersey}
+                  index={i}
+                  isLiked={likedIds.has(jersey.id)}
+                  onLike={(id) => currentUser ? likeMutation.mutate(id) : api.auth.redirectToLogin()}
+                />
+              ))}
+            </div>
+
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center gap-4 mt-8 pb-8">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="bg-slate-800/50 border-white/10 text-white hover:bg-white/10 disabled:opacity-30"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+                <span className="text-white/60 text-sm font-medium">
+                  Seite {currentPage} von {totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="bg-slate-800/50 border-white/10 text-white hover:bg-white/10 disabled:opacity-30"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
