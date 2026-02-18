@@ -86,7 +86,9 @@ export default function AdminPanel() {
     document.body.removeChild(a);
   };
 
-  const isLoading = false;
+  const isAdmin = user?.role === 'admin' || user?.data?.role === 'admin';
+  const isOwner = user?.role === 'owner' || user?.data?.role === 'owner';
+  const canManageUsers = isAdmin || isOwner;
 
   if (!user || isLoading) {
     return (
@@ -110,81 +112,87 @@ export default function AdminPanel() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* User Verwaltung */}
-            <Card className="bg-slate-900/60 border-white/5 h-full">
-            <CardHeader>
-                <CardTitle className="text-white text-lg flex items-center gap-2">
-                    <Users className="w-5 h-5 text-cyan-400" /> {t('admin.users')}
-                </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                <p className="text-white/60 text-sm h-10">
-                {t('admin.userManageDesc')}
-                </p>
-                <Link to={createPageUrl("ManageUsers")}>
-                    <Button variant="secondary" className="w-full mb-2 bg-slate-800 hover:bg-slate-700 text-white border border-white/10">
-                        {t('admin.userList')}
-                    </Button>
-                </Link>
-                <Link to={createPageUrl("UserPurchases")}>
-                    <Button variant="outline" className="w-full text-cyan-400 border-cyan-500/30 hover:bg-cyan-500/10">
-                        <Euro className="w-4 h-4 mr-2" />
-                        {t('admin.userPurchases')}
-                    </Button>
-                </Link>
-            </CardContent>
-            </Card>
+            {canManageUsers && (
+              <Card className="bg-slate-900/60 border-white/5 h-full">
+              <CardHeader>
+                  <CardTitle className="text-white text-lg flex items-center gap-2">
+                      <Users className="w-5 h-5 text-cyan-400" /> {t('admin.users')}
+                  </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                  <p className="text-white/60 text-sm h-10">
+                  {t('admin.userManageDesc')}
+                  </p>
+                  <Link to={createPageUrl("ManageUsers")}>
+                      <Button variant="secondary" className="w-full mb-2 bg-slate-800 hover:bg-slate-700 text-white border border-white/10">
+                          {t('admin.userList')}
+                      </Button>
+                  </Link>
+                  <Link to={createPageUrl("UserPurchases")}>
+                      <Button variant="outline" className="w-full text-cyan-400 border-cyan-500/30 hover:bg-cyan-500/10">
+                          <Euro className="w-4 h-4 mr-2" />
+                          {t('admin.userPurchases')}
+                      </Button>
+                  </Link>
+              </CardContent>
+              </Card>
+            )}
 
             {/* Seite Verwalten */}
-            <Card className="bg-slate-900/60 border-white/5 h-full">
-            <CardHeader>
-                <CardTitle className="text-white text-lg flex items-center gap-2">
-                    <Settings className="w-5 h-5 text-purple-400" /> {t('admin.manageSite')}
-                </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                <p className="text-white/60 text-sm h-10">
-                {t('admin.siteManageDesc')}
-                </p>
-                <Link to={createPageUrl("EditSiteContent")}>
-                    <Button variant="secondary" className="w-full bg-slate-800 hover:bg-slate-700 text-white border border-white/10">
-                        <FileText className="w-4 h-4 mr-2" />
-                        {t('admin.legalContent')}
-                    </Button>
-                </Link>
-            </CardContent>
-            </Card>
+            {isAdmin && (
+              <Card className="bg-slate-900/60 border-white/5 h-full">
+              <CardHeader>
+                  <CardTitle className="text-white text-lg flex items-center gap-2">
+                      <Settings className="w-5 h-5 text-purple-400" /> {t('admin.manageSite')}
+                  </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                  <p className="text-white/60 text-sm h-10">
+                  {t('admin.siteManageDesc')}
+                  </p>
+                  <Link to={createPageUrl("EditSiteContent")}>
+                      <Button variant="secondary" className="w-full bg-slate-800 hover:bg-slate-700 text-white border border-white/10">
+                          <FileText className="w-4 h-4 mr-2" />
+                          {t('admin.legalContent')}
+                      </Button>
+                  </Link>
+              </CardContent>
+              </Card>
+            )}
 
             {/* System Backup */}
-            <Card className="bg-slate-900/60 border-white/5 h-full">
-            <CardHeader>
-                <CardTitle className="text-white text-lg flex items-center gap-2">
-                    <Database className="w-5 h-5 text-emerald-400" /> {t('admin.systemBackup')}
-                </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                <p className="text-white/60 text-sm h-10">
-                {t('admin.backupDesc')}
-                </p>
-                {isBackingUp && (
-                    <div className="mb-4 space-y-2">
-                        <Progress value={downloadProgress} className="h-2 bg-slate-800" indicatorClassName="bg-emerald-500" />
-                        <p className="text-emerald-400 text-xs text-center">{downloadProgress}% heruntergeladen</p>
-                    </div>
-                )}
-                <Button 
-                    onClick={handleBackup} 
-                    disabled={isBackingUp}
-                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white mt-auto"
-                >
-                    {isBackingUp ? (
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    ) : (
-                        <Download className="w-4 h-4 mr-2" />
-                    )}
-                    {isBackingUp ? t('admin.backupProgress') : t('admin.createBackup')}
-                </Button>
-            </CardContent>
-            </Card>
+            {isAdmin && (
+              <Card className="bg-slate-900/60 border-white/5 h-full">
+              <CardHeader>
+                  <CardTitle className="text-white text-lg flex items-center gap-2">
+                      <Database className="w-5 h-5 text-emerald-400" /> {t('admin.systemBackup')}
+                  </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                  <p className="text-white/60 text-sm h-10">
+                  {t('admin.backupDesc')}
+                  </p>
+                  {isBackingUp && (
+                      <div className="mb-4 space-y-2">
+                          <Progress value={downloadProgress} className="h-2 bg-slate-800" indicatorClassName="bg-emerald-500" />
+                          <p className="text-emerald-400 text-xs text-center">{downloadProgress}% heruntergeladen</p>
+                      </div>
+                  )}
+                  <Button 
+                      onClick={handleBackup} 
+                      disabled={isBackingUp}
+                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white mt-auto"
+                  >
+                      {isBackingUp ? (
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                          <Download className="w-4 h-4 mr-2" />
+                      )}
+                      {isBackingUp ? t('admin.backupProgress') : t('admin.createBackup')}
+                  </Button>
+              </CardContent>
+              </Card>
+            )}
 
             {/* System Version & Changelog */}
             <Card className="bg-slate-900/60 border-white/5 h-full">
