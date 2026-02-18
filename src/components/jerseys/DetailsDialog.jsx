@@ -3,21 +3,23 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { useTranslation } from 'react-i18next';
 
 const DETAILS_OPTIONS = [
-  "pre Season",
+  "preSeason",
   "Home",
   "Away",
   "Third",
-  "Spezialtrikot",
-  "Warm-Up",
-  "Play Offs",
-  "Set 1",
-  "Set 2",
-  "Set 3"
+  "special",
+  "warmUp",
+  "playoffs",
+  "set1",
+  "set2",
+  "set3"
 ];
 
 export default function DetailsDialog({ open, onOpenChange, selectedDetails, onConfirm }) {
+  const { t } = useTranslation();
   const [tempSelected, setTempSelected] = React.useState(selectedDetails || []);
 
   React.useEffect(() => {
@@ -41,9 +43,9 @@ export default function DetailsDialog({ open, onOpenChange, selectedDetails, onC
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-slate-900 border-white/10 text-white max-w-md max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl">Details auswählen</DialogTitle>
+          <DialogTitle className="text-xl">{t('details.title')}</DialogTitle>
           <DialogDescription className="text-white/50">
-            Wähle beliebig viele Details aus
+            {t('details.subtitle')}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-3 py-4">
@@ -59,7 +61,7 @@ export default function DetailsDialog({ open, onOpenChange, selectedDetails, onC
                 htmlFor={detail}
                 className="text-white/90 cursor-pointer flex-1"
               >
-                {detail}
+                {t('details.' + detail, detail)}
               </Label>
             </div>
           ))}
@@ -69,14 +71,14 @@ export default function DetailsDialog({ open, onOpenChange, selectedDetails, onC
             onClick={handleConfirm}
             className="flex-1 bg-cyan-600 hover:bg-cyan-700 text-white"
           >
-            Bestätigen ({tempSelected.length})
+            {t('details.confirm')} ({tempSelected.length})
           </Button>
           <Button
             onClick={() => onOpenChange(false)}
             variant="ghost"
             className="text-white/50 hover:text-white hover:bg-white/5"
           >
-            Abbrechen
+            {t('detail.cancel')}
           </Button>
         </div>
       </DialogContent>

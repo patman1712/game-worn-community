@@ -145,6 +145,50 @@
     "howToDisplayLOA": "How should the certificate be displayed",
     "addPhotos": "+ Photos"
   },
+  "details": {
+    "title": "Select Details",
+    "subtitle": "Select any number of details",
+    "preSeason": "Pre-Season",
+    "Home": "Home",
+    "Away": "Away",
+    "Third": "Third",
+    "special": "Special Jersey",
+    "warmUp": "Warm-Up",
+    "playoffs": "Playoffs",
+    "set1": "Set 1",
+    "set2": "Set 2",
+    "set3": "Set 3",
+    "confirm": "Confirm"
+  },
+  "upload": {
+    "title": "Upload Multiple Images",
+    "clickOrDrop": "Click or drop images here",
+    "selected": "{{count}} image(s) selected",
+    "addMore": "+ Add more",
+    "uploadButton": "Upload {{count}} image(s)",
+    "close": "Close",
+    "uploading": "Uploading..."
+  },
+  "condition": {
+    "title": "Select Condition",
+    "subtitle": "Select the condition of the jersey",
+    "label": "Condition",
+    "quality": "Quality",
+    "newWithTags": "New with tags",
+    "newWithoutTags": "New without tags",
+    "worn": "Worn",
+    "veryGood": "Very good",
+    "good": "Good",
+    "bad": "Bad",
+    "wornPrefix": "Worn - "
+  },
+  "copyright": {
+    "title": "Copyright Confirmation",
+    "text1": "I confirm that I own all necessary rights to the photos I have uploaded and that their publication does not infringe on the rights of third parties (in particular copyright, personal or trademark rights).",
+    "text2": "I bear sole legal responsibility for the uploaded content and indemnify the operator against all third-party claims.",
+    "checkbox": "I have read the declaration and confirm that I possess the necessary rights.",
+    "confirm": "Confirm"
+  },
   "admin": {
     "title": "Admin Panel",
     "dashboard": "Dashboard",

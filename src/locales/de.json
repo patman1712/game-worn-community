@@ -145,6 +145,50 @@
     "howToDisplayLOA": "Wie soll das Zertifikat angezeigt werden",
     "addPhotos": "+ Fotos"
   },
+  "details": {
+    "title": "Details auswählen",
+    "subtitle": "Wähle beliebig viele Details aus",
+    "preSeason": "Pre-Season",
+    "Home": "Home",
+    "Away": "Away",
+    "Third": "Third",
+    "special": "Spezialtrikot",
+    "warmUp": "Warm-Up",
+    "playoffs": "Play-Offs",
+    "set1": "Set 1",
+    "set2": "Set 2",
+    "set3": "Set 3",
+    "confirm": "Bestätigen"
+  },
+  "upload": {
+    "title": "Mehrere Bilder hochladen",
+    "clickOrDrop": "Klicke oder ziehe Bilder hier hin",
+    "selected": "{{count}} Bild(er) ausgewählt",
+    "addMore": "+ Weitere hinzufügen",
+    "uploadButton": "{{count}} Bild(er) hochladen",
+    "close": "Schließen",
+    "uploading": "Wird hochgeladen..."
+  },
+  "condition": {
+    "title": "Zustand auswählen",
+    "subtitle": "Wähle den Zustand des Trikots",
+    "label": "Zustand",
+    "quality": "Qualität",
+    "newWithTags": "Neu mit Etikett",
+    "newWithoutTags": "Neu ohne Etikett",
+    "worn": "Getragen",
+    "veryGood": "Sehr gut",
+    "good": "Gut",
+    "bad": "Schlecht",
+    "wornPrefix": "Getragen - "
+  },
+  "copyright": {
+    "title": "Urheberrechtsbestätigung",
+    "text1": "Ich versichere, dass ich sämtliche erforderlichen Rechte an den von mir hochgeladenen Fotos besitze und dass durch deren Veröffentlichung keine Rechte Dritter (insbesondere Urheber-, Persönlichkeits- oder Markenrechte) verletzt werden.",
+    "text2": "Ich trage die alleinige rechtliche Verantwortung für die hochgeladenen Inhalte und stelle den Betreiber von sämtlichen Ansprüchen Dritter frei.",
+    "checkbox": "Ich habe die Erklärung gelesen und bestätige, dass ich die erforderlichen Rechte besitze.",
+    "confirm": "Bestätigen"
+  },
   "admin": {
     "title": "Admin Panel",
     "dashboard": "Dashboard",

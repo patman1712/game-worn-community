@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Upload, X, CheckCircle2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import { useTranslation } from 'react-i18next';
 
 const compressImage = async (file, targetSizeKB = 1000) => {
   return new Promise((resolve, reject) => {
@@ -78,6 +79,7 @@ const compressImage = async (file, targetSizeKB = 1000) => {
 };
 
 export default function MultiImageUploadDialog({ open, onOpenChange, onImagesUploaded }) {
+  const { t } = useTranslation();
   const [files, setFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState({});
@@ -154,7 +156,7 @@ export default function MultiImageUploadDialog({ open, onOpenChange, onImagesUpl
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-slate-900 border-white/10 max-w-lg">
         <DialogHeader>
-          <DialogTitle className="text-white">Mehrere Bilder hochladen</DialogTitle>
+          <DialogTitle className="text-white">{t('upload.title')}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -173,7 +175,7 @@ export default function MultiImageUploadDialog({ open, onOpenChange, onImagesUpl
             <label className="flex flex-col items-center justify-center w-full p-8 rounded-xl border-2 border-dashed border-white/10 hover:border-cyan-500/40 bg-slate-800/50 cursor-pointer transition-colors"
               onClick={() => fileInputRef.current?.click()}>
               <Upload className="w-8 h-8 text-white/30 mb-2" />
-              <span className="text-white/40 text-sm">Klicke oder ziehe Bilder hier hin</span>
+              <span className="text-white/40 text-sm">{t('upload.clickOrDrop')}</span>
             </label>
           )}
 
@@ -181,7 +183,7 @@ export default function MultiImageUploadDialog({ open, onOpenChange, onImagesUpl
           {files.length > 0 && !uploading && (
             <div className="space-y-2">
               <p className="text-white/70 text-sm">
-                {files.length} Bild{files.length !== 1 ? "er" : ""} ausgewählt
+                {t('upload.selected', {count: files.length})}
               </p>
               <div className="max-h-40 overflow-y-auto space-y-1">
                 {files.map((file, i) => (
@@ -202,7 +204,7 @@ export default function MultiImageUploadDialog({ open, onOpenChange, onImagesUpl
                 onClick={() => fileInputRef.current?.click()}
                 className="w-full p-3 rounded-lg border border-dashed border-white/10 hover:border-cyan-500/30 cursor-pointer transition-colors"
               >
-                <span className="text-white/40 text-sm">+ Weitere hinzufügen</span>
+                <span className="text-white/40 text-sm">{t('upload.addMore')}</span>
               </button>
             </div>
           )}
@@ -246,7 +248,7 @@ export default function MultiImageUploadDialog({ open, onOpenChange, onImagesUpl
                 onClick={handleUpload}
                 className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500"
               >
-                {files.length} Bild{files.length !== 1 ? "er" : ""} hochladen
+                {t('upload.uploadButton', {count: files.length})}
               </Button>
             )}
             <Button
@@ -255,7 +257,7 @@ export default function MultiImageUploadDialog({ open, onOpenChange, onImagesUpl
               className="flex-1 text-white/50 hover:text-white hover:bg-white/5"
               disabled={uploading}
             >
-              {uploading ? "Wird hochgeladen..." : "Schließen"}
+              {uploading ? t('upload.uploading') : t('upload.close')}
             </Button>
           </div>
         </div>
