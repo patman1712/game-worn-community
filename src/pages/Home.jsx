@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Shirt, Loader2, RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
 import { useTranslation } from 'react-i18next';
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import JerseyCard from "@/components/jerseys/JerseyCard";
 import FilterBar from "@/components/jerseys/FilterBar";
@@ -371,25 +372,43 @@ export default function Home() {
             </div>
 
             {totalPages > 1 && (
-              <div className="flex justify-center items-center gap-4 mt-8 pb-8">
+              <div className="flex justify-center items-center gap-2 mt-8 pb-8">
                 <Button
                   variant="outline"
                   size="icon"
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className="bg-slate-800/50 border-white/10 text-white hover:bg-white/10 disabled:opacity-30"
+                  className="bg-slate-800/50 border-white/10 text-white hover:bg-white/10 disabled:opacity-30 w-8 h-8"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </Button>
-                <span className="text-white/60 text-sm font-medium">
-                  Seite {currentPage} von {totalPages}
-                </span>
+                
+                <div className="flex items-center gap-2 text-sm text-white/60">
+                  <span className="hidden sm:inline">{t('pagination.page')}</span>
+                  <Select 
+                    value={String(currentPage)} 
+                    onValueChange={(v) => handlePageChange(Number(v))}
+                  >
+                    <SelectTrigger className="w-[65px] h-8 bg-slate-800/50 border-white/10 text-white text-xs">
+                      <SelectValue>{currentPage}</SelectValue>
+                    </SelectTrigger>
+                    <SelectContent className="max-h-[200px] bg-slate-900 border-white/10 text-white">
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+                        <SelectItem key={p} value={String(p)} className="text-xs focus:bg-white/10 focus:text-white cursor-pointer">
+                          {p}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <span>{t('pagination.of')} {totalPages}</span>
+                </div>
+
                 <Button
                   variant="outline"
                   size="icon"
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}
-                  className="bg-slate-800/50 border-white/10 text-white hover:bg-white/10 disabled:opacity-30"
+                  className="bg-slate-800/50 border-white/10 text-white hover:bg-white/10 disabled:opacity-30 w-8 h-8"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </Button>

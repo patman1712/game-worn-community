@@ -28,6 +28,7 @@
   - **Optimiert:** "Team A-Z" Sortierung funktioniert nun auch für Objekte ohne explizites Team-Feld (Fallback auf Titel).
   - **UX:** Sortier-Dropdown ist nun immer sichtbar (auch bei "Alle Sportarten").
   - **Daten:** Trikots und sonstige Objekte werden korrekt chronologisch gemischt.
+  - **Performance:** Pagination eingeführt (25 Items pro Seite) mit "Gehe zu Seite" Funktion. Bilder nutzen Lazy Loading für schnelleres Laden.
 - **Formulare:**
   - Fix für Liga-Auswahl: Manuelle Eingabe (z.B. "DEL 2") wird nicht mehr automatisch durch ähnliche Optionen (z.B. "DEL") überschrieben.
 

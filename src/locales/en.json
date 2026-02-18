@@ -276,5 +276,10 @@
     "add": "add",
     "yes": "Yes",
     "no": "No"
+  },
+  "pagination": {
+    "page": "Page",
+    "of": "of",
+    "jumpTo": "Go to"
   }
 }

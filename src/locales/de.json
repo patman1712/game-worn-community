@@ -305,5 +305,10 @@
     "add": "hinzufügen",
     "yes": "Ja",
     "no": "Nein"
+  },
+  "pagination": {
+    "page": "Seite",
+    "of": "von",
+    "jumpTo": "Gehe zu"
   }
 }
