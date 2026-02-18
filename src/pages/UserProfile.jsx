@@ -73,7 +73,12 @@ export default function UserProfile() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const ownerName = profileUser?.display_name || allProducts[0]?.owner_name || email;
+  const ownerName = profileUser?.display_name || 
+                    profileUser?.data?.display_name || 
+                    profileUser?.name || 
+                    allProducts[0]?.owner_name || 
+                    email;
+                    
   const totalLikes = allProducts.reduce((s, j) => s + (j.likes_count || 0), 0);
   const isLoading = jerseysLoading || itemsLoading;
 
