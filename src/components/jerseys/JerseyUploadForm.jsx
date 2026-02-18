@@ -15,6 +15,7 @@ import MultiImageUploadDialog from "./MultiImageUploadDialog";
 import CopyrightDialog from "./CopyrightDialog";
 import DetailsDialog from "./DetailsDialog";
 import ConditionDialog from "./ConditionDialog";
+import { useTranslation } from 'react-i18next';
 
 const compressImage = async (file, targetSizeKB = 1000) => {
   return new Promise((resolve, reject) => {
@@ -124,6 +125,7 @@ const CAPTAIN_PATCH_OPTIONS = ["Keine", "C", "A"];
 const TYPE_OPTIONS = JERSEY_TYPES.map(t => ({ value: t, label: t }));
 
 export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSubmitting }) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const defaultFormData = {
     sport_type: "icehockey",
@@ -187,7 +189,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
       }
     } catch (error) {
       console.error("Error uploading image:", error);
-      alert("Fehler beim Hochladen des Bildes");
+      alert(t('form.errorUpload'));
     } finally {
       setUploading(false);
     }
@@ -231,7 +233,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
       setEditingImageType(null);
     } catch (error) {
       console.error("Error uploading rotated image:", error);
-      alert("Fehler beim Hochladen des Bildes");
+      alert(t('form.errorUpload'));
     } finally {
       setUploading(false);
     }
@@ -368,7 +370,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Images Gallery */}
        <div>
-         <Label className="text-white/70 text-sm mb-2 block">Fotos * (Mindestens 1 erforderlich)</Label>
+         <Label className="text-white/70 text-sm mb-2 block">{t('form.photos')}</Label>
          {form.additional_images && form.additional_images.length > 0 ? (
            <DragDropContext onDragEnd={handleDragEnd}>
              <Droppable droppableId="images" direction="horizontal" type="IMAGE">
@@ -447,7 +449,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
       {/* Info Fields */}
        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
          <div>
-          <Label className="text-white/70 text-sm mb-1.5 block">Team *</Label>
+          <Label className="text-white/70 text-sm mb-1.5 block">{t('form.team')}</Label>
           <Input
             value={form.team}
             onChange={(e) => handleChange("team", e.target.value)}
@@ -457,7 +459,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
           />
         </div>
         <div>
-          <Label className="text-white/70 text-sm mb-1.5 block">Liga</Label>
+          <Label className="text-white/70 text-sm mb-1.5 block">{t('form.league')}</Label>
           {isMobile ? (
             <MobileDrawerSelect
               value={form.league === "Sonstige" || !leagueOptions.includes(form.league) ? "Sonstige" : form.league}
@@ -469,8 +471,8 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
                 }
               }}
               options={LEAGUE_OPTIONS}
-              label="Liga wählen"
-              placeholder="Liga wählen"
+              label={t('form.selectLeague')}
+              placeholder={t('form.selectLeague')}
             />
           ) : (
             <Select value={form.league === "Sonstige" || !leagueOptions.includes(form.league) ? "Sonstige" : form.league} onValueChange={(v) => {
@@ -481,7 +483,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
               }
             }}>
               <SelectTrigger className="bg-slate-800/50 border-white/10 text-white">
-                <SelectValue placeholder="Liga wählen" />
+                <SelectValue placeholder={t('form.selectLeague')} />
               </SelectTrigger>
               <SelectContent>
                 {leagueOptions.map(l => <SelectItem key={l} value={l}>{l}</SelectItem>)}
@@ -492,13 +494,13 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
             <Input
               value={form.league}
               onChange={(e) => handleChange("league", e.target.value)}
-              placeholder="Liga eingeben"
+              placeholder={t('form.enterLeague')}
               className="bg-slate-800/50 border-white/10 text-white placeholder:text-white/20 focus:border-cyan-500/50 mt-2"
             />
           )}
         </div>
         <div>
-          <Label className="text-white/70 text-sm mb-1.5 block">Saison</Label>
+          <Label className="text-white/70 text-sm mb-1.5 block">{t('form.season')}</Label>
           <Input
             value={form.season}
             onChange={(e) => handleChange("season", e.target.value)}
@@ -507,7 +509,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
           />
         </div>
         <div>
-          <Label className="text-white/70 text-sm mb-1.5 block">Spielername</Label>
+          <Label className="text-white/70 text-sm mb-1.5 block">{t('form.playerName')}</Label>
           <Input
             value={form.player_name}
             onChange={(e) => handleChange("player_name", e.target.value)}
@@ -516,7 +518,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
           />
         </div>
         <div>
-          <Label className="text-white/70 text-sm mb-1.5 block">{form.sport_type === 'soccer' ? 'Trikotnummer' : 'Rückennummer'}</Label>
+          <Label className="text-white/70 text-sm mb-1.5 block">{t('form.playerNumber')}</Label>
           <Input
             value={form.player_number}
             onChange={(e) => handleChange("player_number", e.target.value)}
@@ -526,7 +528,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
         </div>
 
         <div>
-          <Label className="text-white/70 text-sm mb-1.5 block">Details</Label>
+          <Label className="text-white/70 text-sm mb-1.5 block">{t('form.details')}</Label>
           <Button
             type="button"
             onClick={() => setDetailsDialogOpen(true)}
@@ -534,8 +536,8 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
             className="w-full bg-slate-800/50 border-white/10 text-white hover:bg-slate-700 hover:text-white justify-start"
           >
             {form.details && form.details.length > 0 
-              ? `${form.details.length} Detail${form.details.length > 1 ? 's' : ''} ausgewählt`
-              : "Details hinzufügen"}
+              ? t('form.detailsSelected', {count: form.details.length})
+              : t('form.addDetails')}
           </Button>
           {form.details && form.details.length > 0 && (
             <div className="flex flex-wrap gap-1 mt-2">
@@ -551,31 +553,31 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
         {/* Condition Field - Only for Authentic or Fan-Jersey */}
         {(form.is_authentic || form.is_fan_jersey) && (
           <div>
-            <Label className="text-white/70 text-sm mb-1.5 block">Zustand</Label>
+            <Label className="text-white/70 text-sm mb-1.5 block">{t('form.condition')}</Label>
             <Button
               type="button"
               onClick={() => setConditionDialogOpen(true)}
               variant="outline"
               className="w-full bg-slate-800/50 border-white/10 text-white hover:bg-slate-700 hover:text-white justify-start"
             >
-              {form.condition || "Zustand hinzufügen"}
+              {form.condition || t('form.addCondition')}
             </Button>
           </div>
         )}
         <div>
-          <Label className="text-white/70 text-sm mb-1.5 block">Captain/Alternate Patch</Label>
+          <Label className="text-white/70 text-sm mb-1.5 block">{t('form.captainPatch')}</Label>
           {isMobile ? (
             <MobileDrawerSelect
               value={form.captain_patch}
               onValueChange={(v) => handleChange("captain_patch", v)}
               options={CAPTAIN_PATCH_OPTIONS.map(c => ({ value: c, label: c }))}
-              label="Patch wählen"
-              placeholder="Patch wählen"
+              label={t('form.selectPatch')}
+              placeholder={t('form.selectPatch')}
             />
           ) : (
             <Select value={form.captain_patch} onValueChange={(v) => handleChange("captain_patch", v)}>
               <SelectTrigger className="bg-slate-800/50 border-white/10 text-white">
-                <SelectValue placeholder="Patch wählen" />
+                <SelectValue placeholder={t('form.selectPatch')} />
               </SelectTrigger>
               <SelectContent>
                 {CAPTAIN_PATCH_OPTIONS.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
@@ -584,7 +586,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
           )}
         </div>
         <div>
-          <Label className="text-white/70 text-sm mb-1.5 block">Marke/Hersteller</Label>
+          <Label className="text-white/70 text-sm mb-1.5 block">{t('form.brand')}</Label>
           <Input
             value={form.brand || ""}
             onChange={(e) => handleChange("brand", e.target.value)}
@@ -593,7 +595,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
           />
         </div>
         <div>
-          <Label className="text-white/70 text-sm mb-1.5 block">Größe</Label>
+          <Label className="text-white/70 text-sm mb-1.5 block">{t('form.size')}</Label>
           <Input
             value={form.size || ""}
             onChange={(e) => handleChange("size", e.target.value)}
@@ -606,7 +608,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
       {/* Toggles */}
       <div className="space-y-3">
         <div>
-          <Label className="text-white/70 text-sm mb-2 block">Trikot-Typ * (Genau einer erforderlich)</Label>
+          <Label className="text-white/70 text-sm mb-2 block">{t('form.jerseyType')}</Label>
           <div className="flex flex-wrap gap-3">
             <Button
               type="button"
@@ -618,7 +620,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
               }}
               className={`${form.is_game_worn ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-slate-600 hover:bg-slate-700 text-white'} transition-colors`}
             >
-              {form.sport_type === 'soccer' ? 'Matchworn' : 'Game-Worn'}
+              {form.sport_type === 'soccer' ? t('badges.matchworn') : t('badges.gameworn')}
             </Button>
             <Button
               type="button"
@@ -630,7 +632,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
               }}
               className={`${form.is_game_issued ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-slate-600 hover:bg-slate-700 text-white'} transition-colors`}
             >
-              {form.sport_type === 'soccer' ? 'Player Edition' : 'Game-Issued'}
+              {form.sport_type === 'soccer' ? t('badges.playeredition') : t('badges.gameissued')}
             </Button>
             {form.sport_type !== 'soccer' && (
               <Button
@@ -643,7 +645,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
                 }}
                 className={`${form.is_authentic ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-slate-600 hover:bg-slate-700 text-white'} transition-colors`}
               >
-                Authentic
+                {t('badges.authentic')}
               </Button>
             )}
             <Button
@@ -656,7 +658,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
               }}
               className={`${form.is_fan_jersey ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-slate-600 hover:bg-slate-700 text-white'} transition-colors`}
             >
-              Fantrikot
+              {t('badges.fanjersey')}
             </Button>
           </div>
         </div>
@@ -666,28 +668,28 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
             onClick={() => handleChange("is_signed", !form.is_signed)}
             className={`${form.is_signed ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'} transition-colors`}
           >
-            Signiert
+            {t('badges.signed')}
           </Button>
           <Button
             type="button"
             onClick={() => handleChange("has_loa", !form.has_loa)}
             className={`${form.has_loa ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'} transition-colors`}
           >
-            Zertifikat (LOA)
+            {t('detail.coa')}
           </Button>
           <Button
             type="button"
             onClick={() => handleChange("is_photomatch", !form.is_photomatch)}
             className={`${form.is_photomatch ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'} transition-colors`}
           >
-            Photomatch
+            {t('badges.photomatch')}
           </Button>
         </div>
 
         {/* Certificate Images Section */}
         {form.has_loa && (
           <div className="space-y-3 p-4 bg-slate-800/30 rounded-lg border border-white/10">
-            <Label className="text-white/70 text-sm block">Zertifikat-Bilder (max. 2)</Label>
+            <Label className="text-white/70 text-sm block">{t('form.loaImages')}</Label>
             <div className="grid grid-cols-2 gap-3">
               {form.loa_certificate_images?.map((url, i) => (
                 <div key={i} className="relative group">
@@ -741,7 +743,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
                       handleChange("loa_certificate_images", [...(form.loa_certificate_images || []), ...newUrls]);
                       setCopyrightDialogOpen(true);
                     } catch (error) {
-                      alert("Fehler beim Hochladen");
+                      alert(t('form.errorUpload'));
                     } finally {
                       setUploading(false);
                     }
@@ -763,7 +765,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
                         handleChange("loa_certificate_images", [...(form.loa_certificate_images || []), file_url]);
                         setCopyrightDialogOpen(true);
                       } catch (error) {
-                        alert("Fehler beim Hochladen");
+                        alert(t('form.errorUpload'));
                       } finally {
                         setUploading(false);
                       }
@@ -774,14 +776,14 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
                   ) : (
                     <>
                       <Upload className="w-5 h-5 text-white/30 mb-1" />
-                      <span className="text-[10px] text-white/30">Klicken oder ziehen</span>
+                      <span className="text-[10px] text-white/30">{t('form.clickOrDrop')}</span>
                     </>
                   )}
                 </div>
               )}
             </div>
             <div className="flex items-center justify-between pt-2">
-              <Label className="text-white/70 text-sm">Wie soll das Zertifikat angezeigt werden</Label>
+              <Label className="text-white/70 text-sm">{t('form.howToDisplayLOA')}</Label>
               <div className="flex gap-2">
                 <Button
                   type="button"
@@ -789,7 +791,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
                   onClick={() => handleChange("loa_certificates_public", false)}
                   className={`${!form.loa_certificates_public ? 'bg-green-600 hover:bg-green-700' : 'bg-slate-600 hover:bg-slate-700'} text-white text-xs`}
                 >
-                  Privat
+                  {t('form.private')}
                 </Button>
                 <Button
                   type="button"
@@ -797,7 +799,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
                   onClick={() => handleChange("loa_certificates_public", true)}
                   className={`${form.loa_certificates_public ? 'bg-green-600 hover:bg-green-700' : 'bg-slate-600 hover:bg-slate-700'} text-white text-xs`}
                 >
-                  Öffentlich
+                  {t('form.public')}
                 </Button>
               </div>
             </div>
@@ -809,14 +811,14 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
             onClick={() => handleChange("is_private", true)}
             className={`${form.is_private ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'} transition-colors`}
           >
-            Privat
+            {t('form.private')}
           </Button>
           <Button
             type="button"
             onClick={() => handleChange("is_private", false)}
             className={`${!form.is_private ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'} transition-colors`}
           >
-            Öffentlich
+            {t('form.public')}
           </Button>
         </div>
         <div className="flex flex-wrap gap-3">
@@ -825,21 +827,21 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
             onClick={() => handleChange("for_sale", true)}
             className={`${form.for_sale ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'} transition-colors`}
           >
-            Zum Verkauf
+            {t('card.forSale')}
           </Button>
           <Button
             type="button"
             onClick={() => handleChange("for_sale", false)}
             className={`${!form.for_sale ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'} transition-colors`}
           >
-            Nicht zum Verkauf
+            {t('card.notForSale')}
           </Button>
         </div>
       </div>
 
       {/* Purchase Price */}
       <div>
-        <Label className="text-white/70 text-sm mb-1.5 block">Kaufpreis (optional, nur für dich sichtbar)</Label>
+        <Label className="text-white/70 text-sm mb-1.5 block">{t('form.purchasePrice')}</Label>
         <Input
           type="number"
           step="0.01"
@@ -853,14 +855,14 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
       {/* Invoice Upload - Only visible if purchase price is set */}
       {form.purchase_price && parseFloat(form.purchase_price) > 0 && (
         <div className="p-4 bg-slate-800/30 rounded-lg border border-white/10">
-          <Label className="text-white/70 text-sm mb-2 block">Rechnung hochladen (optional, nur für dich sichtbar)</Label>
+          <Label className="text-white/70 text-sm mb-2 block">{t('form.uploadInvoice')}</Label>
           {form.invoice_url ? (
             <div className="relative group">
               <div className="p-4 rounded-lg border-2 border-white/10 bg-slate-800/50 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Upload className="w-6 h-6 text-cyan-400" />
                   <div>
-                    <p className="text-white text-sm">Rechnung hochgeladen</p>
+                    <p className="text-white text-sm">{t('form.invoiceUploaded')}</p>
                   </div>
                 </div>
                 <button
@@ -896,7 +898,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
                   const { file_url } = await base44.integrations.Core.UploadFile({ file });
                   handleChange("invoice_url", file_url);
                 } catch (error) {
-                  alert("Fehler beim Hochladen der Rechnung");
+                  alert(t('form.errorUpload'));
                 } finally {
                   setUploading(false);
                 }
@@ -917,7 +919,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
                     const { file_url } = await base44.integrations.Core.UploadFile({ file });
                     handleChange("invoice_url", file_url);
                   } catch (error) {
-                    alert("Fehler beim Hochladen der Rechnung");
+                    alert(t('form.errorUpload'));
                   } finally {
                     setUploading(false);
                   }
@@ -928,7 +930,7 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
               ) : (
                 <Upload className="w-6 h-6 text-white/30 mb-2" />
               )}
-              <span className="text-white/40 text-sm">Rechnung hochladen (Bild oder PDF)</span>
+              <span className="text-white/40 text-sm">{t('form.uploadInvoice')}</span>
             </div>
           )}
         </div>
@@ -936,11 +938,11 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
 
       {/* Description */}
       <div>
-        <Label className="text-white/70 text-sm mb-1.5 block">Beschreibung</Label>
+        <Label className="text-white/70 text-sm mb-1.5 block">{t('form.description')}</Label>
         <Textarea
           value={form.description}
           onChange={(e) => handleChange("description", e.target.value)}
-          placeholder="Geschichte zum Trikot, besondere Details..."
+          placeholder={t('form.descriptionPlaceholder')}
           rows={4}
           className="bg-slate-800/50 border-white/10 text-white placeholder:text-white/20 focus:border-cyan-500/50 resize-none"
         />
@@ -954,11 +956,11 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
            className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white px-8 disabled:opacity-50 disabled:cursor-not-allowed"
          >
           {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-          {initialData ? "Aktualisieren" : "Veröffentlichen"}
+          {initialData ? t('form.update') : t('form.publish')}
         </Button>
         {onCancel && (
           <Button type="button" variant="ghost" onClick={onCancel} className="text-white/50 hover:text-white hover:bg-white/5">
-            Abbrechen
+            {t('detail.cancel')}
           </Button>
         )}
       </div>
@@ -966,13 +968,13 @@ export default function JerseyUploadForm({ onSubmit, onCancel, initialData, isSu
       {!copyrightAgreed && !initialData && form.additional_images?.length > 0 && (
         <p className="text-amber-400 text-xs flex items-center gap-1">
           <AlertCircle className="w-3 h-3" />
-          Bitte bestätige die Urheberrechtsbestätigung, um fortzufahren.
+          {t('form.copyrightWarning')}
         </p>
       )}
       {!copyrightAgreed && initialData && (form.additional_images?.length || 0) > initialImageCount && (
         <p className="text-amber-400 text-xs flex items-center gap-1">
           <AlertCircle className="w-3 h-3" />
-          Bitte bestätige die Urheberrechtsbestätigung für die neuen Bilder.
+          {t('form.copyrightWarning')}
         </p>
       )}
 
