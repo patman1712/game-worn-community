@@ -161,6 +161,20 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
   
   const leagueOptions = LEAGUES_BY_SPORT[sportType] || [];
   const LEAGUE_OPTIONS = leagueOptions.map(l => ({ value: l, label: l }));
+  
+  const [isCustomLeague, setIsCustomLeague] = useState(
+    (initialData?.league && !leagueOptions.includes(initialData.league)) || false
+  );
+
+  const handleLeagueChange = (v) => {
+    if (v === "Sonstige") {
+      setIsCustomLeague(true);
+      handleChange("league", "");
+    } else {
+      setIsCustomLeague(false);
+      handleChange("league", v);
+    }
+  };
 
   const handleChange = (field, value) => {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -361,26 +375,17 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
               <Label className="text-white/70 text-sm mb-1.5 block">{t('form.league')}</Label>
               {isMobile ? (
                 <MobileDrawerSelect
-                  value={form.league === "Sonstige" || !leagueOptions.includes(form.league) ? "Sonstige" : form.league}
-                  onValueChange={(v) => {
-                    if (v === "Sonstige") {
-                      handleChange("league", "");
-                    } else {
-                      handleChange("league", v);
-                    }
-                  }}
+                  value={isCustomLeague ? "Sonstige" : (leagueOptions.includes(form.league) ? form.league : "Sonstige")}
+                  onValueChange={handleLeagueChange}
                   options={LEAGUE_OPTIONS}
                   label={t('form.selectLeague')}
                   placeholder={t('form.selectLeague')}
                 />
               ) : (
-                <Select value={form.league === "Sonstige" || !leagueOptions.includes(form.league) ? "Sonstige" : form.league} onValueChange={(v) => {
-                  if (v === "Sonstige") {
-                    handleChange("league", "");
-                  } else {
-                    handleChange("league", v);
-                  }
-                }}>
+                <Select 
+                  value={isCustomLeague ? "Sonstige" : (leagueOptions.includes(form.league) ? form.league : "Sonstige")} 
+                  onValueChange={handleLeagueChange}
+                >
                   <SelectTrigger className="bg-slate-800/50 border-white/10 text-white">
                     <SelectValue placeholder={t('form.selectLeague')} />
                   </SelectTrigger>
@@ -389,7 +394,7 @@ export default function GenericProductForm({ sportType, productType, onSubmit, o
                   </SelectContent>
                 </Select>
               )}
-              {(form.league === "" || (form.league && form.league !== "" && !leagueOptions.includes(form.league))) && (
+              {isCustomLeague && (
                 <Input
                   value={form.league}
                   onChange={(e) => handleChange("league", e.target.value)}
