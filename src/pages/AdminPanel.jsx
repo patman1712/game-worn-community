@@ -86,8 +86,9 @@ export default function AdminPanel() {
     document.body.removeChild(a);
   };
 
-  const isAdmin = user?.role === 'admin' || user?.data?.role === 'admin';
-  const isOwner = user?.role === 'owner' || user?.data?.role === 'owner';
+  const role = user?.data?.role || user?.role;
+  const isAdmin = role === 'admin';
+  const isOwner = role === 'owner';
   const canManageUsers = isAdmin || isOwner;
 
   if (!user || isLoading) {
