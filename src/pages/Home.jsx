@@ -211,7 +211,8 @@ export default function Home() {
       result = result.filter(j =>
         j.title?.toLowerCase().includes(s) ||
         j.team?.toLowerCase().includes(s) ||
-        j.player_name?.toLowerCase().includes(s)
+        j.player_name?.toLowerCase().includes(s) ||
+        j.season?.toLowerCase().includes(s)
       );
     }
 
