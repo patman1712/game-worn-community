@@ -234,7 +234,11 @@ export default function Home() {
       result.sort((a, b) => (a.team || "").localeCompare(b.team || ""));
     } else {
       // Default: newest first
-      result.sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+      result.sort((a, b) => {
+        const dateA = a.created_date ? new Date(a.created_date).getTime() : 0;
+        const dateB = b.created_date ? new Date(b.created_date).getTime() : 0;
+        return dateB - dateA;
+      });
     }
 
     return result;

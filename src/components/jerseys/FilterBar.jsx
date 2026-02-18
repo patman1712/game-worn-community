@@ -113,7 +113,9 @@ export default function FilterBar({ search, onSearchChange, league, onLeagueChan
           className="pl-10 bg-slate-800/50 border-white/10 text-white placeholder:text-white/25 focus:border-cyan-500/50"
         />
       </div>
-      <div className={`grid ${showExtendedFilters ? 'grid-cols-2' : 'grid-cols-1'} gap-3`}>
+      
+      {/* Filters Grid */}
+      <div className={`grid grid-cols-2 ${showExtendedFilters ? 'md:grid-cols-4' : 'md:grid-cols-2'} gap-3`}>
         {isMobile ? (
           <>
             <MobileDrawerSelect
@@ -126,9 +128,23 @@ export default function FilterBar({ search, onSearchChange, league, onLeagueChan
                 }
               }}
               options={visibleSportOptions.map(s => ({ ...s, label: t(`home.filters.${s.value}`, s.label) }))}
-              label={t('home.filters.all')} // Reuse "Alle" or create new label
+              label={t('home.filters.all')}
               placeholder={t('home.filters.all')}
             />
+            
+            <MobileDrawerSelect
+              value={sortBy}
+              onValueChange={onSortChange}
+              options={[
+                { value: "newest", label: t('home.sort.newest') },
+                { value: "oldest", label: t('home.sort.oldest') },
+                { value: "popular", label: "Beliebteste" },
+                { value: "team", label: "Team A-Z" }
+              ]}
+              label="Sortierung"
+              placeholder="Sortieren"
+            />
+
             {showExtendedFilters && (
               <>
                 <MobileDrawerSelect
@@ -144,17 +160,6 @@ export default function FilterBar({ search, onSearchChange, league, onLeagueChan
                   options={leagueOptions}
                   label="Liga"
                   placeholder="Alle Ligen"
-                />
-                <MobileDrawerSelect
-                  value={sortBy}
-                  onValueChange={onSortChange}
-                  options={[
-                    { value: "newest", label: t('home.sort.newest') },
-                    { value: "oldest", label: t('home.sort.oldest') },
-                    // ... other sort options
-                  ]}
-                  label="Sortierung"
-                  placeholder="Sortieren"
                 />
               </>
             )}
@@ -175,6 +180,20 @@ export default function FilterBar({ search, onSearchChange, league, onLeagueChan
                 {visibleSportOptions.map(s => <SelectItem key={s.value} value={s.value}>{t(`home.filters.${s.value}`, s.label)}</SelectItem>)}
               </SelectContent>
             </Select>
+
+            <Select value={sortBy} onValueChange={onSortChange}>
+              <SelectTrigger className="bg-slate-800/50 border-white/10 text-white">
+                <SlidersHorizontal className="w-3.5 h-3.5 mr-2 text-white/40" />
+                <SelectValue placeholder="Sortieren" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">{t('home.sort.newest')}</SelectItem>
+                <SelectItem value="oldest">{t('home.sort.oldest')}</SelectItem>
+                <SelectItem value="popular">Beliebteste</SelectItem>
+                <SelectItem value="team">Team A-Z</SelectItem>
+              </SelectContent>
+            </Select>
+
             {showExtendedFilters && (
               <>
                 <Select value={productType} onValueChange={onProductTypeChange}>
@@ -191,18 +210,6 @@ export default function FilterBar({ search, onSearchChange, league, onLeagueChan
                   </SelectTrigger>
                   <SelectContent>
                     {leagueOptions.map(l => <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-                <Select value={sortBy} onValueChange={onSortChange}>
-                  <SelectTrigger className="bg-slate-800/50 border-white/10 text-white">
-                    <SlidersHorizontal className="w-3.5 h-3.5 mr-2 text-white/40" />
-                    <SelectValue placeholder="Sortieren" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="newest">{t('home.sort.newest')}</SelectItem>
-                    <SelectItem value="oldest">{t('home.sort.oldest')}</SelectItem>
-                    <SelectItem value="popular">Beliebteste</SelectItem>
-                    <SelectItem value="team">Team A-Z</SelectItem>
                   </SelectContent>
                 </Select>
               </>
