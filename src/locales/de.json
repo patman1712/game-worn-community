@@ -224,6 +224,10 @@
     "userList": "User Liste & Bearbeiten",
     "userManageDesc": "Verwalte registrierte User, blockiere Accounts und prüfe Käufe.",
     "siteManageDesc": "Bearbeite rechtliche Texte und Seiteninhalte.",
+    "imageOptimization": "Bild-Optimierung",
+    "optimizeDesc": "Komprimiere und skaliere alle Bilder neu, um Ladezeiten zu verbessern.",
+    "optimizing": "Optimiere...",
+    "startOptimization": "Optimierung starten",
     "changelogDesc": "Aktuelle Version: <1>v{{version}}</1>. Verlauf der Updates einsehen."
   },
   "card": {

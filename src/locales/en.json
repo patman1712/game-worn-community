@@ -224,6 +224,10 @@
     "userList": "User List & Edit",
     "userManageDesc": "Manage registered users, block accounts and check purchases.",
     "siteManageDesc": "Edit legal texts and site content.",
+    "imageOptimization": "Image Optimization",
+    "optimizeDesc": "Compress and resize all images to improve loading times.",
+    "optimizing": "Optimizing...",
+    "startOptimization": "Start Optimization",
     "changelogDesc": "Current Version: <1>v{{version}}</1>. View update history."
   },
   "card": {

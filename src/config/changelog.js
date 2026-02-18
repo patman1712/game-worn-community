@@ -8,7 +8,8 @@ export const CHANGELOG = [
     changes: [
       { type: "improvement", text: "Serverseitige Bildoptimierung: Neue Bilder werden automatisch komprimiert und ins WebP-Format konvertiert." },
       { type: "improvement", text: "Caching: Browser-Caching für Bilder auf 1 Jahr erhöht, um Ladezeiten bei wiederholten Besuchen drastisch zu verkürzen." },
-      { type: "improvement", text: "Upload-System: Automatische Skalierung auf maximal 1200px Breite/Höhe." }
+      { type: "improvement", text: "Upload-System: Automatische Skalierung auf maximal 1200px Breite/Höhe." },
+      { type: "feature", text: "Admin Panel: Neues Tool zur manuellen Bildoptimierung hinzugefügt (Retroaktive Komprimierung)." }
     ]
   },
   {

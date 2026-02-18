@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { api } from '@/api/apiClient';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, Shield, Users, Euro, Download, Database, FileText, Settings, Clock, Sparkles } from "lucide-react";
+import { Loader2, Shield, Users, Euro, Download, Database, FileText, Settings, Clock, Sparkles, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Progress } from "@/components/ui/progress";
@@ -15,6 +15,7 @@ export default function AdminPanel() {
   const { t } = useTranslation();
   const [user, setUser] = useState(null);
   const [isBackingUp, setIsBackingUp] = useState(false);
+  const [isOptimizing, setIsOptimizing] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
 
   useEffect(() => {
@@ -75,6 +76,35 @@ export default function AdminPanel() {
     } finally {
       setIsBackingUp(false);
       setTimeout(() => setDownloadProgress(0), 1000);
+    }
+  };
+
+  const handleOptimizeImages = async () => {
+    if (!window.confirm("Dies startet die Bildoptimierung für alle vorhandenen Bilder. Das kann einige Minuten dauern. Fortfahren?")) {
+        return;
+    }
+    
+    try {
+      setIsOptimizing(true);
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/admin/optimize-images', {
+          method: 'POST',
+          headers: { 
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json' 
+          }
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) throw new Error(data.error || 'Optimization failed');
+      
+      alert(`Optimierung erfolgreich!\n\nVerarbeitet: ${data.details.processed}\nÜbersprungen: ${data.details.skipped}\nFehler: ${data.details.errors}\nGespart: ${data.details.savedMB} MB`);
+      
+    } catch (error) {
+      alert('Fehler: ' + error.message);
+    } finally {
+      setIsOptimizing(false);
     }
   };
 
@@ -173,6 +203,28 @@ export default function AdminPanel() {
                   >
                       {isBackingUp ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
                       {isBackingUp ? t('admin.backupProgress') : t('admin.createBackup')}
+                  </Button>
+              </CardContent>
+              </Card>
+            )}
+
+            {/* Image Optimization */}
+            {isAdmin && (
+              <Card className="bg-slate-900/60 border-white/5 h-full">
+              <CardHeader>
+                  <CardTitle className="text-white text-lg flex items-center gap-2">
+                      <Zap className="w-5 h-5 text-yellow-400" /> {t('admin.imageOptimization')}
+                  </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                  <p className="text-white/60 text-sm h-10">{t('admin.optimizeDesc')}</p>
+                  <Button 
+                      onClick={handleOptimizeImages} 
+                      disabled={isOptimizing}
+                      className="w-full bg-yellow-600 hover:bg-yellow-700 text-white mt-auto"
+                  >
+                      {isOptimizing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Zap className="w-4 h-4 mr-2" />}
+                      {isOptimizing ? t('admin.optimizing') : t('admin.startOptimization')}
                   </Button>
               </CardContent>
               </Card>

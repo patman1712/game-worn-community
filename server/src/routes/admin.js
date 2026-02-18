@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const path = require('path');
 const archiver = require('archiver');
+const sharp = require('sharp');
 const User = require('../models/User');
 const SystemSetting = require('../models/SystemSetting');
 
@@ -182,6 +183,94 @@ router.get('/backup/full', requireAdmin, async (req, res) => {
       res.status(500).json({ error: error.message });
     }
   }
+});
+
+// Manual Image Optimization Trigger
+router.post('/optimize-images', requireAdmin, async (req, res) => {
+    try {
+        const uploadDir = process.env.UPLOAD_DIR || path.join(__dirname, '../../uploads');
+        
+        if (!fs.existsSync(uploadDir)) {
+            return res.status(404).json({ error: 'Upload directory not found' });
+        }
+
+        const files = fs.readdirSync(uploadDir);
+        let processed = 0;
+        let skipped = 0;
+        let errors = 0;
+        let totalSavedBytes = 0;
+
+        // Process in chunks to avoid blocking event loop too long
+        // But for this simple implementation, we'll just loop
+        for (const file of files) {
+            const filePath = path.join(uploadDir, file);
+            const ext = path.extname(file).toLowerCase();
+            
+            // Skip non-image files
+            if (!['.jpg', '.jpeg', '.png', '.webp'].includes(ext)) {
+                continue;
+            }
+
+            try {
+                const stats = fs.statSync(filePath);
+                const originalSize = stats.size;
+                
+                // Skip files smaller than 300KB unless dimensions are huge
+                // We use sharp metadata which is fast
+                const metadata = await sharp(filePath).metadata();
+                
+                const isTooLargeDimension = metadata.width > 1200 || metadata.height > 1200;
+                const isTooLargeFile = originalSize > 300 * 1024; // > 300KB
+
+                if (!isTooLargeDimension && !isTooLargeFile) {
+                    skipped++;
+                    continue;
+                }
+
+                // Process image
+                let pipeline = sharp(filePath)
+                    .resize(1200, 1200, { fit: 'inside', withoutEnlargement: true });
+
+                if (ext === '.jpg' || ext === '.jpeg') {
+                    pipeline = pipeline.jpeg({ quality: 80, mozjpeg: true });
+                } else if (ext === '.png') {
+                    pipeline = pipeline.png({ quality: 80, compressionLevel: 8 });
+                } else if (ext === '.webp') {
+                    pipeline = pipeline.webp({ quality: 80 });
+                }
+
+                const buffer = await pipeline.toBuffer();
+                
+                // Only overwrite if we actually saved space
+                if (buffer.length < originalSize) {
+                    fs.writeFileSync(filePath, buffer);
+                    processed++;
+                    totalSavedBytes += (originalSize - buffer.length);
+                } else {
+                    skipped++;
+                }
+
+            } catch (err) {
+                console.error(`Error processing ${file}:`, err.message);
+                errors++;
+            }
+        }
+
+        res.json({
+            success: true,
+            message: 'Optimization complete',
+            details: {
+                processed,
+                skipped,
+                errors,
+                savedMB: (totalSavedBytes / (1024 * 1024)).toFixed(2)
+            }
+        });
+
+    } catch (error) {
+        console.error('Optimization failed:', error);
+        res.status(500).json({ error: error.message });
+    }
 });
 
 module.exports = router;
