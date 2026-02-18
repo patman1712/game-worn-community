@@ -17,6 +17,10 @@ export default function ManageUsers() {
   const [searchQuery, setSearchQuery] = useState("");
   const [editingUser, setEditingUser] = useState(null);
   const queryClient = useQueryClient();
+  
+  const currentUserRole = user?.data?.role || user?.role;
+  const isOwner = currentUserRole === 'owner';
+  const isAdmin = currentUserRole === 'admin';
 
   useEffect(() => {
     api.auth.me().then((u) => {
@@ -209,7 +213,10 @@ export default function ManageUsers() {
         </Card>
 
         <div className="space-y-4">
-          {filteredUsers.map((u) => (
+          {filteredUsers.map((u) => {
+            const targetRole = u.data?.role || u.role;
+            const isTargetProtected = isOwner && (targetRole === 'admin' || targetRole === 'owner');
+            return (
             <Card key={u.id} className="bg-slate-900/60 backdrop-blur-sm border-white/5">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
@@ -282,6 +289,7 @@ export default function ManageUsers() {
                           }}
                           size="sm"
                           variant="ghost"
+                          disabled={isTargetProtected}
                           className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
                         >
                           <Edit className="w-4 h-4 mr-2" />
@@ -342,8 +350,12 @@ export default function ManageUsers() {
                                 <SelectContent className="bg-slate-900 border-white/10">
                                   <SelectItem value="user" className="text-white">User</SelectItem>
                                   <SelectItem value="moderator" className="text-white">Moderator</SelectItem>
-                                  <SelectItem value="admin" className="text-white">Admin</SelectItem>
-                                  <SelectItem value="owner" className="text-white">Owner</SelectItem>
+                                  {isAdmin && (
+                                    <>
+                                      <SelectItem value="admin" className="text-white">Admin</SelectItem>
+                                      <SelectItem value="owner" className="text-white">Owner</SelectItem>
+                                    </>
+                                  )}
                                 </SelectContent>
                               </Select>
                             </div>
@@ -409,7 +421,7 @@ export default function ManageUsers() {
                         action: u.data?.is_blocked ? 'unblock' : 'block',
                         userId: u.id
                       })}
-                      disabled={manageMutation.isPending}
+                      disabled={manageMutation.isPending || isTargetProtected}
                       size="sm"
                       variant="ghost"
                       className={u.data?.is_blocked ? "text-green-400 hover:bg-green-500/10" : "text-orange-400 hover:bg-orange-500/10"}
@@ -424,6 +436,7 @@ export default function ManageUsers() {
                         <Button
                           size="sm"
                           variant="ghost"
+                          disabled={isTargetProtected}
                           className="text-red-400 hover:bg-red-500/10"
                         >
                           <Trash2 className="w-4 h-4 mr-2" />
@@ -452,7 +465,7 @@ export default function ManageUsers() {
                 </div>
               </CardContent>
             </Card>
-          ))}
+          ); })}
 
           {filteredUsers.length === 0 && (
             <Card className="bg-slate-900/60 backdrop-blur-sm border-white/5">

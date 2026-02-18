@@ -432,6 +432,26 @@ router.post('/manage-user', async (req, res) => {
     }
     
     const { action, userId, updates } = req.body;
+    
+    // Permission Check for Owners
+    const requesterRole = adminUser.data?.role || adminUser.role;
+    if (requesterRole === 'owner') {
+        // Fetch target user to check their role
+        const targetUser = await User.findByPk(userId);
+        if (targetUser) {
+            const targetRole = targetUser.data?.role || targetUser.role;
+            // Cannot modify Admins or other Owners
+            if (targetRole === 'admin' || targetRole === 'owner') {
+                return res.status(403).json({ error: 'Als Owner darfst du keine Admins oder andere Owner bearbeiten.' });
+            }
+        }
+        
+        // Cannot promote to Admin or Owner
+        if (action === 'update' && updates && updates.role && (updates.role === 'admin' || updates.role === 'owner')) {
+             return res.status(403).json({ error: 'Als Owner darfst du niemanden zum Admin oder Owner ernennen.' });
+        }
+    }
+
     if (action === 'delete') {
       const targetUser = await User.findByPk(userId);
       if (!targetUser) return res.status(404).json({ error: 'User not found' });
