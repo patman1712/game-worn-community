@@ -4,20 +4,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
-import { Plus, Shirt, Trash2, Pencil, Loader2 } from "lucide-react";
+import { Plus, Shirt, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { useTranslation } from 'react-i18next';
+import JerseyCard from "@/components/jerseys/JerseyCard";
 
 export default function MyCollection() {
   const { t } = useTranslation();
@@ -42,37 +32,21 @@ export default function MyCollection() {
     enabled: !!user,
   });
 
+  const { data: likes = [] } = useQuery({
+    queryKey: ["likes", user?.email],
+    queryFn: () => user ? api.entities.JerseyLike.filter({ user_email: user.email }) : [],
+    enabled: !!user,
+  });
+
+  const likedIds = new Set(likes.map(l => l.jersey_id));
   const allProducts = [...jerseys, ...items];
   const isLoading = jerseysLoading || itemsLoading;
-
-  const deleteJerseyMutation = useMutation({
-    mutationFn: (id) => api.entities.Jersey.delete(id),
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["myJerseys"] });
-    },
-  });
-
-  const deleteItemMutation = useMutation({
-    mutationFn: (id) => api.entities.CollectionItem.delete(id),
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["myItems"] });
-    },
-  });
-
-  const handleDelete = (product) => {
-    // Check if it's a Jersey or CollectionItem
-    if (jerseys.some(j => j.id === product.id)) {
-      deleteJerseyMutation.mutate(product.id);
-    } else {
-      deleteItemMutation.mutate(product.id);
-    }
-  };
 
   if (!user) return null;
 
   return (
     <div className="min-h-screen">
-      <div className="max-w-6xl mx-auto px-4 py-10">
+      <div className="max-w-7xl mx-auto px-4 py-10">
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <div>
@@ -109,79 +83,31 @@ export default function MyCollection() {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             <AnimatePresence>
               {allProducts.map((jersey, i) => (
-                <motion.div
+                <JerseyCard
                   key={jersey.id}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ delay: i * 0.05 }}
-                  className="group relative bg-slate-900/60 rounded-xl overflow-hidden border border-white/5 hover:border-cyan-500/20 transition-all"
-                >
-                  <Link to={createPageUrl("JerseyDetail") + `?id=${jersey.id}`}>
-                    <div className="aspect-[4/3] overflow-hidden">
-                      <img
-                        src={jersey.image_url}
-                        alt={jersey.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                    </div>
-                  </Link>
-                  <div className="p-4">
-                    <div className="flex items-start justify-between">
-                      <div className="min-w-0 flex-1">
-                        <h3 className="text-white font-medium text-sm truncate">{jersey.title || jersey.team || "Ohne Titel"}</h3>
-                        <p className="text-white/40 text-xs mt-0.5">{jersey.team}</p>
-                      </div>
-                      <div className="flex items-center gap-2 ml-3">
-                        <Link to={createPageUrl("EditJersey") + `?id=${jersey.id}`}>
-                          <Button variant="ghost" size="sm" className="h-7 px-2 text-white/50 hover:text-cyan-400 hover:bg-cyan-500/10 text-xs">
-                            <Pencil className="w-3.5 h-3.5 mr-1" />
-                            Bearbeiten
-                          </Button>
-                        </Link>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-7 px-2 text-white/50 hover:text-red-400 hover:bg-red-500/10 text-xs">
-                              <Trash2 className="w-3.5 h-3.5 mr-1" />
-                              Löschen
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent className="bg-slate-900 border-white/10">
-                            <AlertDialogHeader>
-                              <AlertDialogTitle className="text-white">Trikot löschen?</AlertDialogTitle>
-                              <AlertDialogDescription className="text-white/50">
-                                Das Trikot wird unwiderruflich gelöscht.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel className="bg-white/5 text-white border-white/10 hover:bg-white/10">Abbrechen</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleDelete(jersey)}
-                                className="bg-red-600 hover:bg-red-700"
-                              >
-                                Löschen
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 mt-2">
-                      {jersey.league && (
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                          {jersey.league}
-                        </span>
-                      )}
-                      <span className="text-white/20 text-xs flex items-center gap-1">
-                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" /></svg>
-                        {jersey.likes_count || 0}
-                      </span>
-                    </div>
-                  </div>
-                </motion.div>
+                  jersey={jersey}
+                  index={i}
+                  isLiked={likedIds.has(jersey.id)}
+                  // onLike is optional, JerseyCard handles UI, but we can provide it for optimistic updates if needed
+                  // For MyCollection, simple re-render on like change via query invalidation (which JerseyCard might not trigger for likes list)
+                  // But JerseyCard only toggles heart visually if onLike is passed? No, let's check JerseyCard.
+                  // JerseyCard calls onLike prop. If we don't pass it, it might not do anything.
+                  // We should pass a simple handler.
+                  onLike={async (id) => {
+                    const existing = likes.find(l => l.jersey_id === id);
+                    if (existing) {
+                      await api.entities.JerseyLike.delete(existing.id);
+                    } else {
+                      await api.entities.JerseyLike.create({ jersey_id: id, user_email: user.email });
+                    }
+                    queryClient.invalidateQueries({ queryKey: ["likes"] });
+                    queryClient.invalidateQueries({ queryKey: ["myJerseys"] });
+                    queryClient.invalidateQueries({ queryKey: ["myItems"] });
+                  }}
+                />
               ))}
             </AnimatePresence>
           </div>

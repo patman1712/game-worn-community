@@ -36,6 +36,8 @@ export default function JerseyCard({ jersey: initialJersey, isLiked, onLike, ind
   }, []);
 
   const isModerator = currentUser?.data?.role === 'moderator' || currentUser?.role === 'admin' || currentUser?.data?.role === 'admin';
+  const isOwner = currentUser?.email === jersey.owner_email || currentUser?.email === jersey.created_by;
+  const canEdit = isModerator || isOwner;
 
   // Fix: Check explicit value, not just existence
   const isCollectionItem = jersey.product_type === 'collection_item';
@@ -128,7 +130,7 @@ export default function JerseyCard({ jersey: initialJersey, isLiked, onLike, ind
 
             {/* Like and Edit buttons */}
             <div className="absolute top-3 right-3 flex gap-2 z-10">
-              {isModerator && (
+              {canEdit && (
                 <>
                   <button 
                     onClick={(e) => {
