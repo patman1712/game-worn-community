@@ -54,7 +54,7 @@ export default function LoginPage() {
           </Link>
           
           <img 
-            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/698e4ef5392203adc7a32dee/7c3640279_logogamewordcummunity.PNG" 
+            src="/logo.png" 
             alt="Game-Worn Community" 
             className="h-52 w-auto object-contain mx-auto mb-8 drop-shadow-[0_4px_20px_rgba(6,182,212,0.4)]"
           />
