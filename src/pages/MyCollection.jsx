@@ -4,15 +4,18 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
-import { Plus, Shirt, Loader2 } from "lucide-react";
+import { Plus, Shirt, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from 'react-i18next';
 import JerseyCard from "@/components/jerseys/JerseyCard";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function MyCollection() {
   const { t } = useTranslation();
   const [user, setUser] = useState(null);
   const queryClient = useQueryClient();
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 25;
 
   useEffect(() => {
     api.auth.me().then(setUser).catch(() => {
@@ -45,6 +48,16 @@ export default function MyCollection() {
     return dateB - dateA;
   });
   const isLoading = jerseysLoading || itemsLoading;
+
+  // Pagination Calculation
+  const totalPages = Math.ceil(allProducts.length / itemsPerPage);
+  const currentItems = allProducts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  const handlePageChange = (newPage) => {
+    if (newPage < 1 || newPage > totalPages) return;
+    setCurrentPage(newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   if (!user) return null;
 
@@ -87,34 +100,75 @@ export default function MyCollection() {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            <AnimatePresence>
-              {allProducts.map((jersey, i) => (
-                <JerseyCard
-                  key={jersey.id}
-                  jersey={jersey}
-                  index={i}
-                  isLiked={likedIds.has(jersey.id)}
-                  // onLike is optional, JerseyCard handles UI, but we can provide it for optimistic updates if needed
-                  // For MyCollection, simple re-render on like change via query invalidation (which JerseyCard might not trigger for likes list)
-                  // But JerseyCard only toggles heart visually if onLike is passed? No, let's check JerseyCard.
-                  // JerseyCard calls onLike prop. If we don't pass it, it might not do anything.
-                  // We should pass a simple handler.
-                  onLike={async (id) => {
-                    const existing = likes.find(l => l.jersey_id === id);
-                    if (existing) {
-                      await api.entities.JerseyLike.delete(existing.id);
-                    } else {
-                      await api.entities.JerseyLike.create({ jersey_id: id, user_email: user.email });
-                    }
-                    queryClient.invalidateQueries({ queryKey: ["likes"] });
-                    queryClient.invalidateQueries({ queryKey: ["myJerseys"] });
-                    queryClient.invalidateQueries({ queryKey: ["myItems"] });
-                  }}
-                />
-              ))}
-            </AnimatePresence>
-          </div>
+          <>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+              <AnimatePresence>
+                {currentItems.map((jersey, i) => (
+                  <JerseyCard
+                    key={jersey.id}
+                    jersey={jersey}
+                    index={i}
+                    isLiked={likedIds.has(jersey.id)}
+                    onLike={async (id) => {
+                      const existing = likes.find(l => l.jersey_id === id);
+                      if (existing) {
+                        await api.entities.JerseyLike.delete(existing.id);
+                      } else {
+                        await api.entities.JerseyLike.create({ jersey_id: id, user_email: user.email });
+                      }
+                      queryClient.invalidateQueries({ queryKey: ["likes"] });
+                      queryClient.invalidateQueries({ queryKey: ["myJerseys"] });
+                      queryClient.invalidateQueries({ queryKey: ["myItems"] });
+                    }}
+                  />
+                ))}
+              </AnimatePresence>
+            </div>
+
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center gap-2 mt-8 pb-8">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="bg-slate-800/50 border-white/10 text-white hover:bg-white/10 disabled:opacity-30 w-8 h-8"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+                
+                <div className="flex items-center gap-2 text-sm text-white/60">
+                  <span className="hidden sm:inline">{t('pagination.page')}</span>
+                  <Select 
+                    value={String(currentPage)} 
+                    onValueChange={(v) => handlePageChange(Number(v))}
+                  >
+                    <SelectTrigger className="w-[65px] h-8 bg-slate-800/50 border-white/10 text-white text-xs">
+                      <SelectValue>{currentPage}</SelectValue>
+                    </SelectTrigger>
+                    <SelectContent className="max-h-[200px] bg-slate-900 border-white/10 text-white">
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+                        <SelectItem key={p} value={String(p)} className="text-xs focus:bg-white/10 focus:text-white cursor-pointer">
+                          {p}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <span>{t('pagination.of')} {totalPages}</span>
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="bg-slate-800/50 border-white/10 text-white hover:bg-white/10 disabled:opacity-30 w-8 h-8"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
