@@ -1,30 +1,33 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { api } from '@/api/apiClient';
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, Shield, Users, Euro, Download, Database, FileText, Settings, Clock, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Progress } from "@/components/ui/progress";
-import { APP_VERSION } from "@/config/changelog";
 import { useTranslation } from 'react-i18next';
+
+// Hardcode version to be safe and avoid import issues
+const SAFE_APP_VERSION = "1.2.1";
 
 export default function AdminPanel() {
   const { t } = useTranslation();
   const [user, setUser] = useState(null);
   const [isBackingUp, setIsBackingUp] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
-  const queryClient = useQueryClient();
 
-  React.useEffect(() => {
+  useEffect(() => {
     api.auth.me().then(u => {
-      const role = u.data?.role || u.role;
+      const role = u?.data?.role || u?.role;
       if (role !== 'admin' && role !== 'owner') {
         window.location.href = '/';
+        return;
       }
       setUser(u);
-    }).catch(() => window.location.href = '/');
+    }).catch(() => {
+        window.location.href = '/';
+    });
   }, []);
 
   const handleBackup = async () => {
@@ -34,14 +37,11 @@ export default function AdminPanel() {
       const token = localStorage.getItem('token');
       
       const response = await fetch('/api/admin/backup/full', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: { 'Authorization': `Bearer ${token}` }
       });
 
       if (!response.ok) throw new Error('Backup failed');
 
-      // Attempt to read stream for progress
       const contentLength = response.headers.get('Content-Length');
       const reader = response.body.getReader();
       const chunks = [];
@@ -49,23 +49,26 @@ export default function AdminPanel() {
 
       while(true) {
         const {done, value} = await reader.read();
-        if (done) {
-          break;
-        }
+        if (done) break;
         chunks.push(value);
         receivedLength += value.length;
-        
         if (contentLength) {
             setDownloadProgress(Math.round((receivedLength / parseInt(contentLength)) * 100));
         } else {
-            // Fake progress if unknown length
             setDownloadProgress((prev) => Math.min(prev + 5, 90));
         }
       }
 
       const blob = new Blob(chunks);
       setDownloadProgress(100);
-      triggerDownload(blob);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `backup-full-${new Date().toISOString().slice(0,10)}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
 
     } catch (error) {
       alert('Backup fehlgeschlagen: ' + error.message);
@@ -75,29 +78,18 @@ export default function AdminPanel() {
     }
   };
 
-  const triggerDownload = (blob) => {
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `backup-full-${new Date().toISOString().slice(0,10)}.zip`;
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(url);
-    document.body.removeChild(a);
-  };
-
-  const role = user?.data?.role || user?.role;
-  const isAdmin = role === 'admin';
-  const isOwner = role === 'owner';
-  const canManageUsers = isAdmin || isOwner;
-
-  if (!user || isLoading) {
+  if (!user) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="w-8 h-8 text-cyan-400 animate-spin" />
       </div>
     );
   }
+
+  const role = user?.data?.role || user?.role;
+  const isAdmin = role === 'admin';
+  const isOwner = role === 'owner';
+  const canManageUsers = isAdmin || isOwner;
 
   return (
     <div className="min-h-screen">
@@ -112,6 +104,7 @@ export default function AdminPanel() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            
             {/* User Verwaltung */}
             {canManageUsers && (
               <Card className="bg-slate-900/60 border-white/5 h-full">
@@ -121,9 +114,7 @@ export default function AdminPanel() {
                   </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                  <p className="text-white/60 text-sm h-10">
-                  {t('admin.userManageDesc')}
-                  </p>
+                  <p className="text-white/60 text-sm h-10">{t('admin.userManageDesc')}</p>
                   <Link to={createPageUrl("ManageUsers")}>
                       <Button variant="secondary" className="w-full mb-2 bg-slate-800 hover:bg-slate-700 text-white border border-white/10">
                           {t('admin.userList')}
@@ -148,9 +139,7 @@ export default function AdminPanel() {
                   </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                  <p className="text-white/60 text-sm h-10">
-                  {t('admin.siteManageDesc')}
-                  </p>
+                  <p className="text-white/60 text-sm h-10">{t('admin.siteManageDesc')}</p>
                   <Link to={createPageUrl("EditSiteContent")}>
                       <Button variant="secondary" className="w-full bg-slate-800 hover:bg-slate-700 text-white border border-white/10">
                           <FileText className="w-4 h-4 mr-2" />
@@ -170,13 +159,11 @@ export default function AdminPanel() {
                   </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                  <p className="text-white/60 text-sm h-10">
-                  {t('admin.backupDesc')}
-                  </p>
+                  <p className="text-white/60 text-sm h-10">{t('admin.backupDesc')}</p>
                   {isBackingUp && (
                       <div className="mb-4 space-y-2">
                           <Progress value={downloadProgress} className="h-2 bg-slate-800" indicatorClassName="bg-emerald-500" />
-                          <p className="text-emerald-400 text-xs text-center">{downloadProgress}% heruntergeladen</p>
+                          <p className="text-emerald-400 text-xs text-center">{downloadProgress}%</p>
                       </div>
                   )}
                   <Button 
@@ -184,18 +171,14 @@ export default function AdminPanel() {
                       disabled={isBackingUp}
                       className="w-full bg-emerald-600 hover:bg-emerald-700 text-white mt-auto"
                   >
-                      {isBackingUp ? (
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      ) : (
-                          <Download className="w-4 h-4 mr-2" />
-                      )}
+                      {isBackingUp ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
                       {isBackingUp ? t('admin.backupProgress') : t('admin.createBackup')}
                   </Button>
               </CardContent>
               </Card>
             )}
 
-            {/* System Version & Changelog */}
+            {/* Updates */}
             <Card className="bg-slate-900/60 border-white/5 h-full">
             <CardHeader>
                 <CardTitle className="text-white text-lg flex items-center gap-2">
@@ -204,9 +187,9 @@ export default function AdminPanel() {
             </CardHeader>
             <CardContent className="space-y-4">
                 <p className="text-white/60 text-sm h-10">
-                    Aktuelle Version: <span className="text-cyan-400 font-mono font-bold">v{APP_VERSION}</span>
-                    <br />
-                    Verlauf der Updates einsehen.
+                  Aktuelle Version: <span className="text-cyan-400 font-mono font-bold">v{SAFE_APP_VERSION}</span>
+                  <br />
+                  Verlauf der Updates einsehen.
                 </p>
                 <Link to={createPageUrl("UpdateLog")}>
                     <Button variant="secondary" className="w-full bg-slate-800 hover:bg-slate-700 text-white border border-white/10">
