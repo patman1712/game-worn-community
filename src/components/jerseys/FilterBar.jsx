@@ -109,7 +109,7 @@ export default function FilterBar({ search, onSearchChange, league, onLeagueChan
         <Input
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
-          placeholder={t('home.searchPlaceholder') + " / " + t('detail.season')}
+          placeholder={t('home.searchPlaceholder')}
           className="pl-10 bg-slate-800/50 border-white/10 text-white placeholder:text-white/25 focus:border-cyan-500/50"
         />
       </div>
