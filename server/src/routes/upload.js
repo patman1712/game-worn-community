@@ -3,6 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const sharp = require('sharp');
 
 // Ensure uploads directory exists
 // Allow override via env var for production volumes
@@ -12,19 +13,12 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, uploadDir);
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  }
-});
+// Use memory storage to allow image processing with sharp
+const storage = multer.memoryStorage();
 
 const upload = multer({ storage: storage });
 
-router.post('/', upload.single('file'), (req, res) => {
+router.post('/', upload.single('file'), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'No file uploaded' });
   }
@@ -44,9 +38,41 @@ router.post('/', upload.single('file'), (req, res) => {
       }
   }
   
-  // Return the URL that the frontend can use to access the file
-  const fileUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
-  res.json({ url: fileUrl });
+  try {
+    // Generate unique filename with .webp extension
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const filename = uniqueSuffix + '.webp';
+    const filepath = path.join(uploadDir, filename);
+
+    // Process image: resize to max 1200px width/height, convert to webp, compress
+    await sharp(req.file.buffer)
+      .resize(1200, 1200, {
+        fit: 'inside',
+        withoutEnlargement: true
+      })
+      .webp({ quality: 80 })
+      .toFile(filepath);
+
+    // Return the URL that the frontend can use to access the file
+    const fileUrl = `${req.protocol}://${req.get('host')}/uploads/${filename}`;
+    res.json({ url: fileUrl });
+
+  } catch (err) {
+    console.error('Image processing failed, falling back to original file:', err);
+    
+    // Fallback: save original file if processing fails (e.g. not an image)
+    try {
+      const originalFilename = Date.now() + '-' + Math.round(Math.random() * 1E9) + path.extname(req.file.originalname);
+      const originalPath = path.join(uploadDir, originalFilename);
+      fs.writeFileSync(originalPath, req.file.buffer);
+      
+      const fileUrl = `${req.protocol}://${req.get('host')}/uploads/${originalFilename}`;
+      res.json({ url: fileUrl });
+    } catch (writeErr) {
+      console.error('Failed to save original file:', writeErr);
+      res.status(500).json({ error: 'Failed to upload file' });
+    }
+  }
 });
 
 module.exports = router;

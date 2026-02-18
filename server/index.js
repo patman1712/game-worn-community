@@ -32,7 +32,10 @@ app.use(express.json());
 
 // Serve uploads - allow override via env var
 const uploadDir = process.env.UPLOAD_DIR || path.join(__dirname, 'uploads');
-app.use('/uploads', express.static(uploadDir));
+app.use('/uploads', express.static(uploadDir, {
+  maxAge: '1y', // Cache images for 1 year
+  immutable: true // Content won't change (filenames are unique)
+}));
 
 // Routes will be added here
 const authRoutes = require('./src/routes/auth');

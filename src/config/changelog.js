@@ -1,6 +1,16 @@
-export const APP_VERSION = "1.2.2";
+export const APP_VERSION = "1.2.3";
 
 export const CHANGELOG = [
+  {
+    version: "1.2.3",
+    date: "2026-02-18",
+    title: "Performance Boost & Image Optimization",
+    changes: [
+      { type: "improvement", text: "Serverseitige Bildoptimierung: Neue Bilder werden automatisch komprimiert und ins WebP-Format konvertiert." },
+      { type: "improvement", text: "Caching: Browser-Caching für Bilder auf 1 Jahr erhöht, um Ladezeiten bei wiederholten Besuchen drastisch zu verkürzen." },
+      { type: "improvement", text: "Upload-System: Automatische Skalierung auf maximal 1200px Breite/Höhe." }
+    ]
+  },
   {
     version: "1.2.2",
     date: "2026-02-18",
