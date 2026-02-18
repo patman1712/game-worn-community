@@ -39,7 +39,11 @@ export default function MyCollection() {
   });
 
   const likedIds = new Set(likes.map(l => l.jersey_id));
-  const allProducts = [...jerseys, ...items];
+  const allProducts = [...jerseys, ...items].sort((a, b) => {
+    const dateA = new Date(a.createdAt || a.created_date || 0).getTime();
+    const dateB = new Date(b.createdAt || b.created_date || 0).getTime();
+    return dateB - dateA;
+  });
   const isLoading = jerseysLoading || itemsLoading;
 
   if (!user) return null;

@@ -42,12 +42,12 @@ export default function Home() {
 
   const { data: allJerseys = [], isLoading, refetch } = useQuery({
     queryKey: ["jerseys"],
-    queryFn: () => api.entities.Jersey.list("-created_date", 200),
+    queryFn: () => api.entities.Jersey.list("-createdAt", 200),
   });
 
   const { data: allCollectionItems = [] } = useQuery({
     queryKey: ["collectionItems"],
-    queryFn: () => api.entities.CollectionItem.list("-created_date", 200),
+    queryFn: () => api.entities.CollectionItem.list("-createdAt", 200),
   });
 
   const { data: allUsers = [] } = useQuery({
@@ -235,8 +235,8 @@ export default function Home() {
     } else {
       // Default: newest first
       result.sort((a, b) => {
-        const dateA = a.created_date ? new Date(a.created_date).getTime() : 0;
-        const dateB = b.created_date ? new Date(b.created_date).getTime() : 0;
+        const dateA = new Date(a.createdAt || a.created_date || 0).getTime();
+        const dateB = new Date(b.createdAt || b.created_date || 0).getTime();
         return dateB - dateA;
       });
     }
