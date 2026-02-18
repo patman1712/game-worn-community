@@ -260,6 +260,8 @@
     "loading": "Loading...",
     "error": "Error",
     "success": "Success",
-    "add": "add"
+    "add": "add",
+    "yes": "Yes",
+    "no": "No"
   }
 }

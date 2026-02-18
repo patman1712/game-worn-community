@@ -260,6 +260,8 @@
     "loading": "Lädt...",
     "error": "Fehler",
     "success": "Erfolg",
-    "add": "hinzufügen"
+    "add": "hinzufügen",
+    "yes": "Ja",
+    "no": "Nein"
   }
 }
