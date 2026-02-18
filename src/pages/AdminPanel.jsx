@@ -9,7 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { useTranslation } from 'react-i18next';
 
 // Hardcode version to be safe and avoid import issues
-const SAFE_APP_VERSION = "1.2.1";
+const SAFE_APP_VERSION = "1.2.2";
 
 export default function AdminPanel() {
   const { t } = useTranslation();

@@ -1,6 +1,18 @@
-export const APP_VERSION = "1.2.1";
+export const APP_VERSION = "1.2.2";
 
 export const CHANGELOG = [
+  {
+    version: "1.2.2",
+    date: "2026-02-18",
+    title: "Owner Rolle & Security Update",
+    changes: [
+      { type: "feature", text: "Neue Rolle 'Owner' eingeführt (Super-Moderator mit Benutzerverwaltung)." },
+      { type: "security", text: "Rechte-Management: Owner dürfen User/Moderatoren verwalten, aber keine Admins bearbeiten." },
+      { type: "improvement", text: "Admin Panel: Zugriff für Owner freigeschaltet (System-Backups & Rechtstexte bleiben Admin-only)." },
+      { type: "improvement", text: "User-Profil: Performance-Optimierung durch Pagination und Bugfixes." },
+      { type: "improvement", text: "Meine Sammlung: Pagination und Lazy Loading implementiert." }
+    ]
+  },
   {
     version: "1.2.1",
     date: "2026-02-18",
