@@ -47,10 +47,10 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
-import AGB from './pages/AGB';
 import AddJersey from './pages/AddJersey';
 import AdminPanel from './pages/AdminPanel';
 import Chat from './pages/Chat';
+import Datenschutz from './pages/Datenschutz';
 import EditJersey from './pages/EditJersey';
 import EditSiteContent from './pages/EditSiteContent';
 import Home from './pages/Home';
@@ -69,10 +69,10 @@ import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "AGB": AGB,
     "AddJersey": AddJersey,
     "AdminPanel": AdminPanel,
     "Chat": Chat,
+    "Datenschutz": Datenschutz,
     "EditJersey": EditJersey,
     "EditSiteContent": EditSiteContent,
     "Home": Home,
