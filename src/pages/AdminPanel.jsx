@@ -8,7 +8,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Progress } from "@/components/ui/progress";
 import { APP_VERSION } from "@/config/changelog";
-import { useTranslation, Trans } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
 export default function AdminPanel() {
   const { t } = useTranslation();
@@ -204,11 +204,9 @@ export default function AdminPanel() {
             </CardHeader>
             <CardContent className="space-y-4">
                 <p className="text-white/60 text-sm h-10">
-                  <Trans i18nKey="admin.changelogDesc" values={{ version: APP_VERSION }}>
                     Aktuelle Version: <span className="text-cyan-400 font-mono font-bold">v{APP_VERSION}</span>
                     <br />
                     Verlauf der Updates einsehen.
-                  </Trans>
                 </p>
                 <Link to={createPageUrl("UpdateLog")}>
                     <Button variant="secondary" className="w-full bg-slate-800 hover:bg-slate-700 text-white border border-white/10">
