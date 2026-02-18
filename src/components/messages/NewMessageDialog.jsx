@@ -8,8 +8,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MessageCircle, Send, Loader2 } from "lucide-react";
+import { useTranslation } from 'react-i18next';
 
 export default function NewMessageDialog({ currentUser, onMessageSent }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState("");
   const [message, setMessage] = useState("");
@@ -62,19 +64,19 @@ export default function NewMessageDialog({ currentUser, onMessageSent }) {
       <DialogTrigger asChild>
         <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500">
           <MessageCircle className="w-4 h-4 mr-2" />
-          Neue Nachricht
+          {t('chat.newMessage')}
         </Button>
       </DialogTrigger>
       <DialogContent className="bg-slate-900 border-white/10 text-white">
         <DialogHeader>
-          <DialogTitle>Neue Nachricht senden</DialogTitle>
+          <DialogTitle>{t('chat.sendNewMessage')}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 mt-4">
           <div>
-            <Label>Empfänger auswählen</Label>
+            <Label>{t('chat.selectRecipient')}</Label>
             <Select value={selectedUser} onValueChange={setSelectedUser}>
               <SelectTrigger className="bg-slate-800 border-white/10 text-white">
-                <SelectValue placeholder="User auswählen..." />
+                <SelectValue placeholder={t('chat.selectUser')} />
               </SelectTrigger>
               <SelectContent>
                 {users.map(u => (
@@ -86,11 +88,11 @@ export default function NewMessageDialog({ currentUser, onMessageSent }) {
             </Select>
           </div>
           <div>
-            <Label>Nachricht</Label>
+            <Label>{t('chat.messageLabel')}</Label>
             <Textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="Schreibe deine Nachricht..."
+              placeholder={t('chat.typeMessage')}
               className="bg-slate-800 border-white/10 text-white placeholder:text-white/30 min-h-[120px]"
             />
           </div>
@@ -104,7 +106,7 @@ export default function NewMessageDialog({ currentUser, onMessageSent }) {
             ) : (
               <>
                 <Send className="w-4 h-4 mr-2" />
-                Senden
+                {t('chat.send')}
               </>
             )}
           </Button>

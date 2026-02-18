@@ -98,7 +98,20 @@
     "selectChat": "Wähle einen Chat aus",
     "searchConversations": "Suche Konversationen...",
     "deleteConversation": "Konversation löschen?",
-    "deleteConversationText": "Möchtest du diese Konversation wirklich löschen? Alle Nachrichten werden dauerhaft entfernt."
+    "deleteConversationText": "Möchtest du diese Konversation wirklich löschen? Alle Nachrichten werden dauerhaft entfernt.",
+    "newMessage": "Neue Nachricht",
+    "sendNewMessage": "Neue Nachricht senden",
+    "selectRecipient": "Empfänger auswählen",
+    "selectUser": "User auswählen...",
+    "messageLabel": "Nachricht"
+  },
+  "purchases": {
+    "title": "Meine Käufe",
+    "backToCollection": "Zurück zu Meine Objekte",
+    "total": "Gesamtsumme",
+    "noPurchases": "Noch keine Käufe erfasst.",
+    "addPriceHint": "Füge bei deinen Objekten einen Kaufpreis hinzu.",
+    "invoice": "Rechnung"
   },
   "myCollection": {
     "title": "Meine Sammlung",
@@ -218,6 +231,41 @@
     "notForSale": "Not For Sale",
     "view": "Ansehen"
   },
+  "settings": {
+    "title": "Einstellungen",
+    "subtitle": "Verwalte dein Profil und Account",
+    "language": "Sprache",
+    "chooseLanguage": "Wähle deine bevorzugte Sprache",
+    "profile": "Profil bearbeiten",
+    "profileDesc": "Bestimme, welche Informationen andere sehen können",
+    "displayName": "Anzeigename (öffentlich)",
+    "displayNameDesc": "Dieser Name wird bei deinen Trikots und Kommentaren angezeigt",
+    "realName": "Richtiger Name (privat)",
+    "onlyVisibleToYou": "Nur für dich sichtbar",
+    "publicVisible": "Öffentlich sichtbar",
+    "location": "Wohnort",
+    "messages": "Nachrichten-System erlauben",
+    "messagesDesc": "Aktiviere das Nachrichten-System um Nachrichten zu senden und zu empfangen",
+    "hideSports": "Sportarten ausblenden",
+    "hideSportsDesc": "Wähle Sportarten, die du nicht sehen möchtest",
+    "saveProfile": "Profil speichern",
+    "password": "Passwort ändern",
+    "currentPassword": "Aktuelles Passwort",
+    "newPassword": "Neues Passwort",
+    "confirmPassword": "Neues Passwort bestätigen",
+    "logout": "Abmelden",
+    "dangerZone": "Gefahrenzone",
+    "dangerDesc": "Diese Aktion kann nicht rückgängig gemacht werden",
+    "deleteAccount": "Account löschen",
+    "deleteConfirmTitle": "Bist du dir absolut sicher?",
+    "deleteConfirmText1": "Diese Aktion kann nicht rückgängig gemacht werden.",
+    "deleteConfirmText2": "Dein Account, alle deine Trikots und Likes werden permanent gelöscht.",
+    "yesDelete": "Ja, Account löschen",
+    "passwordMismatch": "Die Passwörter stimmen nicht überein",
+    "passwordTooShort": "Das Passwort muss mindestens 6 Zeichen lang sein",
+    "passwordChanged": "Passwort erfolgreich geändert",
+    "errorPassword": "Fehler beim Ändern des Passworts"
+  },
   "badges": {
     "gameworn": "Game-Worn",
     "matchworn": "Matchworn",
@@ -249,12 +297,6 @@
     "ball": "Ball",
     "bat": "Schläger",
     "other": "Sonstiges"
-  },
-  "settings": {
-    "title": "Einstellungen",
-    "language": "Sprache",
-    "chooseLanguage": "Wähle deine bevorzugte Sprache",
-    "save": "Speichern"
   },
   "common": {
     "loading": "Lädt...",

@@ -6,8 +6,10 @@ import { createPageUrl } from "@/utils";
 import { ArrowLeft, Loader2, Euro, FileText, Download } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from 'react-i18next';
 
 export default function MyPurchases() {
+  const { t } = useTranslation();
   const [user, setUser] = useState(null);
 
   useEffect(() => {
@@ -58,15 +60,15 @@ export default function MyPurchases() {
           className="inline-flex items-center gap-2 text-white/40 hover:text-white/70 text-sm mb-8 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          Zurück zu Meine Objekte
+          {t('purchases.backToCollection')}
         </Link>
 
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl font-bold text-white">Meine Käufe</h1>
+          <h1 className="text-2xl font-bold text-white">{t('purchases.title')}</h1>
           <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-600/20 border border-cyan-500/30">
             <Euro className="w-5 h-5 text-cyan-400" />
             <div>
-              <p className="text-white/50 text-xs">Gesamtsumme</p>
+              <p className="text-white/50 text-xs">{t('purchases.total')}</p>
               <p className="text-white font-bold text-lg">{totalCost.toFixed(2)} €</p>
             </div>
           </div>
@@ -75,8 +77,8 @@ export default function MyPurchases() {
         {purchasedItems.length === 0 ? (
           <div className="text-center py-20">
             <Euro className="w-12 h-12 text-white/10 mx-auto mb-4" />
-            <p className="text-white/30 text-sm">Noch keine Käufe erfasst.</p>
-            <p className="text-white/20 text-xs mt-1">Füge bei deinen Objekten einen Kaufpreis hinzu.</p>
+            <p className="text-white/30 text-sm">{t('purchases.noPurchases')}</p>
+            <p className="text-white/20 text-xs mt-1">{t('purchases.addPriceHint')}</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -110,22 +112,22 @@ export default function MyPurchases() {
                         )}
                         {jersey.is_game_worn && (
                           <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                            {jersey.sport_type === 'soccer' ? 'Matchworn' : 'Game-Worn'}
+                            {jersey.sport_type === 'soccer' ? t('badges.matchworn') : t('badges.gameworn')}
                           </span>
                         )}
                         {jersey.is_game_issued && (
                           <span className="text-[10px] px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-300 border border-orange-500/30">
-                            {jersey.sport_type === 'soccer' ? 'Player Edition' : 'Game-Issued'}
+                            {jersey.sport_type === 'soccer' ? t('badges.playeredition') : t('badges.gameissued')}
                           </span>
                         )}
                         {jersey.is_authentic && (
                           <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                            Authentic
+                            {t('badges.authentic')}
                           </span>
                         )}
                         {jersey.is_fan_jersey && (
                           <span className="text-[10px] px-2 py-0.5 rounded-full bg-pink-500/20 text-pink-300 border border-pink-500/30">
-                            Fantrikot
+                            {t('badges.fanjersey')}
                           </span>
                         )}
                       </div>
@@ -143,7 +145,7 @@ export default function MyPurchases() {
                           }}
                         >
                           <FileText className="w-4 h-4 mr-1" />
-                          Rechnung
+                          {t('purchases.invoice')}
                         </Button>
                       )}
                     </div>

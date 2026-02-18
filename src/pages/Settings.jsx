@@ -207,37 +207,37 @@ export default function Settings() {
           <CardHeader>
             <CardTitle className="text-white text-base flex items-center gap-2">
               <User className="w-4 h-4" />
-              Profil bearbeiten
+              {t('settings.profile')}
             </CardTitle>
             <CardDescription className="text-white/40 text-xs">
-              Bestimme, welche Informationen andere sehen können
+              {t('settings.profileDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label className="text-white/70 text-sm">Anzeigename (öffentlich)</Label>
+              <Label className="text-white/70 text-sm">{t('settings.displayName')}</Label>
               <Input
                 value={profile.display_name}
                 onChange={(e) => setProfile({ ...profile, display_name: e.target.value })}
-                placeholder="Dein öffentlicher Name"
+                placeholder={t('settings.displayName')}
                 className="bg-slate-800/50 border-white/10 text-white placeholder:text-white/20 mt-1.5"
               />
-              <p className="text-white/30 text-xs mt-1">Dieser Name wird bei deinen Trikots und Kommentaren angezeigt</p>
+              <p className="text-white/30 text-xs mt-1">{t('settings.displayNameDesc')}</p>
             </div>
 
             <div>
-              <Label className="text-white/70 text-sm">Richtiger Name (privat)</Label>
+              <Label className="text-white/70 text-sm">{t('settings.realName')}</Label>
               <Input
                 value={profile.real_name}
                 onChange={(e) => setProfile({ ...profile, real_name: e.target.value })}
-                placeholder="Dein voller Name"
+                placeholder={t('settings.realName')}
                 className="bg-slate-800/50 border-white/10 text-white placeholder:text-white/20 mt-1.5"
               />
-              <p className="text-white/30 text-xs mt-1">Nur für dich sichtbar</p>
+              <p className="text-white/30 text-xs mt-1">{t('settings.onlyVisibleToYou')}</p>
             </div>
             
             <div>
-              <Label className="text-white/70 text-sm">E-Mail</Label>
+              <Label className="text-white/70 text-sm">{t('auth.email')}</Label>
               <div className="flex items-center gap-2 mt-1.5">
                 <Input
                   value={user.email}
@@ -257,12 +257,12 @@ export default function Settings() {
                 </div>
               </div>
               <p className="text-white/30 text-xs mt-1">
-                {profile.show_email ? "Öffentlich sichtbar" : "Nur für dich sichtbar"}
+                {profile.show_email ? t('settings.publicVisible') : t('settings.onlyVisibleToYou')}
               </p>
             </div>
 
             <div>
-              <Label className="text-white/70 text-sm">Wohnort</Label>
+              <Label className="text-white/70 text-sm">{t('settings.location')}</Label>
               <div className="flex items-center gap-2 mt-1.5">
                 <div className="relative flex-1">
                   <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
@@ -286,7 +286,7 @@ export default function Settings() {
                 </div>
               </div>
               <p className="text-white/30 text-xs mt-1">
-                {profile.show_location ? "Öffentlich sichtbar" : "Nur für dich sichtbar"}
+                {profile.show_location ? t('settings.publicVisible') : t('settings.onlyVisibleToYou')}
               </p>
             </div>
 
@@ -295,8 +295,8 @@ export default function Settings() {
                 <div className="flex items-center gap-3">
                   <MessageCircle className="w-4 h-4 text-white/40" />
                   <div>
-                    <Label className="text-white/70 text-sm">Nachrichten-System erlauben</Label>
-                    <p className="text-white/30 text-xs mt-0.5">Aktiviere das Nachrichten-System um Nachrichten zu senden und zu empfangen</p>
+                    <Label className="text-white/70 text-sm">{t('settings.messages')}</Label>
+                    <p className="text-white/30 text-xs mt-0.5">{t('settings.messagesDesc')}</p>
                   </div>
                 </div>
                 <Switch
@@ -310,14 +310,14 @@ export default function Settings() {
               <div className="flex items-center gap-3 mb-3">
                 <FilterX className="w-4 h-4 text-white/40" />
                 <div>
-                  <Label className="text-white/70 text-sm">Sportarten ausblenden</Label>
-                  <p className="text-white/30 text-xs mt-0.5">Wähle Sportarten, die du nicht sehen möchtest</p>
+                  <Label className="text-white/70 text-sm">{t('settings.hideSports')}</Label>
+                  <p className="text-white/30 text-xs mt-0.5">{t('settings.hideSportsDesc')}</p>
                 </div>
               </div>
               <div className="flex flex-wrap gap-2">
                 {[
-                  { value: "icehockey", label: "Eishockey" },
-                  { value: "soccer", label: "Fussball" }
+                  { value: "icehockey", label: t('home.filters.icehockey') },
+                  { value: "soccer", label: t('home.filters.soccer') }
                 ].map(sport => (
                   <Button
                     key={sport.value}
@@ -349,7 +349,7 @@ export default function Settings() {
               ) : (
                 <Save className="w-4 h-4 mr-2" />
               )}
-              Profil speichern
+              {t('settings.saveProfile')}
             </Button>
           </CardContent>
         </Card>
@@ -359,12 +359,12 @@ export default function Settings() {
           <CardHeader>
             <CardTitle className="text-white text-base flex items-center gap-2">
               <Lock className="w-4 h-4" />
-              Passwort ändern
+              {t('settings.password')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label className="text-white/70 text-sm">Aktuelles Passwort</Label>
+              <Label className="text-white/70 text-sm">{t('settings.currentPassword')}</Label>
               <Input
                 type="password"
                 value={passwordData.current}
@@ -373,7 +373,7 @@ export default function Settings() {
               />
             </div>
             <div>
-              <Label className="text-white/70 text-sm">Neues Passwort</Label>
+              <Label className="text-white/70 text-sm">{t('settings.newPassword')}</Label>
               <Input
                 type="password"
                 value={passwordData.new}
@@ -382,7 +382,7 @@ export default function Settings() {
               />
             </div>
             <div>
-              <Label className="text-white/70 text-sm">Neues Passwort bestätigen</Label>
+              <Label className="text-white/70 text-sm">{t('settings.confirmPassword')}</Label>
               <Input
                 type="password"
                 value={passwordData.confirm}
@@ -400,7 +400,7 @@ export default function Settings() {
               ) : (
                 <Lock className="w-4 h-4 mr-2" />
               )}
-              Passwort ändern
+              {t('settings.password')}
             </Button>
           </CardContent>
         </Card>
@@ -414,7 +414,7 @@ export default function Settings() {
               className="w-full bg-white/5 text-white border-white/10 hover:bg-white/10"
             >
               <LogOut className="w-4 h-4 mr-2" />
-              Abmelden
+              {t('settings.logout')}
             </Button>
           </CardContent>
         </Card>
@@ -424,10 +424,10 @@ export default function Settings() {
           <CardHeader>
             <CardTitle className="text-red-400 text-base flex items-center gap-2">
               <AlertTriangle className="w-4 h-4" />
-              Gefahrenzone
+              {t('settings.dangerZone')}
             </CardTitle>
             <CardDescription className="text-red-300/60 text-xs">
-              Diese Aktion kann nicht rückgängig gemacht werden
+              {t('settings.dangerDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -443,30 +443,30 @@ export default function Settings() {
                   ) : (
                     <Trash2 className="w-4 h-4 mr-2" />
                   )}
-                  Account löschen
+                  {t('settings.deleteAccount')}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent className="bg-slate-900 border-white/10">
                 <AlertDialogHeader>
-                  <AlertDialogTitle className="text-white">Bist du dir absolut sicher?</AlertDialogTitle>
+                  <AlertDialogTitle className="text-white">{t('settings.deleteConfirmTitle')}</AlertDialogTitle>
                   <AlertDialogDescription className="text-white/60 space-y-2">
                     <p>
-                      Diese Aktion kann <strong>nicht rückgängig</strong> gemacht werden.
+                      {t('settings.deleteConfirmText1')}
                     </p>
                     <p>
-                      Dein Account, alle deine Trikots und Likes werden permanent gelöscht.
+                      {t('settings.deleteConfirmText2')}
                     </p>
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel className="bg-white/5 text-white border-white/10 hover:bg-white/10">
-                    Abbrechen
+                    {t('detail.cancel')}
                   </AlertDialogCancel>
                   <AlertDialogAction
                     onClick={handleDeleteAccount}
                     className="bg-red-600 hover:bg-red-700"
                   >
-                    Ja, Account löschen
+                    {t('settings.yesDelete')}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>

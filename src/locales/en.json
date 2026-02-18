@@ -98,7 +98,20 @@
     "selectChat": "Select a chat",
     "searchConversations": "Search conversations...",
     "deleteConversation": "Delete conversation?",
-    "deleteConversationText": "Are you sure you want to delete this conversation? All messages will be permanently removed."
+    "deleteConversationText": "Are you sure you want to delete this conversation? All messages will be permanently removed.",
+    "newMessage": "New Message",
+    "sendNewMessage": "Send New Message",
+    "selectRecipient": "Select Recipient",
+    "selectUser": "Select User...",
+    "messageLabel": "Message"
+  },
+  "purchases": {
+    "title": "My Purchases",
+    "backToCollection": "Back to My Collection",
+    "total": "Total",
+    "noPurchases": "No purchases recorded yet.",
+    "addPriceHint": "Add a purchase price to your items.",
+    "invoice": "Invoice"
   },
   "myCollection": {
     "title": "My Collection",
