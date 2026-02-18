@@ -1,6 +1,16 @@
-export const APP_VERSION = "1.2.3";
+export const APP_VERSION = "1.2.4";
 
 export const CHANGELOG = [
+  {
+    version: "1.2.4",
+    date: "2026-02-18",
+    title: "Datenschutz & Such-Optimierung",
+    changes: [
+      { type: "security", text: "Datenschutz: User-Profile verwenden jetzt IDs statt Email-Adressen in der URL." },
+      { type: "feature", text: "Suche: Es kann jetzt auch nach der Saison gesucht werden (z.B. '2004')." },
+      { type: "bugfix", text: "Suche: Platzhaltertext korrigiert (doppelte 'Saison' entfernt)." }
+    ]
+  },
   {
     version: "1.2.3",
     date: "2026-02-18",
