@@ -106,7 +106,8 @@ export default function JerseyCard({ jersey: initialJersey, isLiked, onLike, ind
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "0px 0px -50px 0px" }}
       transition={{ duration: 0.4, delay: index * 0.05 }}
       className="group relative"
     >
@@ -124,6 +125,8 @@ export default function JerseyCard({ jersey: initialJersey, isLiked, onLike, ind
             <img
               src={jersey.image_url}
               alt={jersey.title}
+              loading="lazy"
+              decoding="async"
               className={`w-full h-full object-contain transition-all duration-700 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
               onLoad={() => setImgLoaded(true)}
             />
