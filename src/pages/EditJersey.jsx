@@ -34,8 +34,8 @@ export default function EditJersey() {
     api.auth.me().then(u => {
       if (!u) {
         api.auth.redirectToLogin(window.location.href);
-      } else if (u.data?.role !== 'moderator' && u.role !== 'admin' && u.data?.role !== 'admin') {
-        // Not admin/moderator, will check if user owns the jersey later
+      } else if (u.data?.role !== 'moderator' && u.role !== 'admin' && u.data?.role !== 'admin' && u.role !== 'owner' && u.data?.role !== 'owner') {
+        // Not admin/moderator/owner, will check if user owns the jersey later
       }
       setUser(u);
     }).catch(() => {
@@ -188,9 +188,9 @@ export default function EditJersey() {
     return <div className="text-center py-20 text-white/40">{t('detail.notFound')}</div>;
   }
 
-  // Check authorization: owner or moderator/admin
+  // Check authorization: owner or moderator/admin/owner
   const isOwner = jersey.owner_email === user?.email || jersey.created_by === user?.email;
-  const isModerator = user?.data?.role === 'moderator' || user?.role === 'admin' || user?.data?.role === 'admin';
+  const isModerator = user?.data?.role === 'moderator' || user?.role === 'admin' || user?.data?.role === 'admin' || user?.role === 'owner' || user?.data?.role === 'owner';
   
   if (!isOwner && !isModerator) {
     return <div className="text-center py-20 text-white/40">{t('detail.noPermission')}</div>;

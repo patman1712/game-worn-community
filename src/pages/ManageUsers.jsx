@@ -20,7 +20,8 @@ export default function ManageUsers() {
 
   useEffect(() => {
     api.auth.me().then((u) => {
-      if (!u || (u.role !== 'admin' && u.data?.role !== 'admin')) {
+      const role = u.data?.role || u.role;
+      if (!u || (role !== 'admin' && role !== 'owner')) {
         window.location.href = '/';
       } else {
         setUser(u);
@@ -225,6 +226,12 @@ export default function ManageUsers() {
                             Admin
                           </Badge>
                         )}
+                        {(u.role === 'owner' || u.data?.role === 'owner') && (
+                          <Badge className="bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs">
+                            <Shield className="w-3 h-3 mr-1" />
+                            Owner
+                          </Badge>
+                        )}
                         {u.data?.role === 'moderator' && (
                           <Badge className="bg-blue-500/20 text-blue-300 border border-blue-500/30 text-xs">
                             <Shield className="w-3 h-3 mr-1" />
@@ -336,6 +343,7 @@ export default function ManageUsers() {
                                   <SelectItem value="user" className="text-white">User</SelectItem>
                                   <SelectItem value="moderator" className="text-white">Moderator</SelectItem>
                                   <SelectItem value="admin" className="text-white">Admin</SelectItem>
+                                  <SelectItem value="owner" className="text-white">Owner</SelectItem>
                                 </SelectContent>
                               </Select>
                             </div>
@@ -369,6 +377,16 @@ export default function ManageUsers() {
                                 if (editingUser.data?.show_location !== undefined) updates.show_location = editingUser.data.show_location;
                                 if (editingUser.data?.accept_messages !== undefined) updates.accept_messages = editingUser.data.accept_messages;
                                 
+                                // Check Owner limit
+                                if (updates.role === 'owner') {
+                                    const currentOwners = users.filter(u => (u.data?.role || u.role) === 'owner').length;
+                                    const wasOwner = (users.find(u => u.id === editingUser.id)?.data?.role || users.find(u => u.id === editingUser.id)?.role) === 'owner';
+                                    if (!wasOwner && currentOwners >= 2) {
+                                        alert("Es sind maximal 2 Owner erlaubt!");
+                                        return;
+                                    }
+                                }
+
                                 manageMutation.mutate({
                                   action: 'update',
                                   userId: editingUser.id,

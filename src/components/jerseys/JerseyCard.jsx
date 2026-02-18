@@ -35,7 +35,7 @@ export default function JerseyCard({ jersey: initialJersey, isLiked, onLike, ind
     api.auth.me().then(setCurrentUser).catch(() => {});
   }, []);
 
-  const isModerator = currentUser?.data?.role === 'moderator' || currentUser?.role === 'admin' || currentUser?.data?.role === 'admin';
+  const isModerator = currentUser?.data?.role === 'moderator' || currentUser?.role === 'admin' || currentUser?.data?.role === 'admin' || currentUser?.data?.role === 'owner' || currentUser?.role === 'owner';
   const isOwner = currentUser?.email === jersey.owner_email || currentUser?.email === jersey.created_by;
   const canEdit = isModerator || isOwner;
 

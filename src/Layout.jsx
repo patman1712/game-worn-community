@@ -73,7 +73,7 @@ export default function Layout({ children, currentPageName }) {
   const { data: pendingUsersCount = 0 } = useQuery({
     queryKey: ["pendingUsersCount", user?.email],
     queryFn: async () => {
-      if (!user || (user.role !== 'admin' && user.data?.role !== 'admin')) return 0;
+      if (!user || (user.role !== 'admin' && user.data?.role !== 'admin' && user.role !== 'owner' && user.data?.role !== 'owner')) return 0;
       try {
         const list = await api.entities.PendingUser.list();
         return list.length;
@@ -81,7 +81,7 @@ export default function Layout({ children, currentPageName }) {
         return 0;
       }
     },
-    enabled: !!user && (user.role === 'admin' || user.data?.role === 'admin'),
+    enabled: !!user && (user.role === 'admin' || user.data?.role === 'admin' || user.role === 'owner' || user.data?.role === 'owner'),
   });
   
   const visibleTabs = TABS.filter(tab => {
@@ -188,7 +188,7 @@ export default function Layout({ children, currentPageName }) {
 
               {user ? (
                 <>
-                  {(user.role === 'admin' || user.data?.role === 'admin') && (
+                  {(user.role === 'admin' || user.data?.role === 'admin' || user.role === 'owner' || user.data?.role === 'owner') && (
                     <Link to={createPageUrl("AdminPanel")} className="relative group">
                       <Button
                         size="sm"
