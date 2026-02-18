@@ -353,7 +353,7 @@ router.post('/approve', async (req, res) => {
     if (!token) return res.status(401).json({ error: 'No token provided' });
     const decoded = jwt.verify(token, JWT_SECRET);
     const adminUser = await User.findByPk(decoded.id);
-    if (!adminUser || (adminUser.role !== 'admin' && adminUser.data?.role !== 'admin')) {
+    if (!adminUser || (adminUser.role !== 'admin' && adminUser.data?.role !== 'admin' && adminUser.role !== 'owner' && adminUser.data?.role !== 'owner')) {
         return res.status(403).json({ error: 'Unauthorized' });
     }
 
@@ -392,7 +392,7 @@ router.post('/reject', async (req, res) => {
     if (!token) return res.status(401).json({ error: 'No token provided' });
     const decoded = jwt.verify(token, JWT_SECRET);
     const adminUser = await User.findByPk(decoded.id);
-    if (!adminUser || (adminUser.role !== 'admin' && adminUser.data?.role !== 'admin')) {
+    if (!adminUser || (adminUser.role !== 'admin' && adminUser.data?.role !== 'admin' && adminUser.role !== 'owner' && adminUser.data?.role !== 'owner')) {
         return res.status(403).json({ error: 'Unauthorized' });
     }
 
@@ -427,7 +427,7 @@ router.post('/manage-user', async (req, res) => {
     const decoded = jwt.verify(token, JWT_SECRET);
     // Check role in token OR fetch user to be sure
     const adminUser = await User.findByPk(decoded.id);
-    if (!adminUser || (adminUser.role !== 'admin' && adminUser.data?.role !== 'admin')) {
+    if (!adminUser || (adminUser.role !== 'admin' && adminUser.data?.role !== 'admin' && adminUser.role !== 'owner' && adminUser.data?.role !== 'owner')) {
         return res.status(403).json({ error: 'Unauthorized' });
     }
     
