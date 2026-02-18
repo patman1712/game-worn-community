@@ -12,7 +12,8 @@ export default function UserPurchases() {
 
   useEffect(() => {
     api.auth.me().then(u => {
-      if (u?.role !== 'admin' && u?.data?.role !== 'admin') {
+      const role = u?.data?.role || u?.role;
+      if (role !== 'admin' && role !== 'owner') {
         window.location.href = '/';
       }
       setUser(u);
