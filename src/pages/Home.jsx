@@ -231,7 +231,17 @@ export default function Home() {
     if (sortBy === "popular") {
       result.sort((a, b) => (b.likes_count || 0) - (a.likes_count || 0));
     } else if (sortBy === "team") {
-      result.sort((a, b) => (a.team || "").localeCompare(b.team || ""));
+      result.sort((a, b) => {
+        const nameA = a.team || a.title || "";
+        const nameB = b.team || b.title || "";
+        return nameA.localeCompare(nameB);
+      });
+    } else if (sortBy === "oldest") {
+      result.sort((a, b) => {
+        const dateA = new Date(a.createdAt || a.created_date || 0).getTime();
+        const dateB = new Date(b.createdAt || b.created_date || 0).getTime();
+        return dateA - dateB;
+      });
     } else {
       // Default: newest first
       result.sort((a, b) => {
