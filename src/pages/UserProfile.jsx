@@ -12,7 +12,9 @@ import { useTranslation } from 'react-i18next';
 export default function UserProfile() {
   const { t } = useTranslation();
   const params = new URLSearchParams(window.location.search);
-  const email = params.get("email");
+  const emailParam = params.get("email");
+  const idParam = params.get("id");
+  
   const [currentUser, setCurrentUser] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 25;
@@ -20,6 +22,34 @@ export default function UserProfile() {
   useEffect(() => {
     api.auth.me().then(setCurrentUser).catch(() => {});
   }, []);
+
+  // First, resolve the user based on ID or Email
+  const { data: profileUser, isLoading: userLoading } = useQuery({
+    queryKey: ["profileUser", idParam || emailParam],
+    queryFn: async () => {
+      try {
+        if (idParam) {
+            // Fetch by ID if available
+            // We need to list users and find by ID since we don't have a direct get(id) yet or filter({id})
+            // Optimization: Filter by ID if supported, otherwise list all.
+            // Assuming api.entities.User.filter works with ID (Sequelize usually supports it)
+            const users = await api.entities.User.filter({ id: idParam });
+            return Array.isArray(users) ? users[0] : null;
+        } else if (emailParam) {
+            const users = await api.entities.User.filter({ email: emailParam });
+            return Array.isArray(users) ? users[0] : null;
+        }
+        return null;
+      } catch (e) {
+        console.error("Error fetching user profile:", e);
+        return null;
+      }
+    },
+    enabled: !!(idParam || emailParam),
+  });
+
+  // Derive email from the fetched user, or fallback to param
+  const email = profileUser?.email || emailParam;
 
   const { data: jerseys = [], isLoading: jerseysLoading } = useQuery({
     queryKey: ["userJerseys", email],
@@ -30,20 +60,6 @@ export default function UserProfile() {
   const { data: items = [], isLoading: itemsLoading } = useQuery({
     queryKey: ["userItems", email],
     queryFn: () => api.entities.CollectionItem.filter({ owner_email: email }, "-createdAt"),
-    enabled: !!email,
-  });
-
-  const { data: profileUser } = useQuery({
-    queryKey: ["profileUser", email],
-    queryFn: async () => {
-      try {
-        const users = await api.entities.User.filter({ email });
-        return Array.isArray(users) ? users[0] : null;
-      } catch (e) {
-        console.error("Error fetching user profile:", e);
-        return null;
-      }
-    },
     enabled: !!email,
   });
 

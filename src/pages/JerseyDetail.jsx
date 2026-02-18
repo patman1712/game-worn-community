@@ -364,7 +364,7 @@ export default function JerseyDetail() {
             <div className="p-4 rounded-xl bg-slate-800/30 border border-white/5 space-y-4">
               <div className="flex items-center justify-between">
                 <Link
-                  to={createPageUrl("UserProfile") + `?email=${jersey.owner_email || jersey.created_by}`}
+                  to={ownerUser?.id ? `${createPageUrl("UserProfile")}?id=${ownerUser.id}` : `${createPageUrl("UserProfile")}?email=${jersey.owner_email || jersey.created_by}`}
                   className="flex items-center gap-3 hover:opacity-80 transition-opacity"
                 >
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center">
